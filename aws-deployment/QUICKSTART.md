@@ -2,6 +2,17 @@
 
 Deploy the Compliance Discovery Questionnaire to AWS using App Runner (backend) and Amplify (frontend).
 
+## Deployment Options
+
+**Choose your preferred method:**
+
+1. **CloudFormation (Recommended)** - Infrastructure as Code, single command deployment
+   - See [CLOUDFORMATION_DEPLOY.md](CLOUDFORMATION_DEPLOY.md)
+   - Best for: Repeatable deployments, version control, team environments
+
+2. **Manual Console/CLI** - Step-by-step deployment (this guide)
+   - Best for: Learning, one-off deployments, quick testing
+
 ## Prerequisites
 
 - AWS Account with appropriate permissions

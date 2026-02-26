@@ -1,0 +1,246 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Compliance Discovery Questionnaire - Full Stack Deployment (App Runner + Amplify)'
+
+Parameters:
+  GitHubRepository:
+    Type: String
+    Default: 'https://github.com/nickkotakis/compliance-discovery-questionnaire'
+    Description: GitHub repository URL
+  
+  GitHubBranch:
+    Type: String
+    Default: 'main'
+    Description: GitHub branch to deploy
+  
+  GitHubConnectionArn:
+    Type: String
+    Description: ARN of the GitHub connection (create this first in App Runner console)
+    AllowedPattern: 'arn:aws:apprunner:.*:.*:connection/.*'
+  
+  AppRunnerInstanceCpu:
+    Type: String
+    Default: '1 vCPU'
+    AllowedValues:
+      - '0.25 vCPU'
+      - '0.5 vCPU'
+      - '1 vCPU'
+      - '2 vCPU'
+      - '4 vCPU'
+    Description: CPU allocation for App Runner instance
+  
+  AppRunnerInstanceMemory:
+    Type: String
+    Default: '2 GB'
+    AllowedValues:
+      - '0.5 GB'
+      - '1 GB'
+      - '2 GB'
+      - '3 GB'
+      - '4 GB'
+      - '6 GB'
+      - '8 GB'
+      - '10 GB'
+      - '12 GB'
+    Description: Memory allocation for App Runner instance
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: 'GitHub Configuration'
+        Parameters:
+          - GitHubRepository
+          - GitHubBranch
+          - GitHubConnectionArn
+      - Label:
+          default: 'App Runner Configuration'
+        Parameters:
+          - AppRunnerInstanceCpu
+          - AppRunnerInstanceMemory
+
+Resources:
+  # IAM Role for App Runner
+  AppRunnerInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: tasks.apprunner.amazonaws.com
+            Action: 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/CloudWatchLogsFullAccess'
+      Tags:
+        - Key: Application
+          Value: ComplianceDiscoveryQuestionnaire
+
+  # IAM Role for App Runner Access
+  AppRunnerAccessRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: build.apprunner.amazonaws.com
+            Action: 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/service-role/AWSAppRunnerServicePolicyForECRAccess'
+      Tags:
+        - Key: Application
+          Value: ComplianceDiscoveryQuestionnaire
+
+  # App Runner Service (Backend)
+  BackendAppRunnerService:
+    Type: AWS::AppRunner::Service
+    Properties:
+      ServiceName: compliance-discovery-api
+      SourceConfiguration:
+        AuthenticationConfiguration:
+          ConnectionArn: !Ref GitHubConnectionArn
+        AutoDeploymentsEnabled: true
+        CodeRepository:
+          RepositoryUrl: !Ref GitHubRepository
+          SourceCodeVersion:
+            Type: BRANCH
+            Value: !Ref GitHubBranch
+          CodeConfiguration:
+            ConfigurationSource: API
+            CodeConfigurationValues:
+              Runtime: PYTHON_3
+              BuildCommand: 'pip install -r requirements.txt'
+              StartCommand: 'python -m compliance_discovery.api_server'
+              Port: '5001'
+              RuntimeEnvironmentVariables:
+                - Name: FLASK_APP
+                  Value: compliance_discovery.api_server
+                - Name: PYTHONUNBUFFERED
+                  Value: '1'
+                - Name: DATABASE_PATH
+                  Value: /app/data/sessions.db
+                - Name: HOST
+                  Value: 0.0.0.0
+                - Name: PORT
+                  Value: '5001'
+                - Name: CORS_ORIGINS
+                  Value: '*'
+          SourceDirectory: /backend
+      InstanceConfiguration:
+        Cpu: !Ref AppRunnerInstanceCpu
+        Memory: !Ref AppRunnerInstanceMemory
+        InstanceRoleArn: !GetAtt AppRunnerInstanceRole.Arn
+      HealthCheckConfiguration:
+        Protocol: HTTP
+        Path: /api/health
+        Interval: 10
+        Timeout: 5
+        HealthyThreshold: 1
+        UnhealthyThreshold: 5
+      Tags:
+        - Key: Application
+          Value: ComplianceDiscoveryQuestionnaire
+        - Key: Component
+          Value: Backend
+
+  # Amplify App (Frontend)
+  FrontendAmplifyApp:
+    Type: AWS::Amplify::App
+    Properties:
+      Name: compliance-discovery-frontend
+      Repository: !Ref GitHubRepository
+      AccessToken: '{{resolve:secretsmanager:github/personal-access-token:SecretString:token}}'
+      BuildSpec: |
+        version: 1
+        frontend:
+          phases:
+            preBuild:
+              commands:
+                - cd frontend
+                - npm ci
+            build:
+              commands:
+                - npm run build
+          artifacts:
+            baseDirectory: frontend/dist
+            files:
+              - '**/*'
+          cache:
+            paths:
+              - frontend/node_modules/**/*
+      EnvironmentVariables:
+        - Name: VITE_API_URL
+          Value: !Sub 'https://${BackendAppRunnerService.ServiceUrl}'
+      IAMServiceRole: !GetAtt AmplifyRole.Arn
+      Tags:
+        - Key: Application
+          Value: ComplianceDiscoveryQuestionnaire
+        - Key: Component
+          Value: Frontend
+
+  # Amplify Branch
+  FrontendAmplifyBranch:
+    Type: AWS::Amplify::Branch
+    Properties:
+      AppId: !GetAtt FrontendAmplifyApp.AppId
+      BranchName: !Ref GitHubBranch
+      EnableAutoBuild: true
+      EnablePullRequestPreview: false
+      Stage: PRODUCTION
+
+  # IAM Role for Amplify
+  AmplifyRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: amplify.amazonaws.com
+            Action: 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/AdministratorAccess-Amplify'
+      Tags:
+        - Key: Application
+          Value: ComplianceDiscoveryQuestionnaire
+
+Outputs:
+  BackendServiceUrl:
+    Description: App Runner service URL for the backend API
+    Value: !Sub 'https://${BackendAppRunnerService.ServiceUrl}'
+    Export:
+      Name: !Sub '${AWS::StackName}-BackendUrl'
+  
+  BackendServiceArn:
+    Description: App Runner service ARN
+    Value: !GetAtt BackendAppRunnerService.ServiceArn
+    Export:
+      Name: !Sub '${AWS::StackName}-BackendArn'
+  
+  FrontendAppId:
+    Description: Amplify App ID
+    Value: !GetAtt FrontendAmplifyApp.AppId
+    Export:
+      Name: !Sub '${AWS::StackName}-FrontendAppId'
+  
+  FrontendUrl:
+    Description: Amplify app URL for the frontend
+    Value: !Sub 'https://${GitHubBranch}.${FrontendAmplifyApp.DefaultDomain}'
+    Export:
+      Name: !Sub '${AWS::StackName}-FrontendUrl'
+  
+  FrontendDefaultDomain:
+    Description: Amplify default domain
+    Value: !GetAtt FrontendAmplifyApp.DefaultDomain
+    Export:
+      Name: !Sub '${AWS::StackName}-FrontendDomain'
+  
+  NextSteps:
+    Description: Next steps after deployment
+    Value: !Sub |
+      1. Update CORS: Go to App Runner console and update CORS_ORIGINS to https://${GitHubBranch}.${FrontendAmplifyApp.DefaultDomain}
+      2. Access your app at: https://${GitHubBranch}.${FrontendAmplifyApp.DefaultDomain}
+      3. Backend API: https://${BackendAppRunnerService.ServiceUrl}/api/health

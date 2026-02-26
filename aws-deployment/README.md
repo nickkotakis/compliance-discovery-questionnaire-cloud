@@ -4,10 +4,12 @@ This directory contains all documentation and scripts for deploying the Complian
 
 ## Quick Links
 
-- **[QUICKSTART.md](QUICKSTART.md)** - Deploy in 15 minutes
+- **[CLOUDFORMATION_DEPLOY.md](CLOUDFORMATION_DEPLOY.md)** - Deploy with CloudFormation (recommended)
+- **[QUICKSTART.md](QUICKSTART.md)** - Deploy in 15 minutes (manual)
 - **[DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)** - Comprehensive deployment guide
 - **[PRE_DEPLOYMENT_CHECKLIST.md](PRE_DEPLOYMENT_CHECKLIST.md)** - Pre-flight checklist
 - **[deploy.sh](deploy.sh)** - Interactive deployment helper script
+- **[cloudformation-template.yaml](cloudformation-template.yaml)** - CloudFormation template
 
 ## Architecture
 
@@ -41,14 +43,24 @@ This directory contains all documentation and scripts for deploying the Complian
 
 ## Deployment Options
 
-### Option 1: Quick Deploy (Recommended)
-Follow [QUICKSTART.md](QUICKSTART.md) for a 15-minute deployment using AWS Console.
+### Option 1: CloudFormation (Recommended)
+Infrastructure as Code deployment with a single template.
+- **Guide**: [CLOUDFORMATION_DEPLOY.md](CLOUDFORMATION_DEPLOY.md)
+- **Time**: 10-15 minutes
+- **Best for**: Production deployments, repeatable infrastructure, team environments
+- **Benefits**: Version controlled, automated, easy to update/delete
 
-### Option 2: CLI Deployment
-Use the [deploy.sh](deploy.sh) script for an interactive CLI-based deployment.
+### Option 2: Quick Deploy (Console)
+Manual deployment using AWS Console.
+- **Guide**: [QUICKSTART.md](QUICKSTART.md)
+- **Time**: 15 minutes
+- **Best for**: Learning, quick testing, one-off deployments
 
-### Option 3: Manual Deployment
-Follow [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) for detailed step-by-step instructions.
+### Option 3: CLI Deployment
+Interactive CLI-based deployment.
+- **Script**: [deploy.sh](deploy.sh)
+- **Time**: 10-15 minutes
+- **Best for**: Automation, scripting, CI/CD integration
 
 ## Repository Structure
 
