@@ -5,6 +5,8 @@ import Sidebar from './Sidebar';
 import Dashboard from './Dashboard';
 import InterviewMode from './InterviewMode';
 import AWSImplementationGuide from './AWSImplementationGuide';
+import ExportOptions from './ExportOptions';
+import Settings from './Settings';
 
 // NIST 800-53 Family Name Mappings
 const FAMILY_NAMES: Record<string, string> = {
@@ -50,6 +52,9 @@ const ComplianceQuestionnaire: React.FC<ComplianceQuestionnaireProps> = ({ sessi
   const [activeView, setActiveView] = useState<string>('questionnaire');
   const [allQuestions, setAllQuestions] = useState<Record<string, Question[]>>({});
   const [interviewControl, setInterviewControl] = useState<ControlDetail | null>(null);
+  const [customerName, setCustomerName] = useState<string>('');
+  const [analystName, setAnalystName] = useState<string>('');
+  const [frameworks, setFrameworks] = useState<string[]>(['NIST 800-53']);
 
   useEffect(() => {
     loadControls();
@@ -119,6 +124,19 @@ const ComplianceQuestionnaire: React.FC<ComplianceQuestionnaireProps> = ({ sessi
 
   const totalQuestions = Object.values(allQuestions).flat().length;
   const answeredQuestions = Object.keys(responses).length;
+
+  const handleExport = async (format: 'excel' | 'pdf' | 'json' | 'yaml') => {
+    // TODO: Implement actual export functionality
+    console.log(`Exporting as ${format}...`);
+    alert(`Export as ${format} - Coming soon!`);
+  };
+
+  const handleSaveSettings = (settings: { customerName: string; analystName: string; frameworks: string[] }) => {
+    setCustomerName(settings.customerName);
+    setAnalystName(settings.analystName);
+    setFrameworks(settings.frameworks);
+    alert('Settings saved successfully!');
+  };
 
   if (loading) {
     return (
@@ -468,6 +486,19 @@ const ComplianceQuestionnaire: React.FC<ComplianceQuestionnaireProps> = ({ sessi
                   );
                 })}
               </div>
+            )}
+
+            {activeView === 'export' && (
+              <ExportOptions onExport={handleExport} />
+            )}
+
+            {activeView === 'settings' && (
+              <Settings
+                customerName={customerName}
+                analystName={analystName}
+                frameworks={frameworks}
+                onSave={handleSaveSettings}
+              />
             )}
           </div>
         </div>
