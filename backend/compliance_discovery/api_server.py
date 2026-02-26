@@ -497,7 +497,8 @@ def export_template():
         baseline_version='NIST 800-53 Rev 5 Moderate Baseline',
         export_date=datetime.utcnow(),
         total_control_count=len(controls_cache),
-        frameworks_included=['NIST 800-53', 'AWS']
+        frameworks_included=['NIST 800-53', 'AWS'],
+        instructions='Complete all questions for each control. Provide detailed responses and attach evidence where applicable.'
     )
     
     # Create blank template
