@@ -473,50 +473,87 @@ def record_response(session_id: str):
 
 @app.route('/api/export', methods=['GET'])
 def export_template():
-    """Export blank template.
+    """Export blank template in various formats.
     
     Query parameters:
-        format: Export format (json, csv, excel) - default: json
+        format: Export format (excel, pdf, json, yaml) - default: json
+        customer_name: Customer name for template (optional)
+        analyst_name: Analyst name for template (optional)
     """
+    from .export_generator import ExportGenerator
+    from .models import BlankQuestionnaireTemplate, TemplateMetadata
+    from flask import send_file
+    import io
+    
     initialize_data()
     
-    export_format = request.args.get('format', 'json')
+    export_format = request.args.get('format', 'json').lower()
+    customer_name = request.args.get('customer_name', '')
+    analyst_name = request.args.get('analyst_name', '')
     
-    template_data = {
-        'metadata': {
-            'template_version': '1.0.0',
-            'baseline_version': 'NIST 800-53 Rev 5 Moderate Baseline',
-            'export_date': datetime.utcnow().isoformat(),
-            'total_control_count': len(controls_cache),
-            'frameworks_included': ['NIST 800-53', 'AWS']
-        },
-        'controls': [
-            {
-                'id': c.id,
-                'title': c.title,
-                'description': c.description,
-                'family': c.family
-            }
-            for c in controls_cache
-        ],
-        'questions': {
-            control_id: [
-                {
-                    'id': q.id,
-                    'question_text': q.question_text,
-                    'question_type': q.question_type.value,
-                    'response': ''
-                }
-                for q in questions
-            ]
-            for control_id, questions in questions_cache.items()
-        }
-    }
+    # Create template metadata
+    metadata = TemplateMetadata(
+        template_version='1.0.0',
+        baseline_version='NIST 800-53 Rev 5 Moderate Baseline',
+        export_date=datetime.utcnow(),
+        total_control_count=len(controls_cache),
+        frameworks_included=['NIST 800-53', 'AWS']
+    )
     
-    if export_format == 'json':
-        return jsonify(template_data)
-    else:
-        return jsonify({'error': 'Only JSON format supported in this version'}), 400
+    # Create blank template
+    template = BlankQuestionnaireTemplate(
+        metadata=metadata,
+        controls=controls_cache,
+        questions=questions_cache,
+        framework_mappings={}  # TODO: Add framework mappings if available
+    )
+    
+    # Initialize export generator
+    generator = ExportGenerator()
+    generator.set_controls(controls_cache)
+    generator.set_questions(questions_cache)
+    generator.set_framework_mappings({})
+    
+    try:
+        if export_format == 'excel':
+            excel_bytes = generator.export_blank_template_excel(template)
+            return send_file(
+                io.BytesIO(excel_bytes),
+                mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                as_attachment=True,
+                download_name=f'compliance_questionnaire_{datetime.utcnow().strftime("%Y%m%d")}.xlsx'
+            )
+        elif export_format == 'pdf':
+            pdf_bytes = generator.export_blank_template_pdf(template)
+            return send_file(
+                io.BytesIO(pdf_bytes),
+                mimetype='application/pdf',
+                as_attachment=True,
+                download_name=f'compliance_questionnaire_{datetime.utcnow().strftime("%Y%m%d")}.pdf'
+            )
+        elif export_format == 'yaml':
+            yaml_str = generator.export_blank_template_yaml(template)
+            return send_file(
+                io.BytesIO(yaml_str.encode('utf-8')),
+                mimetype='text/yaml',
+                as_attachment=True,
+                download_name=f'compliance_questionnaire_{datetime.utcnow().strftime("%Y%m%d")}.yaml'
+            )
+        elif export_format == 'json':
+            json_str = generator.export_blank_template_json(template)
+            return send_file(
+                io.BytesIO(json_str.encode('utf-8')),
+                mimetype='application/json',
+                as_attachment=True,
+                download_name=f'compliance_questionnaire_{datetime.utcnow().strftime("%Y%m%d")}.json'
+            )
+        else:
+            return jsonify({'error': f'Unsupported format: {export_format}. Supported formats: excel, pdf, json, yaml'}), 400
+    except Exception as e:
+        print(f"Export error: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': f'Export failed: {str(e)}'}), 500
 
 
 @app.route('/api/sessions', methods=['GET'])

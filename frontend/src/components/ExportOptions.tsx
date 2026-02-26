@@ -11,7 +11,33 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ onExport }) => {
   const handleExport = async (format: 'excel' | 'pdf' | 'json' | 'yaml') => {
     setIsExporting(true);
     try {
+      // Call the API to download the file
+      const response = await fetch(`http://localhost:5001/api/export?format=${format}`);
+      
+      if (!response.ok) {
+        throw new Error(`Export failed: ${response.statusText}`);
+      }
+      
+      // Get the blob and create a download link
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      
+      // Set filename based on format
+      const date = new Date().toISOString().split('T')[0].replace(/-/g, '');
+      const extension = format === 'excel' ? 'xlsx' : format;
+      a.download = `compliance_questionnaire_${date}.${extension}`;
+      
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
       await onExport(format);
+    } catch (error) {
+      console.error('Export error:', error);
+      alert(`Export failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsExporting(false);
     }
