@@ -18,17 +18,24 @@ from compliance_discovery.aws_control_mapping import get_aws_responsibility, get
 
 
 app = Flask(__name__)
+
+# Production-ready CORS configuration
+allowed_origins = os.environ.get('CORS_ORIGINS', '*')
+if allowed_origins != '*':
+    allowed_origins = allowed_origins.split(',')
+
 CORS(app, resources={
     r"/api/*": {
-        "origins": "*",
+        "origins": allowed_origins,
         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         "allow_headers": ["Content-Type"]
     }
 })
 
-# Database configuration
+# Database configuration - support environment variable for production
 basedir = os.path.abspath(os.path.dirname(__file__))
-app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(basedir, "sessions.db")}'
+database_path = os.environ.get('DATABASE_PATH', os.path.join(basedir, "sessions.db"))
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{database_path}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize database
@@ -530,4 +537,10 @@ if __name__ == '__main__':
     print("Initializing data...")
     initialize_data()
     print("Server ready!")
-    app.run(debug=True, port=5001)
+    
+    # Production configuration
+    port = int(os.environ.get('PORT', 5001))
+    debug = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
+    host = os.environ.get('HOST', '0.0.0.0')
+    
+    app.run(debug=debug, host=host, port=port)
