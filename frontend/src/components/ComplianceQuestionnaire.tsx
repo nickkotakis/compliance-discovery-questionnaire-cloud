@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { complianceApi, Control, Question, ControlDetail } from '../services/complianceApi';
-import { AlertCircle, ChevronDown, ChevronRight, FileText, Search, CheckCircle2, Circle, MessageSquare } from 'lucide-react';
+import { AlertCircle, ChevronDown, ChevronRight, FileText, Search, CheckCircle2, Circle, MessageSquare, Shield } from 'lucide-react';
 import Sidebar from './Sidebar';
 import Dashboard from './Dashboard';
 import InterviewMode from './InterviewMode';
 import AWSImplementationGuide from './AWSImplementationGuide';
-import ExportOptions from './ExportOptions';
 import Settings from './Settings';
 
 // NIST 800-53 Family Name Mappings
@@ -40,7 +39,7 @@ interface ComplianceQuestionnaireProps {
   sessionId?: string;
 }
 
-const ComplianceQuestionnaire: React.FC<ComplianceQuestionnaireProps> = ({ sessionId }) => {
+const ComplianceQuestionnaire: React.FC<ComplianceQuestionnaireProps> = ({ sessionId: initialSessionId }) => {
   const [controls, setControls] = useState<Control[]>([]);
   const [selectedControl, setSelectedControl] = useState<ControlDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -48,13 +47,12 @@ const ComplianceQuestionnaire: React.FC<ComplianceQuestionnaireProps> = ({ sessi
   const [expandedControl, setExpandedControl] = useState<string | null>(null);
   const [responses, setResponses] = useState<Record<string, string>>({});
   const [selectedFamily, setSelectedFamily] = useState<string>('all');
+  const [selectedResponsibility, setSelectedResponsibility] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [activeView, setActiveView] = useState<string>('questionnaire');
   const [allQuestions, setAllQuestions] = useState<Record<string, Question[]>>({});
   const [interviewControl, setInterviewControl] = useState<ControlDetail | null>(null);
-  const [customerName, setCustomerName] = useState<string>('');
-  const [analystName, setAnalystName] = useState<string>('');
-  const [frameworks, setFrameworks] = useState<string[]>(['NIST 800-53']);
+  const [sessionId, setSessionId] = useState<string | undefined>(initialSessionId);
 
   useEffect(() => {
     loadControls();
@@ -119,24 +117,13 @@ const ComplianceQuestionnaire: React.FC<ComplianceQuestionnaireProps> = ({ sessi
       control.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
       control.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       control.description.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesFamily && matchesSearch;
+    const matchesResponsibility = selectedResponsibility === 'all' || control.aws_responsibility === selectedResponsibility;
+    
+    return matchesFamily && matchesSearch && matchesResponsibility;
   });
 
   const totalQuestions = Object.values(allQuestions).flat().length;
   const answeredQuestions = Object.keys(responses).length;
-
-  const handleExport = async (format: 'excel' | 'pdf' | 'json' | 'yaml') => {
-    // TODO: Implement actual export functionality
-    console.log(`Exporting as ${format}...`);
-    alert(`Export as ${format} - Coming soon!`);
-  };
-
-  const handleSaveSettings = (settings: { customerName: string; analystName: string; frameworks: string[] }) => {
-    setCustomerName(settings.customerName);
-    setAnalystName(settings.analystName);
-    setFrameworks(settings.frameworks);
-    alert('Settings saved successfully!');
-  };
 
   if (loading) {
     return (
@@ -188,7 +175,17 @@ const ComplianceQuestionnaire: React.FC<ComplianceQuestionnaireProps> = ({ sessi
               NIST 800-53 Rev 5 Moderate Baseline
             </h1>
             <p className="text-indigo-100">
-              Comprehensive compliance assessment questionnaire • {filteredControls.length} controls loaded
+              Comprehensive compliance assessment questionnaire • {filteredControls.length} {filteredControls.length === controls.length ? 'controls' : `of ${controls.length} controls`}
+              {selectedResponsibility !== 'all' && (
+                <span className="ml-2">
+                  ({selectedResponsibility === 'aws' ? '🟠 AWS Only' : selectedResponsibility === 'shared' ? '🟢 Shared' : '🔵 Customer Only'})
+                </span>
+              )}
+              {selectedFamily !== 'all' && (
+                <span className="ml-2">
+                  • {selectedFamily.toUpperCase()} - {getFamilyFullName(selectedFamily)}
+                </span>
+              )}
             </p>
           </div>
         </div>
@@ -218,6 +215,16 @@ const ComplianceQuestionnaire: React.FC<ComplianceQuestionnaireProps> = ({ sessi
                 </option>
               ))}
             </select>
+            <select
+              value={selectedResponsibility}
+              onChange={(e) => setSelectedResponsibility(e.target.value)}
+              className="px-4 py-3 border-2 border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white shadow-sm font-medium"
+            >
+              <option value="all">All Responsibilities</option>
+              <option value="aws">🟠 AWS Only</option>
+              <option value="shared">🟢 Shared</option>
+              <option value="customer">🔵 Customer Only</option>
+            </select>
           </div>
         </div>
 
@@ -229,6 +236,13 @@ const ComplianceQuestionnaire: React.FC<ComplianceQuestionnaireProps> = ({ sessi
                 totalControls={controls.length}
                 answeredQuestions={answeredQuestions}
                 totalQuestions={totalQuestions}
+              />
+            )}
+            
+            {activeView === 'settings' && (
+              <Settings 
+                sessionId={sessionId}
+                onSessionChange={setSessionId}
               />
             )}
             
@@ -334,68 +348,71 @@ const ComplianceQuestionnaire: React.FC<ComplianceQuestionnaireProps> = ({ sessi
                             />
                           )}
 
-                          {/* AWS Applicability Banner */}
-                          {selectedControl.aws_applicability && (
-                            <div className={`rounded-xl p-5 border-2 ${
-                              selectedControl.aws_applicability.responsibility === 'aws'
-                                ? 'bg-gradient-to-br from-orange-50 to-amber-50 border-orange-300'
-                                : selectedControl.aws_applicability.responsibility === 'shared'
-                                ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-300'
-                                : 'bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-300'
-                            }`}>
-                              <div className="flex items-start gap-3">
-                                <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
-                                  selectedControl.aws_applicability.responsibility === 'aws'
-                                    ? 'bg-orange-500'
-                                    : selectedControl.aws_applicability.responsibility === 'shared'
-                                    ? 'bg-green-500'
-                                    : 'bg-blue-500'
-                                }`}>
-                                  {selectedControl.aws_applicability.responsibility === 'shared' ? (
-                                    <CheckCircle2 className="text-white" size={24} />
-                                  ) : (
-                                    <AlertCircle className="text-white" size={24} />
-                                  )}
-                                </div>
-                                <div className="flex-1">
-                                  <h4 className={`font-bold mb-2 ${
-                                    selectedControl.aws_applicability.responsibility === 'aws'
-                                      ? 'text-orange-900'
-                                      : selectedControl.aws_applicability.responsibility === 'shared'
-                                      ? 'text-green-900'
-                                      : 'text-blue-900'
-                                  }`}>
-                                    AWS Shared Responsibility Model
-                                  </h4>
-                                  <p className={`text-sm leading-relaxed mb-3 ${
-                                    selectedControl.aws_applicability.responsibility === 'aws'
-                                      ? 'text-orange-800'
-                                      : selectedControl.aws_applicability.responsibility === 'shared'
-                                      ? 'text-green-800'
-                                      : 'text-blue-800'
-                                  }`}>
-                                    {selectedControl.aws_applicability.message}
-                                  </p>
-                                  
-                                  {selectedControl.aws_applicability.artifact_links.length > 0 && (
-                                    <div className="mt-3 space-y-2">
-                                      <div className="text-xs font-semibold text-gray-700 mb-2">Compliance Artifacts:</div>
-                                      {selectedControl.aws_applicability.artifact_links.map((link, idx) => (
-                                        <a
-                                          key={idx}
-                                          href={link.url}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="block text-sm bg-white rounded-lg p-3 border border-gray-200 hover:border-indigo-300 hover:shadow-md transition-all"
-                                        >
-                                          <div className="font-semibold text-indigo-700 mb-1">{link.name} →</div>
-                                          <div className="text-xs text-gray-600">{link.description}</div>
-                                        </a>
-                                      ))}
-                                    </div>
-                                  )}
-                                </div>
+                          {/* AWS Responsibility Indicator */}
+                          {selectedControl.aws_applicability && selectedControl.aws_applicability.responsibility && (
+                            <div className="flex items-center gap-3">
+                              <span className="text-xs font-semibold text-gray-600">AWS Responsibility:</span>
+                              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${
+                                selectedControl.aws_applicability.responsibility === 'aws'
+                                  ? 'bg-orange-100 text-orange-800 border border-orange-300'
+                                  : selectedControl.aws_applicability.responsibility === 'shared'
+                                  ? 'bg-green-100 text-green-800 border border-green-300'
+                                  : 'bg-blue-100 text-blue-800 border border-blue-300'
+                              }`}>
+                                {selectedControl.aws_applicability.responsibility === 'aws' && (
+                                  <AlertCircle size={14} />
+                                )}
+                                {selectedControl.aws_applicability.responsibility === 'shared' && (
+                                  <CheckCircle2 size={14} />
+                                )}
+                                {selectedControl.aws_applicability.responsibility === 'customer' && (
+                                  <AlertCircle size={14} />
+                                )}
+                                {selectedControl.aws_applicability.responsibility === 'aws' && 'AWS Only'}
+                                {selectedControl.aws_applicability.responsibility === 'shared' && 'Shared'}
+                                {selectedControl.aws_applicability.responsibility === 'customer' && 'Customer Only'}
+                              </span>
+                              
+                              {/* Evidence link for AWS-only controls */}
+                              {selectedControl.aws_applicability.responsibility === 'aws' && (
+                                <a
+                                  href="https://console.aws.amazon.com/artifact/"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold bg-orange-600 text-white hover:bg-orange-700 transition-colors"
+                                >
+                                  <Shield size={14} />
+                                  Get Evidence from AWS Artifact
+                                </a>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Framework Relevance */}
+                          {selectedControl.framework_relevance && selectedControl.framework_relevance.relevant_frameworks.length > 0 && (
+                            <div className="bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200 rounded-xl p-5">
+                              <h4 className="font-semibold text-purple-900 mb-3 flex items-center gap-2">
+                                <FileText size={18} />
+                                Relevant Compliance Frameworks
+                              </h4>
+                              <div className="flex flex-wrap gap-2 mb-3">
+                                {selectedControl.framework_relevance.relevant_frameworks.map((framework, idx) => (
+                                  <span
+                                    key={idx}
+                                    className="inline-flex items-center px-3 py-1 rounded-md text-xs font-semibold bg-purple-100 text-purple-800 border border-purple-300"
+                                  >
+                                    {framework}
+                                  </span>
+                                ))}
                               </div>
+                              {selectedControl.framework_relevance.has_specific_mappings && (
+                                <p className="text-sm text-purple-700 mb-2">
+                                  ✓ Specific framework mappings available for this control
+                                </p>
+                              )}
+                              <p className="text-sm text-purple-600 italic">
+                                {selectedControl.framework_relevance.notes}
+                              </p>
                             </div>
                           )}
 
@@ -486,19 +503,6 @@ const ComplianceQuestionnaire: React.FC<ComplianceQuestionnaireProps> = ({ sessi
                   );
                 })}
               </div>
-            )}
-
-            {activeView === 'export' && (
-              <ExportOptions onExport={handleExport} />
-            )}
-
-            {activeView === 'settings' && (
-              <Settings
-                customerName={customerName}
-                analystName={analystName}
-                frameworks={frameworks}
-                onSave={handleSaveSettings}
-              />
             )}
           </div>
         </div>

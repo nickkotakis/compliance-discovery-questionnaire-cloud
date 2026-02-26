@@ -163,8 +163,9 @@ const InterviewMode: React.FC<InterviewModeProps> = ({
               </p>
             </div>
 
-            {/* AWS Guidance */}
-            {currentQuestion.aws_service_guidance && (
+            {/* AWS Guidance - Only show if no detailed AWS Implementation Guide */}
+            {currentQuestion.aws_service_guidance && 
+             (!control.aws_controls || control.aws_controls.length === 0) && (
               <div className="bg-gradient-to-br from-orange-50 to-amber-50 border-2 border-orange-200 rounded-xl p-5">
                 <div className="flex items-start gap-3">
                   <Cloud className="text-orange-600 flex-shrink-0 mt-1" size={24} />
@@ -180,66 +181,71 @@ const InterviewMode: React.FC<InterviewModeProps> = ({
               </div>
             )}
 
-            {/* AWS Applicability Banner */}
-            {control.aws_applicability && control.aws_applicability.message && (
-              <div className={`rounded-xl p-5 border-2 ${
-                control.aws_applicability.responsibility === 'aws'
-                  ? 'bg-gradient-to-br from-orange-50 to-amber-50 border-orange-300'
-                  : control.aws_applicability.responsibility === 'shared'
-                  ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-300'
-                  : 'bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-300'
-              }`}>
+            {/* AWS Responsibility Indicator */}
+            {control.aws_applicability && control.aws_applicability.responsibility && (
+              <div className="flex items-center gap-3">
+                <span className="text-xs font-semibold text-gray-600">AWS Responsibility:</span>
+                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${
+                  control.aws_applicability.responsibility === 'aws'
+                    ? 'bg-orange-100 text-orange-800 border border-orange-300'
+                    : control.aws_applicability.responsibility === 'shared'
+                    ? 'bg-green-100 text-green-800 border border-green-300'
+                    : 'bg-blue-100 text-blue-800 border border-blue-300'
+                }`}>
+                  {control.aws_applicability.responsibility === 'aws' && (
+                    <AlertCircle size={14} />
+                  )}
+                  {control.aws_applicability.responsibility === 'shared' && (
+                    <CheckCircle size={14} />
+                  )}
+                  {control.aws_applicability.responsibility === 'customer' && (
+                    <AlertCircle size={14} />
+                  )}
+                  {control.aws_applicability.responsibility === 'aws' && 'AWS Only'}
+                  {control.aws_applicability.responsibility === 'shared' && 'Shared'}
+                  {control.aws_applicability.responsibility === 'customer' && 'Customer Only'}
+                </span>
+                
+                {/* Evidence link for AWS-only controls */}
+                {control.aws_applicability.responsibility === 'aws' && (
+                  <a
+                    href="https://console.aws.amazon.com/artifact/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold bg-orange-600 text-white hover:bg-orange-700 transition-colors"
+                  >
+                    <Shield size={14} />
+                    Get Evidence from AWS Artifact
+                  </a>
+                )}
+              </div>
+            )}
+
+            {/* Framework Relevance */}
+            {control.framework_relevance && control.framework_relevance.relevant_frameworks.length > 0 && (
+              <div className="bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200 rounded-xl p-4">
                 <div className="flex items-start gap-3">
-                  <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
-                    control.aws_applicability.responsibility === 'aws'
-                      ? 'bg-orange-500'
-                      : control.aws_applicability.responsibility === 'shared'
-                      ? 'bg-green-500'
-                      : 'bg-blue-500'
-                  }`}>
-                    {control.aws_applicability.responsibility === 'shared' ? (
-                      <CheckCircle className="text-white" size={20} />
-                    ) : (
-                      <AlertCircle className="text-white" size={20} />
-                    )}
-                  </div>
+                  <BookOpen className="text-purple-600 flex-shrink-0 mt-0.5" size={20} />
                   <div className="flex-1">
-                    <h4 className={`font-bold mb-2 text-sm ${
-                      control.aws_applicability.responsibility === 'aws'
-                        ? 'text-orange-900'
-                        : control.aws_applicability.responsibility === 'shared'
-                        ? 'text-green-900'
-                        : 'text-blue-900'
-                    }`}>
-                      AWS Shared Responsibility Model
-                    </h4>
-                    <p className={`text-sm leading-relaxed mb-3 ${
-                      control.aws_applicability.responsibility === 'aws'
-                        ? 'text-orange-800'
-                        : control.aws_applicability.responsibility === 'shared'
-                        ? 'text-green-800'
-                        : 'text-blue-800'
-                    }`}>
-                      {control.aws_applicability.message}
-                    </p>
-                    
-                    {control.aws_applicability.artifact_links && control.aws_applicability.artifact_links.length > 0 && (
-                      <div className="mt-3 space-y-2">
-                        <div className="text-xs font-semibold text-gray-700 mb-2">Compliance Artifacts:</div>
-                        {control.aws_applicability.artifact_links.map((link, idx) => (
-                          <a
-                            key={idx}
-                            href={link.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="block text-sm bg-white rounded-lg p-3 border border-gray-200 hover:border-indigo-300 hover:shadow-md transition-all"
-                          >
-                            <div className="font-semibold text-indigo-700 mb-1">{link.name} →</div>
-                            <div className="text-xs text-gray-600">{link.description}</div>
-                          </a>
-                        ))}
-                      </div>
+                    <h4 className="font-bold text-purple-900 mb-2">Relevant Compliance Frameworks</h4>
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {control.framework_relevance.relevant_frameworks.map((framework, idx) => (
+                        <span
+                          key={idx}
+                          className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-purple-100 text-purple-800 border border-purple-300"
+                        >
+                          {framework}
+                        </span>
+                      ))}
+                    </div>
+                    {control.framework_relevance.has_specific_mappings && (
+                      <p className="text-xs text-purple-700 mt-2">
+                        ✓ Specific framework mappings available for this control
+                      </p>
                     )}
+                    <p className="text-xs text-purple-600 mt-1 italic">
+                      {control.framework_relevance.notes}
+                    </p>
                   </div>
                 </div>
               </div>

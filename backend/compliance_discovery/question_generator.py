@@ -27,7 +27,12 @@ class DiscoveryQuestionGenerator:
         # 1. Implementation questions - use custom if available, otherwise generic
         if has_custom_questions(control.id):
             custom_questions = get_control_questions(control.id)
-            for idx, q in enumerate(custom_questions):
+            # Separate implementation questions from evidence questions
+            impl_questions = [q for q in custom_questions if q.get('type') != 'evidence']
+            evidence_questions = [q for q in custom_questions if q.get('type') == 'evidence']
+            
+            # Add implementation questions
+            for idx, q in enumerate(impl_questions):
                 questions.append(DiscoveryQuestion(
                     id=f"{control.id}-IMPL-{idx+1}",
                     control_id=control.id,
@@ -36,6 +41,34 @@ class DiscoveryQuestionGenerator:
                     family=control.family,
                     aws_service_guidance=aws_guidance if idx == 0 else None
                 ))
+            
+            # Add custom evidence question if available
+            if evidence_questions:
+                questions.append(DiscoveryQuestion(
+                    id=f"{control.id}-EVIDENCE",
+                    control_id=control.id,
+                    question_text=evidence_questions[0]['question'],
+                    question_type=QuestionType.EVIDENCE,
+                    family=control.family
+                ))
+            else:
+                # Fall back to generic evidence question
+                if is_policy_control:
+                    questions.append(DiscoveryQuestion(
+                        id=f"{control.id}-EVIDENCE",
+                        control_id=control.id,
+                        question_text=f"Where is the {control.id} policy/procedure document stored? When was it last reviewed and approved? Who is responsible for maintaining it?",
+                        question_type=QuestionType.EVIDENCE,
+                        family=control.family
+                    ))
+                else:
+                    questions.append(DiscoveryQuestion(
+                        id=f"{control.id}-EVIDENCE",
+                        control_id=control.id,
+                        question_text=f"What evidence demonstrates {control.id} compliance in AWS? (AWS Config rules, CloudTrail logs, screenshots, policies, etc.) Where is this evidence stored?",
+                        question_type=QuestionType.EVIDENCE,
+                        family=control.family
+                    ))
         else:
             questions.append(DiscoveryQuestion(
                 id=f"{control.id}-IMPLEMENTATION",
@@ -45,24 +78,24 @@ class DiscoveryQuestionGenerator:
                 family=control.family,
                 aws_service_guidance=aws_guidance
             ))
-        
-        # 2. Evidence question - different for policy vs technical controls
-        if is_policy_control:
-            questions.append(DiscoveryQuestion(
-                id=f"{control.id}-EVIDENCE",
-                control_id=control.id,
-                question_text=f"Where is the {control.id} policy/procedure document stored? When was it last reviewed and approved? Who is responsible for maintaining it?",
-                question_type=QuestionType.EVIDENCE,
-                family=control.family
-            ))
-        else:
-            questions.append(DiscoveryQuestion(
-                id=f"{control.id}-EVIDENCE",
-                control_id=control.id,
-                question_text=f"What evidence demonstrates {control.id} compliance in AWS? (AWS Config rules, CloudTrail logs, screenshots, policies, etc.) Where is this evidence stored?",
-                question_type=QuestionType.EVIDENCE,
-                family=control.family
-            ))
+            
+            # Generic evidence question for controls without custom questions
+            if is_policy_control:
+                questions.append(DiscoveryQuestion(
+                    id=f"{control.id}-EVIDENCE",
+                    control_id=control.id,
+                    question_text=f"Where is the {control.id} policy/procedure document stored? When was it last reviewed and approved? Who is responsible for maintaining it?",
+                    question_type=QuestionType.EVIDENCE,
+                    family=control.family
+                ))
+            else:
+                questions.append(DiscoveryQuestion(
+                    id=f"{control.id}-EVIDENCE",
+                    control_id=control.id,
+                    question_text=f"What evidence demonstrates {control.id} compliance in AWS? (AWS Config rules, CloudTrail logs, screenshots, policies, etc.) Where is this evidence stored?",
+                    question_type=QuestionType.EVIDENCE,
+                    family=control.family
+                ))
         
         # 3. Second line defense question - different for policy vs technical
         if is_policy_control:

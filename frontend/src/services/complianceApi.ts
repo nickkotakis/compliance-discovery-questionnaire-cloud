@@ -2,10 +2,7 @@
  * API client for Compliance Discovery Questionnaire
  */
 
-// Use environment variable for API URL, fallback to localhost for development
-const API_BASE_URL = import.meta.env.VITE_API_URL 
-  ? `${import.meta.env.VITE_API_URL}/api`
-  : 'http://localhost:5001/api';
+const API_BASE_URL = 'http://localhost:5001/api';
 
 export interface Control {
   id: string;
@@ -17,6 +14,7 @@ export interface Control {
   enhancement_count?: number;
   parameters?: Parameter[];
   enhancements?: Enhancement[];
+  aws_responsibility?: 'aws' | 'shared' | 'customer';
 }
 
 export interface Parameter {
@@ -85,6 +83,14 @@ export interface ControlDetail {
     control_tower_ids: string[];
     frameworks: string[];
   }>;
+  framework_relevance?: {
+    control_id: string;
+    family: string;
+    relevant_frameworks: string[];
+    notes: string;
+    specific_mappings: Record<string, string[]>;
+    has_specific_mappings: boolean;
+  };
 }
 
 export interface TemplateMetadata {
@@ -182,6 +188,37 @@ class ComplianceApi {
 
   async exportTemplate(format: 'json' | 'csv' | 'excel' = 'json'): Promise<BlankTemplate> {
     return this.fetch(`/export?format=${format}`);
+  }
+
+  async getSessions(): Promise<{ sessions: Session[]; total: number }> {
+    return this.fetch('/sessions');
+  }
+
+  async exportQuestionnaire(
+    format: 'excel' | 'pdf' | 'json' | 'yaml',
+    options?: {
+      include_unanswered?: boolean;
+      include_aws_hints?: boolean;
+      include_framework_mappings?: boolean;
+    }
+  ): Promise<Blob> {
+    const params = new URLSearchParams();
+    params.append('format', format);
+    if (options?.include_unanswered !== undefined) {
+      params.append('include_unanswered', String(options.include_unanswered));
+    }
+    if (options?.include_aws_hints !== undefined) {
+      params.append('include_aws_hints', String(options.include_aws_hints));
+    }
+    if (options?.include_framework_mappings !== undefined) {
+      params.append('include_framework_mappings', String(options.include_framework_mappings));
+    }
+
+    const response = await fetch(`${this.baseUrl}/export?${params.toString()}`);
+    if (!response.ok) {
+      throw new Error(`Export failed: ${response.statusText}`);
+    }
+    return response.blob();
   }
 }
 

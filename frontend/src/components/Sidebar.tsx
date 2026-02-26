@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileText, Download, Settings, Home, Activity } from 'lucide-react';
+import { FileText, BarChart3, Settings, Home, Activity } from 'lucide-react';
 
 interface SidebarProps {
   activeView: string;
@@ -12,7 +12,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange, controlCoun
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Activity },
     { id: 'questionnaire', label: 'Questionnaire', icon: FileText },
-    { id: 'export', label: 'Export', icon: Download },
+    { id: 'progress', label: 'Progress', icon: BarChart3 },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
 

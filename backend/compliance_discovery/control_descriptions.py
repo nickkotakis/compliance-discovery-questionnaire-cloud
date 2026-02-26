@@ -127,6 +127,7 @@ CONTROL_DESCRIPTIONS = {
     'pe-14': 'Protect systems from environmental hazards. Control temperature, humidity, and other environmental factors.',
     'pe-15': 'Protect systems from water damage. Prevent damage from leaks, floods, and plumbing failures.',
     'pe-16': 'Control delivery and removal of system components. Prevent unauthorized removal or introduction of equipment.',
+    'pe-17': 'Establish security controls for alternate work sites (remote work, home offices). Ensure employees working remotely have appropriate security measures in place.',
     
     # Planning (PL)
     'pl-1': 'Establish and maintain planning policies and procedures. Define how security planning is conducted and documented.',
@@ -189,8 +190,8 @@ CONTROL_DESCRIPTIONS = {
     'sc-15': 'Prohibit remote activation of collaborative computing devices. Prevent unauthorized audio/video capture.',
     'sc-17': 'Issue public key certificates or obtain them from approved providers. Enable secure communications and authentication.',
     'sc-18': 'Protect mobile code from unauthorized modification. Ensure downloaded code hasn\'t been tampered with.',
-    'sc-20': 'Provide secure name/address resolution service. Protect DNS and similar services from manipulation.',
-    'sc-21': 'Request and perform data origin authentication and integrity verification. Verify information hasn\'t been modified.',
+    'sc-20': 'Provide authoritative DNS servers that deliver authenticated and integrity-protected responses using DNSSEC. Ensure external clients can trust DNS information your organization publishes.',
+    'sc-21': 'Verify authenticity and integrity of DNS responses using DNSSEC. Protect against DNS spoofing, cache poisoning, and man-in-the-middle attacks on name resolution.',
     'sc-22': 'Protect system architecture and design information. Prevent attackers from learning system details.',
     'sc-23': 'Protect session authenticity. Prevent session hijacking and man-in-the-middle attacks.',
     'sc-28': 'Protect the confidentiality and integrity of information at rest. Encrypt sensitive stored data.',

@@ -1,0 +1,20 @@
+{
+  "_comment": "AWS Shared Responsibility Model Override Configuration",
+  "_description": "Use this file to customize responsibility assignments for specific NIST controls based on your AWS architecture and compliance requirements.",
+  "_instructions": [
+    "1. Copy this file to 'responsibility_overrides.json' in the same directory",
+    "2. Add control IDs (lowercase) as keys with responsibility values",
+    "3. Valid values: 'aws', 'shared', or 'customer'",
+    "4. Restart the backend server to apply changes"
+  ],
+  "_examples": {
+    "ac-1": "shared",
+    "pe-17": "customer",
+    "cm-1": "shared"
+  },
+  "_use_cases": {
+    "override_to_shared": "If you use AWS services for a control that's marked as 'customer' by default",
+    "override_to_customer": "If you have on-premises infrastructure for a control that's marked as 'aws' by default (e.g., PE-17 for hybrid environments)",
+    "override_to_aws": "If AWS handles a control entirely through a managed service you're using"
+  }
+}

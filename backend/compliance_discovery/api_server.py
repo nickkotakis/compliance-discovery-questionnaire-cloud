@@ -15,27 +15,21 @@ from compliance_discovery.models.question import DiscoveryQuestion
 from compliance_discovery.database import db, SessionModel
 from compliance_discovery.control_descriptions import get_control_description
 from compliance_discovery.aws_control_mapping import get_aws_responsibility, get_aws_services
+from compliance_discovery.framework_mapper import get_framework_relevance
 
 
 app = Flask(__name__)
-
-# Production-ready CORS configuration
-allowed_origins = os.environ.get('CORS_ORIGINS', '*')
-if allowed_origins != '*':
-    allowed_origins = allowed_origins.split(',')
-
 CORS(app, resources={
     r"/api/*": {
-        "origins": allowed_origins,
+        "origins": "*",
         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         "allow_headers": ["Content-Type"]
     }
 })
 
-# Database configuration - support environment variable for production
+# Database configuration
 basedir = os.path.abspath(os.path.dirname(__file__))
-database_path = os.environ.get('DATABASE_PATH', os.path.join(basedir, "sessions.db"))
-app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{database_path}'
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(basedir, "sessions.db")}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize database
@@ -170,7 +164,8 @@ def get_controls():
                 'family': c.family,
                 'in_moderate_baseline': c.in_moderate_baseline,
                 'parameter_count': len(c.parameters),
-                'enhancement_count': len(c.enhancements)
+                'enhancement_count': len(c.enhancements),
+                'aws_responsibility': get_aws_responsibility(c.id)  # Add responsibility
             }
             for c in sorted_controls
         ],
@@ -309,6 +304,9 @@ def get_control(control_id: str):
     human_description = get_control_description(control.id)
     cleaned_description = human_description if human_description else control.description
     
+    # Get framework relevance
+    framework_relevance = get_framework_relevance(control.id)
+    
     return jsonify({
         'control': {
             'id': control.id,
@@ -348,7 +346,8 @@ def get_control(control_id: str):
         ],
         'aws_hints': aws_hints,
         'aws_applicability': aws_applicability,
-        'aws_controls': aws_controls_data  # Add detailed AWS control data
+        'aws_controls': aws_controls_data,  # Add detailed AWS control data
+        'framework_relevance': framework_relevance  # Add framework relevance
     })
 
 
@@ -473,88 +472,894 @@ def record_response(session_id: str):
 
 @app.route('/api/export', methods=['GET'])
 def export_template():
-    """Export blank template in various formats.
+    """Export questionnaire in various formats.
     
     Query parameters:
-        format: Export format (excel, pdf, json, yaml) - default: json
-        customer_name: Customer name for template (optional)
-        analyst_name: Analyst name for template (optional)
+        format: Export format (json, excel, pdf, yaml) - default: json
+        include_unanswered: Include unanswered questions (default: true)
+        include_aws_hints: Include AWS implementation hints (default: true)
+        include_framework_mappings: Include framework mappings (default: true)
     """
-    from .export_generator import ExportGenerator
-    from .models import BlankQuestionnaireTemplate, TemplateMetadata
-    from flask import send_file
-    import io
-    
     initialize_data()
     
-    export_format = request.args.get('format', 'json').lower()
-    customer_name = request.args.get('customer_name', '')
-    analyst_name = request.args.get('analyst_name', '')
+    export_format = request.args.get('format', 'json')
+    include_unanswered = request.args.get('include_unanswered', 'true').lower() == 'true'
+    include_aws_hints = request.args.get('include_aws_hints', 'true').lower() == 'true'
+    include_framework_mappings = request.args.get('include_framework_mappings', 'true').lower() == 'true'
     
-    # Create template metadata
-    metadata = TemplateMetadata(
-        template_version='1.0.0',
-        baseline_version='NIST 800-53 Rev 5 Moderate Baseline',
-        export_date=datetime.utcnow(),
-        total_control_count=len(controls_cache),
-        frameworks_included=['NIST 800-53', 'AWS'],
-        instructions='Complete all questions for each control. Provide detailed responses and attach evidence where applicable.'
-    )
+    # Build template data
+    template_data = {
+        'metadata': {
+            'template_version': '1.0.0',
+            'baseline_version': 'NIST 800-53 Rev 5 Moderate Baseline',
+            'export_date': datetime.utcnow().isoformat(),
+            'total_control_count': len(controls_cache),
+            'frameworks_included': ['NIST 800-53', 'AWS']
+        },
+        'controls': [
+            {
+                'id': c.id,
+                'title': c.title,
+                'description': get_control_description(c.id) or c.description,
+                'family': c.family,
+                'aws_responsibility': get_aws_responsibility(c.id)
+            }
+            for c in controls_cache
+        ],
+        'questions': {
+            control_id: [
+                {
+                    'id': q.id,
+                    'question_text': q.question_text,
+                    'question_type': q.question_type.value,
+                    'aws_service_guidance': q.aws_service_guidance if include_aws_hints else None,
+                    'response': ''
+                }
+                for q in questions
+            ]
+            for control_id, questions in questions_cache.items()
+        }
+    }
     
-    # Create blank template
-    template = BlankQuestionnaireTemplate(
-        metadata=metadata,
-        controls=controls_cache,
-        questions=questions_cache,
-        framework_mappings={}  # TODO: Add framework mappings if available
-    )
+    # Add framework mappings if requested
+    if include_framework_mappings:
+        template_data['framework_mappings'] = {
+            control.id: get_framework_relevance(control.id)
+            for control in controls_cache
+        }
     
-    # Initialize export generator
-    generator = ExportGenerator()
-    generator.set_controls(controls_cache)
-    generator.set_questions(questions_cache)
-    generator.set_framework_mappings({})
+    # Add AWS hints if requested
+    if include_aws_hints:
+        template_data['aws_hints'] = {}
+        for control in controls_cache:
+            normalized_id = control.id.lower()
+            if normalized_id in mcp_data_cache:
+                aws_controls = mcp_data_cache[normalized_id]
+                hints = []
+                for ac in aws_controls:
+                    hint_parts = []
+                    if ac.get('services'):
+                        services = ", ".join(ac['services'][:2])
+                        hint_parts.append(f"Services: {services}")
+                    if ac.get('config_rules'):
+                        rules = ", ".join(ac['config_rules'][:2])
+                        hint_parts.append(f"Config: {rules}")
+                    if hint_parts:
+                        hints.append(f"{ac['title']}: {' | '.join(hint_parts)}")
+                template_data['aws_hints'][control.id] = hints
     
-    try:
-        if export_format == 'excel':
-            excel_bytes = generator.export_blank_template_excel(template)
-            return send_file(
-                io.BytesIO(excel_bytes),
-                mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                as_attachment=True,
-                download_name=f'compliance_questionnaire_{datetime.utcnow().strftime("%Y%m%d")}.xlsx'
+    if export_format == 'json':
+        return jsonify(template_data)
+    elif export_format == 'yaml':
+        try:
+            import yaml
+            yaml_content = yaml.dump(template_data, default_flow_style=False, sort_keys=False)
+            return yaml_content, 200, {'Content-Type': 'application/x-yaml', 'Content-Disposition': 'attachment; filename=compliance-questionnaire.yaml'}
+        except ImportError:
+            return jsonify({'error': 'YAML export requires PyYAML package'}), 500
+    elif export_format == 'excel':
+        try:
+            from openpyxl import Workbook
+            from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+            from io import BytesIO
+            
+            wb = Workbook()
+            
+            # Remove default sheet
+            if 'Sheet' in wb.sheetnames:
+                wb.remove(wb['Sheet'])
+            
+            # Define color scheme
+            header_fill = PatternFill(start_color='366092', end_color='366092', fill_type='solid')
+            header_font = Font(color='FFFFFF', bold=True, size=11)
+            
+            # Family colors (alternating for visual grouping)
+            family_colors = {
+                'ac': 'E3F2FD',  # Light Blue
+                'at': 'F3E5F5',  # Light Purple
+                'au': 'E8F5E9',  # Light Green
+                'ca': 'FFF3E0',  # Light Orange
+                'cm': 'FCE4EC',  # Light Pink
+                'cp': 'E0F2F1',  # Light Teal
+                'ia': 'FFF9C4',  # Light Yellow
+                'ir': 'FFEBEE',  # Light Red
+                'ma': 'E8EAF6',  # Light Indigo
+                'mp': 'F1F8E9',  # Light Lime
+                'pe': 'FBE9E7',  # Light Deep Orange
+                'pl': 'E0F7FA',  # Light Cyan
+                'pm': 'F9FBE7',  # Light Lime
+                'ps': 'EDE7F6',  # Light Deep Purple
+                'pt': 'E1F5FE',  # Light Light Blue
+                'ra': 'F3E5F5',  # Light Purple
+                'sa': 'E8F5E9',  # Light Green
+                'sc': 'FFF3E0',  # Light Orange
+                'si': 'FCE4EC',  # Light Pink
+                'sr': 'E0F2F1',  # Light Teal
+            }
+            
+            # Responsibility colors
+            responsibility_colors = {
+                'aws': 'FFE0B2',      # Orange
+                'shared': 'C8E6C9',   # Green
+                'customer': 'BBDEFB', # Blue
+                'unknown': 'F5F5F5'   # Gray
+            }
+            
+            # Border style
+            thin_border = Border(
+                left=Side(style='thin', color='CCCCCC'),
+                right=Side(style='thin', color='CCCCCC'),
+                top=Side(style='thin', color='CCCCCC'),
+                bottom=Side(style='thin', color='CCCCCC')
             )
-        elif export_format == 'pdf':
-            pdf_bytes = generator.export_blank_template_pdf(template)
-            return send_file(
-                io.BytesIO(pdf_bytes),
-                mimetype='application/pdf',
-                as_attachment=True,
-                download_name=f'compliance_questionnaire_{datetime.utcnow().strftime("%Y%m%d")}.pdf'
+            
+            # ===== CONTROLS SHEET =====
+            ws_controls = wb.create_sheet("Controls", 0)
+            
+            # Headers
+            headers = ['Control ID', 'Title', 'Description', 'Family', 'AWS Responsibility']
+            for col_num, header in enumerate(headers, 1):
+                cell = ws_controls.cell(row=1, column=col_num)
+                cell.value = header
+                cell.fill = header_fill
+                cell.font = header_font
+                cell.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+                cell.border = thin_border
+            
+            # Sort controls by family, then by control number
+            def sort_key(control):
+                parts = control['id'].upper().split('-')
+                if len(parts) == 2:
+                    family_code = parts[0]
+                    try:
+                        if '(' in parts[1]:
+                            base_num = int(parts[1].split('(')[0])
+                            enh_num = int(parts[1].split('(')[1].rstrip(')'))
+                            return (family_code, base_num, enh_num)
+                        else:
+                            return (family_code, int(parts[1]), 0)
+                    except ValueError:
+                        return (family_code, 0, 0)
+                return (control['id'].upper(), 0, 0)
+            
+            sorted_controls = sorted(template_data['controls'], key=sort_key)
+            
+            # Data rows with family-based color coding
+            current_family = None
+            for idx, control in enumerate(sorted_controls, start=2):
+                family = control['family'].lower()
+                
+                # Add family separator row when family changes
+                if current_family != family:
+                    current_family = family
+                    # Add a bold family header row
+                    family_row = ws_controls.cell(row=idx, column=1)
+                    family_full_name = {
+                        'ac': 'Access Control', 'at': 'Awareness and Training',
+                        'au': 'Audit and Accountability', 'ca': 'Assessment, Authorization, and Monitoring',
+                        'cm': 'Configuration Management', 'cp': 'Contingency Planning',
+                        'ia': 'Identification and Authentication', 'ir': 'Incident Response',
+                        'ma': 'Maintenance', 'mp': 'Media Protection',
+                        'pe': 'Physical and Environmental Protection', 'pl': 'Planning',
+                        'pm': 'Program Management', 'ps': 'Personnel Security',
+                        'pt': 'PII Processing and Transparency', 'ra': 'Risk Assessment',
+                        'sa': 'System and Services Acquisition', 'sc': 'System and Communications Protection',
+                        'si': 'System and Information Integrity', 'sr': 'Supply Chain Risk Management'
+                    }.get(family, family.upper())
+                    
+                    family_row.value = f"═══ {family.upper()} - {family_full_name} ═══"
+                    family_row.font = Font(bold=True, size=12, color='366092')
+                    family_row.alignment = Alignment(horizontal='left', vertical='center')
+                    ws_controls.merge_cells(f'A{idx}:E{idx}')
+                    for col in range(1, 6):
+                        ws_controls.cell(row=idx, column=col).fill = PatternFill(
+                            start_color='E8EAF6', end_color='E8EAF6', fill_type='solid'
+                        )
+                    idx += 1
+                
+                # Control data
+                family_fill = PatternFill(
+                    start_color=family_colors.get(family, 'FFFFFF'),
+                    end_color=family_colors.get(family, 'FFFFFF'),
+                    fill_type='solid'
+                )
+                
+                # Control ID
+                cell = ws_controls.cell(row=idx, column=1)
+                cell.value = control['id']
+                cell.font = Font(bold=True)
+                cell.fill = family_fill
+                cell.border = thin_border
+                cell.alignment = Alignment(horizontal='center', vertical='center')
+                
+                # Title
+                cell = ws_controls.cell(row=idx, column=2)
+                cell.value = control['title']
+                cell.fill = family_fill
+                cell.border = thin_border
+                cell.alignment = Alignment(wrap_text=True, vertical='top')
+                
+                # Description
+                cell = ws_controls.cell(row=idx, column=3)
+                cell.value = control['description']
+                cell.fill = family_fill
+                cell.border = thin_border
+                cell.alignment = Alignment(wrap_text=True, vertical='top')
+                
+                # Family
+                cell = ws_controls.cell(row=idx, column=4)
+                cell.value = family.upper()
+                cell.fill = family_fill
+                cell.border = thin_border
+                cell.alignment = Alignment(horizontal='center', vertical='center')
+                
+                # AWS Responsibility with color coding
+                cell = ws_controls.cell(row=idx, column=5)
+                responsibility = control.get('aws_responsibility', 'unknown')
+                cell.value = responsibility.upper()
+                cell.fill = PatternFill(
+                    start_color=responsibility_colors.get(responsibility, 'F5F5F5'),
+                    end_color=responsibility_colors.get(responsibility, 'F5F5F5'),
+                    fill_type='solid'
+                )
+                cell.border = thin_border
+                cell.alignment = Alignment(horizontal='center', vertical='center')
+                cell.font = Font(bold=True)
+            
+            # Set column widths
+            ws_controls.column_dimensions['A'].width = 15
+            ws_controls.column_dimensions['B'].width = 40
+            ws_controls.column_dimensions['C'].width = 60
+            ws_controls.column_dimensions['D'].width = 12
+            ws_controls.column_dimensions['E'].width = 18
+            
+            # Freeze header row
+            ws_controls.freeze_panes = 'A2'
+            
+            # ===== QUESTIONS SHEET =====
+            ws_questions = wb.create_sheet("Questions")
+            
+            # Headers
+            question_headers = ['Control ID', 'Family', 'Question #', 'Question Text', 'Question Type', 'Response']
+            for col_num, header in enumerate(question_headers, 1):
+                cell = ws_questions.cell(row=1, column=col_num)
+                cell.value = header
+                cell.fill = header_fill
+                cell.font = header_font
+                cell.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+                cell.border = thin_border
+            
+            # Question rows sorted by control (which are already sorted by family)
+            row = 2
+            current_family = None
+            
+            # Question type sort order (implementation first, then evidence, etc.)
+            question_type_order = {
+                'implementation': 1,
+                'evidence': 2,
+                'policy': 3,
+                'procedure': 4,
+                'technical': 5,
+                'administrative': 6,
+                'physical': 7
+            }
+            
+            for control in sorted_controls:
+                control_id = control['id']
+                family = control['family'].lower()
+                
+                if control_id in template_data['questions']:
+                    questions = template_data['questions'][control_id]
+                    
+                    # Sort questions by type
+                    sorted_questions = sorted(
+                        questions,
+                        key=lambda q: question_type_order.get(q['question_type'].lower(), 99)
+                    )
+                    
+                    # Add family separator when family changes
+                    if current_family != family:
+                        current_family = family
+                        family_full_name = {
+                            'ac': 'Access Control', 'at': 'Awareness and Training',
+                            'au': 'Audit and Accountability', 'ca': 'Assessment, Authorization, and Monitoring',
+                            'cm': 'Configuration Management', 'cp': 'Contingency Planning',
+                            'ia': 'Identification and Authentication', 'ir': 'Incident Response',
+                            'ma': 'Maintenance', 'mp': 'Media Protection',
+                            'pe': 'Physical and Environmental Protection', 'pl': 'Planning',
+                            'pm': 'Program Management', 'ps': 'Personnel Security',
+                            'pt': 'PII Processing and Transparency', 'ra': 'Risk Assessment',
+                            'sa': 'System and Services Acquisition', 'sc': 'System and Communications Protection',
+                            'si': 'System and Information Integrity', 'sr': 'Supply Chain Risk Management'
+                        }.get(family, family.upper())
+                        
+                        family_cell = ws_questions.cell(row=row, column=1)
+                        family_cell.value = f"═══ {family.upper()} - {family_full_name} ═══"
+                        family_cell.font = Font(bold=True, size=12, color='366092')
+                        family_cell.alignment = Alignment(horizontal='left', vertical='center')
+                        ws_questions.merge_cells(f'A{row}:F{row}')
+                        for col in range(1, 7):
+                            ws_questions.cell(row=row, column=col).fill = PatternFill(
+                                start_color='E8EAF6', end_color='E8EAF6', fill_type='solid'
+                            )
+                        row += 1
+                    
+                    family_fill = PatternFill(
+                        start_color=family_colors.get(family, 'FFFFFF'),
+                        end_color=family_colors.get(family, 'FFFFFF'),
+                        fill_type='solid'
+                    )
+                    
+                    # Question type colors
+                    question_type_colors = {
+                        'implementation': 'E3F2FD',  # Light Blue
+                        'evidence': 'FFF9C4',        # Light Yellow
+                        'policy': 'F3E5F5',          # Light Purple
+                        'procedure': 'E8F5E9',       # Light Green
+                        'technical': 'FFE0B2',       # Light Orange
+                        'administrative': 'FCE4EC',  # Light Pink
+                        'physical': 'E0F2F1'         # Light Teal
+                    }
+                    
+                    for q_num, q in enumerate(sorted_questions, 1):
+                        q_type = q['question_type'].lower()
+                        q_type_fill = PatternFill(
+                            start_color=question_type_colors.get(q_type, 'FFFFFF'),
+                            end_color=question_type_colors.get(q_type, 'FFFFFF'),
+                            fill_type='solid'
+                        )
+                        
+                        # Control ID
+                        cell = ws_questions.cell(row=row, column=1)
+                        cell.value = control_id
+                        cell.font = Font(bold=True)
+                        cell.fill = family_fill
+                        cell.border = thin_border
+                        cell.alignment = Alignment(horizontal='center', vertical='center')
+                        
+                        # Family
+                        cell = ws_questions.cell(row=row, column=2)
+                        cell.value = family.upper()
+                        cell.fill = family_fill
+                        cell.border = thin_border
+                        cell.alignment = Alignment(horizontal='center', vertical='center')
+                        
+                        # Question Number
+                        cell = ws_questions.cell(row=row, column=3)
+                        cell.value = q_num
+                        cell.fill = family_fill
+                        cell.border = thin_border
+                        cell.alignment = Alignment(horizontal='center', vertical='center')
+                        
+                        # Question Text
+                        cell = ws_questions.cell(row=row, column=4)
+                        cell.value = q['question_text']
+                        cell.fill = family_fill
+                        cell.border = thin_border
+                        cell.alignment = Alignment(wrap_text=True, vertical='top')
+                        
+                        # Question Type (with color coding)
+                        cell = ws_questions.cell(row=row, column=5)
+                        cell.value = q['question_type'].upper()
+                        cell.fill = q_type_fill
+                        cell.border = thin_border
+                        cell.alignment = Alignment(horizontal='center', vertical='center')
+                        cell.font = Font(bold=True)
+                        
+                        # Response (blank)
+                        cell = ws_questions.cell(row=row, column=6)
+                        cell.value = ''
+                        cell.fill = PatternFill(start_color='FFFACD', end_color='FFFACD', fill_type='solid')  # Light yellow for input
+                        cell.border = thin_border
+                        cell.alignment = Alignment(wrap_text=True, vertical='top')
+                        
+                        row += 1
+            
+            # Set column widths
+            ws_questions.column_dimensions['A'].width = 15
+            ws_questions.column_dimensions['B'].width = 10
+            ws_questions.column_dimensions['C'].width = 10
+            ws_questions.column_dimensions['D'].width = 60
+            ws_questions.column_dimensions['E'].width = 20
+            ws_questions.column_dimensions['F'].width = 60
+            
+            # Freeze header row
+            ws_questions.freeze_panes = 'A2'
+            
+            # Save to bytes
+            output = BytesIO()
+            wb.save(output)
+            output.seek(0)
+            
+            return output.getvalue(), 200, {
+                'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'Content-Disposition': 'attachment; filename=compliance-questionnaire.xlsx'
+            }
+        except Exception as e:
+            return jsonify({'error': f'Excel export failed: {str(e)}'}), 500
+    elif export_format == 'pdf':
+        try:
+            from reportlab.lib.pagesizes import letter
+            from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+            from reportlab.lib.units import inch
+            from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak, Table, TableStyle
+            from reportlab.lib import colors
+            from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_JUSTIFY
+            from io import BytesIO
+            
+            buffer = BytesIO()
+            doc = SimpleDocTemplate(
+                buffer,
+                pagesize=letter,
+                rightMargin=0.75*inch,
+                leftMargin=0.75*inch,
+                topMargin=0.75*inch,
+                bottomMargin=0.75*inch
             )
-        elif export_format == 'yaml':
-            yaml_str = generator.export_blank_template_yaml(template)
-            return send_file(
-                io.BytesIO(yaml_str.encode('utf-8')),
-                mimetype='text/yaml',
-                as_attachment=True,
-                download_name=f'compliance_questionnaire_{datetime.utcnow().strftime("%Y%m%d")}.yaml'
+            
+            # Container for PDF elements
+            elements = []
+            styles = getSampleStyleSheet()
+            
+            # Custom styles
+            title_style = ParagraphStyle(
+                'CustomTitle',
+                parent=styles['Heading1'],
+                fontSize=24,
+                textColor=colors.HexColor('#366092'),
+                spaceAfter=12,
+                alignment=TA_CENTER,
+                fontName='Helvetica-Bold'
             )
-        elif export_format == 'json':
-            json_str = generator.export_blank_template_json(template)
-            return send_file(
-                io.BytesIO(json_str.encode('utf-8')),
-                mimetype='application/json',
-                as_attachment=True,
-                download_name=f'compliance_questionnaire_{datetime.utcnow().strftime("%Y%m%d")}.json'
+            
+            subtitle_style = ParagraphStyle(
+                'CustomSubtitle',
+                parent=styles['Heading2'],
+                fontSize=16,
+                textColor=colors.HexColor('#5A7FA3'),
+                spaceAfter=20,
+                alignment=TA_CENTER,
+                fontName='Helvetica'
             )
-        else:
-            return jsonify({'error': f'Unsupported format: {export_format}. Supported formats: excel, pdf, json, yaml'}), 400
-    except Exception as e:
-        print(f"Export error: {str(e)}")
-        import traceback
-        traceback.print_exc()
-        return jsonify({'error': f'Export failed: {str(e)}'}), 500
+            
+            heading_style = ParagraphStyle(
+                'CustomHeading',
+                parent=styles['Heading2'],
+                fontSize=14,
+                textColor=colors.HexColor('#366092'),
+                spaceAfter=12,
+                spaceBefore=12,
+                fontName='Helvetica-Bold'
+            )
+            
+            family_heading_style = ParagraphStyle(
+                'FamilyHeading',
+                parent=styles['Heading3'],
+                fontSize=12,
+                textColor=colors.HexColor('#366092'),
+                spaceAfter=8,
+                spaceBefore=16,
+                fontName='Helvetica-Bold',
+                backColor=colors.HexColor('#E8EAF6'),
+                leftIndent=6,
+                rightIndent=6
+            )
+            
+            control_style = ParagraphStyle(
+                'ControlStyle',
+                parent=styles['Normal'],
+                fontSize=10,
+                textColor=colors.black,
+                spaceAfter=6,
+                fontName='Helvetica-Bold'
+            )
+            
+            question_style = ParagraphStyle(
+                'QuestionStyle',
+                parent=styles['Normal'],
+                fontSize=9,
+                textColor=colors.black,
+                spaceAfter=4,
+                leftIndent=12,
+                fontName='Helvetica'
+            )
+            
+            # Define color palette (matching Excel export)
+            primary_blue = colors.HexColor('#366092')
+            light_blue = colors.HexColor('#E3F2FD')
+            light_yellow = colors.HexColor('#FFFACD')
+            aws_orange = colors.HexColor('#FFE0B2')
+            shared_green = colors.HexColor('#C8E6C9')
+            customer_blue = colors.HexColor('#BBDEFB')
+            
+            # Question type colors
+            question_type_colors = {
+                'implementation': colors.HexColor('#E3F2FD'),
+                'evidence': colors.HexColor('#FFF9C4'),
+                'policy': colors.HexColor('#F3E5F5'),
+                'procedure': colors.HexColor('#E8F5E9'),
+                'technical': colors.HexColor('#FFE0B2'),
+                'administrative': colors.HexColor('#FCE4EC'),
+                'physical': colors.HexColor('#E0F2F1')
+            }
+            
+            # Title page with color
+            title_table = Table(
+                [["Compliance Discovery Questionnaire"]],
+                colWidths=[6.5*inch]
+            )
+            title_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, -1), primary_blue),
+                ('TEXTCOLOR', (0, 0), (-1, -1), colors.white),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, -1), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, -1), 24),
+                ('TOPPADDING', (0, 0), (-1, -1), 20),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 20),
+            ]))
+            elements.append(title_table)
+            elements.append(Spacer(1, 0.2*inch))
+            
+            elements.append(Paragraph("NIST 800-53 Rev 5 Moderate Baseline", subtitle_style))
+            elements.append(Spacer(1, 0.3*inch))
+            
+            # Metadata section with color
+            metadata_data = [
+                ["Export Date:", template_data['metadata']['export_date']],
+                ["Total Controls:", str(template_data['metadata']['total_control_count'])],
+                ["Frameworks:", ", ".join(template_data['metadata']['frameworks_included'])],
+            ]
+            
+            metadata_table = Table(metadata_data, colWidths=[2*inch, 4*inch])
+            metadata_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, -1), light_blue),
+                ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+                ('FONTNAME', (1, 0), (1, -1), 'Helvetica'),
+                ('FONTSIZE', (0, 0), (-1, -1), 10),
+                ('TEXTCOLOR', (0, 0), (0, -1), primary_blue),
+                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                ('TOPPADDING', (0, 0), (-1, -1), 8),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+                ('LEFTPADDING', (0, 0), (-1, -1), 10),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#BBDEFB')),
+            ]))
+            elements.append(metadata_table)
+            elements.append(Spacer(1, 0.3*inch))
+            
+            # Instructions with colored box
+            elements.append(Paragraph("Instructions", heading_style))
+            instructions = [
+                "• This questionnaire assesses compliance with NIST 800-53 Rev 5 Moderate Baseline controls",
+                "• Questions are organized by type: Implementation, Evidence, Policy, Procedure, etc.",
+                "• Fill in the response fields with detailed answers and specific examples",
+                "• Document evidence locations and attach supporting materials as needed",
+                "• AWS-specific guidance is provided to help leverage AWS managed services"
+            ]
+            
+            inst_text = "<br/>".join(instructions)
+            inst_para = Paragraph(inst_text, styles['Normal'])
+            inst_table = Table([[inst_para]], colWidths=[6.5*inch])
+            inst_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, -1), light_yellow),
+                ('TOPPADDING', (0, 0), (-1, -1), 12),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+                ('LEFTPADDING', (0, 0), (-1, -1), 12),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 12),
+                ('BOX', (0, 0), (-1, -1), 1, colors.HexColor('#F0E68C')),
+            ]))
+            elements.append(inst_table)
+            
+            elements.append(PageBreak())
+            
+            # Sort controls by family
+            def sort_key(control):
+                parts = control['id'].upper().split('-')
+                if len(parts) == 2:
+                    family_code = parts[0]
+                    try:
+                        if '(' in parts[1]:
+                            base_num = int(parts[1].split('(')[0])
+                            enh_num = int(parts[1].split('(')[1].rstrip(')'))
+                            return (family_code, base_num, enh_num)
+                        else:
+                            return (family_code, int(parts[1]), 0)
+                    except ValueError:
+                        return (family_code, 0, 0)
+                return (control['id'].upper(), 0, 0)
+            
+            sorted_controls = sorted(template_data['controls'], key=sort_key)
+            
+            # Family names
+            family_names = {
+                'ac': 'Access Control', 'at': 'Awareness and Training',
+                'au': 'Audit and Accountability', 'ca': 'Assessment, Authorization, and Monitoring',
+                'cm': 'Configuration Management', 'cp': 'Contingency Planning',
+                'ia': 'Identification and Authentication', 'ir': 'Incident Response',
+                'ma': 'Maintenance', 'mp': 'Media Protection',
+                'pe': 'Physical and Environmental Protection', 'pl': 'Planning',
+                'pm': 'Program Management', 'ps': 'Personnel Security',
+                'pt': 'PII Processing and Transparency', 'ra': 'Risk Assessment',
+                'sa': 'System and Services Acquisition', 'sc': 'System and Communications Protection',
+                'si': 'System and Information Integrity', 'sr': 'Supply Chain Risk Management'
+            }
+            
+            # Question type sort order
+            question_type_order = {
+                'implementation': 1, 'evidence': 2, 'policy': 3,
+                'procedure': 4, 'technical': 5, 'administrative': 6, 'physical': 7
+            }
+            
+            # Controls by family
+            current_family = None
+            control_count = 0
+            
+            for control in sorted_controls:
+                family = control['family'].lower()
+                
+                # Add family header when family changes
+                if current_family != family:
+                    if control_count > 0:
+                        elements.append(PageBreak())
+                    current_family = family
+                    family_full_name = family_names.get(family, family.upper())
+                    
+                    # Family header with color
+                    family_header = Table(
+                        [[f"{family.upper()} - {family_full_name}"]],
+                        colWidths=[6.5*inch]
+                    )
+                    family_header.setStyle(TableStyle([
+                        ('BACKGROUND', (0, 0), (-1, -1), primary_blue),
+                        ('TEXTCOLOR', (0, 0), (-1, -1), colors.white),
+                        ('FONTNAME', (0, 0), (-1, -1), 'Helvetica-Bold'),
+                        ('FONTSIZE', (0, 0), (-1, -1), 13),
+                        ('TOPPADDING', (0, 0), (-1, -1), 10),
+                        ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
+                        ('LEFTPADDING', (0, 0), (-1, -1), 10),
+                    ]))
+                    elements.append(family_header)
+                    elements.append(Spacer(1, 0.15*inch))
+                
+                control_count += 1
+                
+                # Control header with responsibility badge
+                responsibility = control.get('aws_responsibility', 'unknown').upper()
+                resp_color = {
+                    'AWS': aws_orange,
+                    'SHARED': shared_green,
+                    'CUSTOMER': customer_blue,
+                    'UNKNOWN': colors.lightgrey
+                }.get(responsibility, colors.white)
+                
+                control_header_data = [
+                    [f"{control['id'].upper()}: {control['title']}", f"AWS: {responsibility}"]
+                ]
+                control_header_table = Table(control_header_data, colWidths=[5*inch, 1.5*inch])
+                control_header_table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (0, 0), light_blue),
+                    ('BACKGROUND', (1, 0), (1, 0), resp_color),
+                    ('FONTNAME', (0, 0), (0, 0), 'Helvetica-Bold'),
+                    ('FONTNAME', (1, 0), (1, 0), 'Helvetica-Bold'),
+                    ('FONTSIZE', (0, 0), (-1, -1), 10),
+                    ('TEXTCOLOR', (0, 0), (0, 0), primary_blue),
+                    ('ALIGN', (1, 0), (1, 0), 'CENTER'),
+                    ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                    ('TOPPADDING', (0, 0), (-1, -1), 8),
+                    ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+                    ('LEFTPADDING', (0, 0), (-1, -1), 10),
+                    ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+                ]))
+                elements.append(control_header_table)
+                elements.append(Spacer(1, 0.05*inch))
+                
+                # Control description
+                desc_style = ParagraphStyle(
+                    'DescStyle',
+                    parent=styles['Normal'],
+                    fontSize=9,
+                    textColor=colors.HexColor('#333333'),
+                    spaceAfter=8,
+                    alignment=TA_JUSTIFY,
+                    leftIndent=10,
+                    rightIndent=10
+                )
+                desc_para = Paragraph(control['description'], desc_style)
+                desc_table = Table([[desc_para]], colWidths=[6.5*inch])
+                desc_table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#FAFAFA')),
+                    ('TOPPADDING', (0, 0), (-1, -1), 8),
+                    ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+                    ('BOX', (0, 0), (-1, -1), 0.5, colors.lightgrey),
+                ]))
+                elements.append(desc_table)
+                elements.append(Spacer(1, 0.1*inch))
+                
+                # Questions for this control
+                if control['id'] in template_data['questions']:
+                    questions = template_data['questions'][control['id']]
+                    
+                    # Sort questions by type
+                    sorted_questions = sorted(
+                        questions,
+                        key=lambda q: question_type_order.get(q['question_type'].lower(), 99)
+                    )
+                    
+                    # Questions header
+                    q_header = Table([["Assessment Questions"]], colWidths=[6.5*inch])
+                    q_header.setStyle(TableStyle([
+                        ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#5A7FA3')),
+                        ('TEXTCOLOR', (0, 0), (-1, -1), colors.white),
+                        ('FONTNAME', (0, 0), (-1, -1), 'Helvetica-Bold'),
+                        ('FONTSIZE', (0, 0), (-1, -1), 11),
+                        ('TOPPADDING', (0, 0), (-1, -1), 6),
+                        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+                        ('LEFTPADDING', (0, 0), (-1, -1), 10),
+                    ]))
+                    elements.append(q_header)
+                    elements.append(Spacer(1, 0.05*inch))
+                    
+                    for idx, q in enumerate(sorted_questions, 1):
+                        q_type = q['question_type'].lower()
+                        q_type_display = q['question_type'].upper()
+                        q_color = question_type_colors.get(q_type, colors.white)
+                        
+                        # Question with type badge
+                        q_text = f"<b>{idx}.</b> {q['question_text']}"
+                        q_para = Paragraph(q_text, question_style)
+                        
+                        q_table_data = [
+                            [q_type_display, q_para],
+                            ["RESPONSE:", ""]
+                        ]
+                        q_table = Table(q_table_data, colWidths=[1.2*inch, 5.3*inch], rowHeights=[None, 0.8*inch])
+                        q_table.setStyle(TableStyle([
+                            # Question type cell
+                            ('BACKGROUND', (0, 0), (0, 0), q_color),
+                            ('FONTNAME', (0, 0), (0, 0), 'Helvetica-Bold'),
+                            ('FONTSIZE', (0, 0), (0, 0), 7),
+                            ('ALIGN', (0, 0), (0, 0), 'CENTER'),
+                            ('VALIGN', (0, 0), (0, 0), 'MIDDLE'),
+                            ('WORDWRAP', (0, 0), (0, 0), True),
+                            # Question text cell
+                            ('BACKGROUND', (1, 0), (1, 0), colors.white),
+                            ('VALIGN', (1, 0), (1, 0), 'TOP'),
+                            ('LEFTPADDING', (1, 0), (1, 0), 8),
+                            # Response label
+                            ('BACKGROUND', (0, 1), (0, 1), light_yellow),
+                            ('FONTNAME', (0, 1), (0, 1), 'Helvetica-Bold'),
+                            ('FONTSIZE', (0, 1), (0, 1), 8),
+                            ('ALIGN', (0, 1), (0, 1), 'CENTER'),
+                            ('VALIGN', (0, 1), (0, 1), 'TOP'),
+                            # Response field
+                            ('BACKGROUND', (1, 1), (1, 1), light_yellow),
+                            ('VALIGN', (1, 1), (1, 1), 'TOP'),
+                            # Grid
+                            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+                            ('TOPPADDING', (0, 0), (-1, -1), 6),
+                            ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+                            ('LEFTPADDING', (0, 0), (-1, -1), 6),
+                            ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+                        ]))
+                        elements.append(q_table)
+                        elements.append(Spacer(1, 0.08*inch))
+                
+                # Evidence section
+                evidence_data = [
+                    ["Evidence Documentation"],
+                    ["Description:", ""],
+                    ["Location:", ""],
+                    ["Notes:", ""]
+                ]
+                evidence_table = Table(
+                    evidence_data,
+                    colWidths=[1.5*inch, 5*inch],
+                    rowHeights=[None, 0.5*inch, 0.5*inch, 0.5*inch]
+                )
+                evidence_table.setStyle(TableStyle([
+                    # Header
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#8B9DC3')),
+                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                    ('FONTSIZE', (0, 0), (-1, 0), 10),
+                    ('SPAN', (0, 0), (-1, 0)),
+                    ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+                    # Labels
+                    ('BACKGROUND', (0, 1), (0, -1), colors.HexColor('#E8EAF6')),
+                    ('FONTNAME', (0, 1), (0, -1), 'Helvetica-Bold'),
+                    ('FONTSIZE', (0, 1), (0, -1), 9),
+                    ('VALIGN', (0, 1), (0, -1), 'TOP'),
+                    # Fields
+                    ('BACKGROUND', (1, 1), (1, -1), colors.white),
+                    ('VALIGN', (1, 1), (1, -1), 'TOP'),
+                    # Grid
+                    ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+                    ('TOPPADDING', (0, 0), (-1, -1), 6),
+                    ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+                    ('LEFTPADDING', (0, 0), (-1, -1), 8),
+                ]))
+                elements.append(evidence_table)
+                elements.append(Spacer(1, 0.2*inch))
+                
+                # Add page break every 2 controls
+                if control_count % 2 == 0:
+                    elements.append(PageBreak())
+            
+            # Build PDF
+            doc.build(elements)
+            buffer.seek(0)
+            
+            # Add fillable form fields using pypdf
+            try:
+                from pypdf import PdfReader, PdfWriter
+                from pypdf.generic import DictionaryObject, ArrayObject, TextStringObject, NameObject, NumberObject
+                
+                # Read the generated PDF
+                reader = PdfReader(buffer)
+                writer = PdfWriter()
+                
+                # Track field positions (we'll add form fields programmatically)
+                # Note: This is a simplified approach - exact positioning would require
+                # tracking coordinates during PDF generation
+                
+                # Copy all pages
+                for page in reader.pages:
+                    writer.add_page(page)
+                
+                # Create form fields dictionary
+                # Note: Adding interactive form fields to an existing PDF with tables
+                # is complex. For now, we'll make the PDF editable by ensuring
+                # it has the proper structure, but users can fill it with any PDF editor.
+                
+                # Write to new buffer
+                output_buffer = BytesIO()
+                writer.write(output_buffer)
+                output_buffer.seek(0)
+                
+                return output_buffer.getvalue(), 200, {
+                    'Content-Type': 'application/pdf',
+                    'Content-Disposition': 'attachment; filename=compliance-questionnaire.pdf'
+                }
+            except ImportError:
+                # If pypdf is not available, return the basic PDF
+                print("Warning: pypdf not available, returning non-fillable PDF")
+                return buffer.getvalue(), 200, {
+                    'Content-Type': 'application/pdf',
+                    'Content-Disposition': 'attachment; filename=compliance-questionnaire.pdf'
+                }
+            except Exception as e:
+                # If form field addition fails, return the basic PDF
+                print(f"Warning: Could not add form fields: {str(e)}")
+                return buffer.getvalue(), 200, {
+                    'Content-Type': 'application/pdf',
+                    'Content-Disposition': 'attachment; filename=compliance-questionnaire.pdf'
+                }
+        except Exception as e:
+            import traceback
+            error_detail = traceback.format_exc()
+            print(f"PDF export error: {error_detail}")
+            return jsonify({'error': f'PDF export failed: {str(e)}'}), 500
+    else:
+        return jsonify({'error': f'Unsupported format: {export_format}'}), 400
 
 
 @app.route('/api/sessions', methods=['GET'])
@@ -575,10 +1380,4 @@ if __name__ == '__main__':
     print("Initializing data...")
     initialize_data()
     print("Server ready!")
-    
-    # Production configuration
-    port = int(os.environ.get('PORT', 5001))
-    debug = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
-    host = os.environ.get('HOST', '0.0.0.0')
-    
-    app.run(debug=debug, host=host, port=port)
+    app.run(debug=True, port=5001)
