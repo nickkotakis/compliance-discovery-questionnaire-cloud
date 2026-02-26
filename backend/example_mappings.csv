@@ -1,0 +1,9 @@
+control_id,framework,requirement_id,description
+AC-1,NIST CSF,ID.GV-1,IDENTIFY - ID.GV
+AC-1,GLBA,GLBA-Safeguards-Access-Control,Access control policy and procedures
+AC-1,SOX,Section 404,ITGC - IT general controls for access management
+AC-1,FFIEC,Access Control,Cyber Risk Management - Access control policies and procedures
+AC-2,NIST CSF,PR.AC-1,PROTECT - PR.AC
+AC-2,GLBA,GLBA-Safeguards-Account-Management,Account management procedures
+AU-1,NIST CSF,DE.AE-1,DETECT - DE.AE
+AU-1,SOX,Section 404,ITGC - Audit logging and monitoring

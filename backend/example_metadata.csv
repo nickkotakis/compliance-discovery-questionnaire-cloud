@@ -1,0 +1,6 @@
+key,value
+template_version,1.0.0
+baseline_version,NIST 800-53 Rev 5 Moderate Baseline
+export_date,2026-02-25 16:15:46
+total_control_count,3
+frameworks_included,"NIST CSF, GLBA, SOX, FFIEC, AWS"

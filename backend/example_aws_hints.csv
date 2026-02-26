@@ -1,0 +1,2 @@
+control_id,hint_text
+AC-2,"Config: IAM_USER_UNUSED_CREDENTIALS_CHECK, Security Hub: IAM.1, IAM.2, Control Tower: CT.IAM.PR.1"

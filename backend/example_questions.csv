@@ -1,0 +1,9 @@
+question_id,control_id,question_text,question_type,response
+Q-AC-1-1,AC-1,Describe your organization's current access control policy. How is it documented and communicated to relevant personnel?,current_state,
+Q-AC-1-2,AC-1,"Is the access control policy currently implemented across all systems? If not, which systems are covered?",implementation,
+Q-AC-1-3,AC-1,What evidence exists to demonstrate compliance with the access control policy?,evidence,
+Q-AC-2-1,AC-2,"Describe your current account management processes. How are accounts created, modified, and removed?",current_state,
+Q-AC-2-2,AC-2,"How mature is your account management process? Is it ad-hoc, defined, managed, or optimized?",maturity,
+Q-AC-2-3,AC-2,Consider AWS IAM for centralized account management. How could AWS services help automate and improve your account management processes?,aws_implementation,
+Q-AU-1-1,AU-1,Describe your organization's audit and accountability policy. How comprehensive is it?,current_state,
+Q-AU-1-2,AU-1,Is automated audit logging and reporting in place? How readily accessible is audit evidence?,audit_readiness,

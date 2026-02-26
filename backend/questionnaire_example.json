@@ -1,0 +1,201 @@
+{
+  "metadata": {
+    "template_version": "1.0.0",
+    "baseline_version": "NIST 800-53 Rev 5 Moderate Baseline",
+    "export_date": "2026-02-25T16:15:46.399366",
+    "total_control_count": 3,
+    "frameworks_included": [
+      "NIST CSF",
+      "GLBA",
+      "SOX",
+      "FFIEC",
+      "AWS"
+    ],
+    "instructions": "# How to Complete This Questionnaire\n\n## Overview\nThis questionnaire is based on the NIST 800-53 Revision 5 Moderate Baseline, which contains security controls appropriate for banking and financial institutions. Complete this assessment to evaluate your organization's compliance posture across multiple regulatory frameworks.\n\n## Completing Response Fields\n\nFor each discovery question:\n1. **Read the question carefully** - Questions are designed to elicit detailed narrative responses\n2. **Provide specific details** - Avoid yes/no answers; describe your current implementation\n3. **Be thorough** - Include information about processes, technologies, and responsible parties\n4. **Note gaps** - If a control is not fully implemented, describe what's missing\n\n## Documenting Evidence\n\nFor each control, document available evidence:\n- **Evidence Description**: What the evidence is (e.g., \"Access control policy document\", \"Audit log reports\")\n- **Evidence Location**: Where it's stored (e.g., \"SharePoint site\", \"Compliance folder\", \"SIEM system\")\n- **Notes**: Any additional context or observations about the evidence\n\n## Understanding Framework Mappings\n\nThis questionnaire maps NIST 800-53 controls to multiple frameworks:\n- **NIST CSF**: Cybersecurity Framework functions and categories\n- **GLBA**: Gramm-Leach-Bliley Act requirements\n- **SOX**: Sarbanes-Oxley Act sections 302 and 404\n- **FFIEC**: Federal Financial Institutions Examination Council standards\n\nBy completing the NIST 800-53 assessment, you automatically address requirements across all mapped frameworks.\n\n## AWS Control Hints\n\nWhere applicable, AWS control hints are provided showing:\n- **AWS Config Rules**: Automated compliance checks\n- **Security Hub Controls**: Security findings and compliance status\n- **Control Tower Controls**: Governance controls for AWS environments\n\nThese hints identify AWS services that can help implement or automate compliance controls.\n\n## Question Types\n\nQuestions are organized by type to guide your assessment:\n- **Current State**: Describe your existing implementation\n- **Implementation**: Assess whether and how controls are implemented\n- **Maturity**: Evaluate sophistication and effectiveness\n- **Evidence**: Identify available documentation\n- **Gap Analysis**: Identify deficiencies\n- **Remediation**: Explore steps to achieve compliance\n- **AWS Implementation**: Consider AWS services for compliance\n- **Second Line Defense**: Assess readiness for compliance review\n- **Third Line Defense**: Assess readiness for internal audit\n- **Audit Readiness**: Evaluate automated reporting capabilities\n- **Continuous Monitoring**: Assess automated monitoring and alerting\n\n## Tips for Success\n\n1. **Involve the right people** - Include IT, security, compliance, and business stakeholders\n2. **Gather evidence first** - Collect relevant documentation before starting\n3. **Be honest** - Accurate assessment is essential for effective remediation planning\n4. **Focus on Moderate Baseline** - This assessment covers the most relevant controls for banking institutions\n5. **Use AWS hints** - Consider cloud-based solutions for automation and efficiency\n\n## Need Help?\n\nContact your compliance analyst or AWS solutions architect for assistance with this assessment."
+  },
+  "controls": [
+    {
+      "id": "AC-1",
+      "title": "Policy and Procedures",
+      "description": "Develop, document, and disseminate access control policy and procedures.",
+      "family": "AC",
+      "in_moderate_baseline": true
+    },
+    {
+      "id": "AC-2",
+      "title": "Account Management",
+      "description": "Manage information system accounts, including establishing, activating, modifying, reviewing, disabling, and removing accounts.",
+      "family": "AC",
+      "in_moderate_baseline": true
+    },
+    {
+      "id": "AU-1",
+      "title": "Policy and Procedures",
+      "description": "Develop, document, and disseminate audit and accountability policy and procedures.",
+      "family": "AU",
+      "in_moderate_baseline": true
+    }
+  ],
+  "questions": {
+    "AC-1": [
+      {
+        "id": "Q-AC-1-1",
+        "control_id": "AC-1",
+        "question_text": "Describe your organization's current access control policy. How is it documented and communicated to relevant personnel?",
+        "question_type": "current_state",
+        "family": "AC",
+        "response": ""
+      },
+      {
+        "id": "Q-AC-1-2",
+        "control_id": "AC-1",
+        "question_text": "Is the access control policy currently implemented across all systems? If not, which systems are covered?",
+        "question_type": "implementation",
+        "family": "AC",
+        "response": ""
+      },
+      {
+        "id": "Q-AC-1-3",
+        "control_id": "AC-1",
+        "question_text": "What evidence exists to demonstrate compliance with the access control policy?",
+        "question_type": "evidence",
+        "family": "AC",
+        "response": ""
+      }
+    ],
+    "AC-2": [
+      {
+        "id": "Q-AC-2-1",
+        "control_id": "AC-2",
+        "question_text": "Describe your current account management processes. How are accounts created, modified, and removed?",
+        "question_type": "current_state",
+        "family": "AC",
+        "response": ""
+      },
+      {
+        "id": "Q-AC-2-2",
+        "control_id": "AC-2",
+        "question_text": "How mature is your account management process? Is it ad-hoc, defined, managed, or optimized?",
+        "question_type": "maturity",
+        "family": "AC",
+        "response": ""
+      },
+      {
+        "id": "Q-AC-2-3",
+        "control_id": "AC-2",
+        "question_text": "Consider AWS IAM for centralized account management. How could AWS services help automate and improve your account management processes?",
+        "question_type": "aws_implementation",
+        "family": "AC",
+        "response": ""
+      }
+    ],
+    "AU-1": [
+      {
+        "id": "Q-AU-1-1",
+        "control_id": "AU-1",
+        "question_text": "Describe your organization's audit and accountability policy. How comprehensive is it?",
+        "question_type": "current_state",
+        "family": "AU",
+        "response": ""
+      },
+      {
+        "id": "Q-AU-1-2",
+        "control_id": "AU-1",
+        "question_text": "Is automated audit logging and reporting in place? How readily accessible is audit evidence?",
+        "question_type": "audit_readiness",
+        "family": "AU",
+        "response": ""
+      }
+    ]
+  },
+  "framework_mappings": {
+    "AC-1": {
+      "nist_csf": [
+        {
+          "function": "IDENTIFY",
+          "category": "ID.GV",
+          "subcategory": "ID.GV-1"
+        }
+      ],
+      "glba": [
+        {
+          "requirement_type": "SAFEGUARDS",
+          "requirement_id": "GLBA-Safeguards-Access-Control",
+          "description": "Access control policy and procedures"
+        }
+      ],
+      "sox": [
+        {
+          "section": "404",
+          "control_type": "ITGC",
+          "description": "IT general controls for access management"
+        }
+      ],
+      "ffiec": [
+        {
+          "domain": "Cyber Risk Management",
+          "assessment_factor": "Access Control",
+          "description": "Access control policies and procedures"
+        }
+      ]
+    },
+    "AC-2": {
+      "nist_csf": [
+        {
+          "function": "PROTECT",
+          "category": "PR.AC",
+          "subcategory": "PR.AC-1"
+        }
+      ],
+      "glba": [
+        {
+          "requirement_type": "SAFEGUARDS",
+          "requirement_id": "GLBA-Safeguards-Account-Management",
+          "description": "Account management procedures"
+        }
+      ],
+      "sox": [],
+      "ffiec": []
+    },
+    "AU-1": {
+      "nist_csf": [
+        {
+          "function": "DETECT",
+          "category": "DE.AE",
+          "subcategory": "DE.AE-1"
+        }
+      ],
+      "glba": [],
+      "sox": [
+        {
+          "section": "404",
+          "control_type": "ITGC",
+          "description": "Audit logging and monitoring"
+        }
+      ],
+      "ffiec": []
+    }
+  },
+  "aws_hints": {
+    "AC-2": [
+      "Config: IAM_USER_UNUSED_CREDENTIALS_CHECK, Security Hub: IAM.1, IAM.2, Control Tower: CT.IAM.PR.1"
+    ]
+  },
+  "evidence": {
+    "AC-1": {
+      "description": "",
+      "location": "",
+      "notes": ""
+    },
+    "AC-2": {
+      "description": "",
+      "location": "",
+      "notes": ""
+    },
+    "AU-1": {
+      "description": "",
+      "location": "",
+      "notes": ""
+    }
+  }
+}

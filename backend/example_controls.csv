@@ -1,0 +1,4 @@
+control_id,title,description,family
+AC-1,Policy and Procedures,"Develop, document, and disseminate access control policy and procedures.",AC
+AC-2,Account Management,"Manage information system accounts, including establishing, activating, modifying, reviewing, disabling, and removing accounts.",AC
+AU-1,Policy and Procedures,"Develop, document, and disseminate audit and accountability policy and procedures.",AU
