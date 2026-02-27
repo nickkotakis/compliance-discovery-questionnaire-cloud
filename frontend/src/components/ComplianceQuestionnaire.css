@@ -1,0 +1,16 @@
+/* Reduce excessive left padding in AppLayout content area */
+.awsui-app-layout__content {
+  padding-left: 20px !important;
+}
+
+/* Ensure navigation panel has proper width */
+.awsui-app-layout__navigation {
+  max-width: 280px;
+}
+
+/* Reduce content area padding on mobile */
+@media (max-width: 768px) {
+  .awsui-app-layout__content {
+    padding-left: 12px !important;
+  }
+}

@@ -2,7 +2,7 @@
  * API client for Compliance Discovery Questionnaire
  */
 
-const API_BASE_URL = 'http://localhost:5001/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://zr5mc40584.execute-api.us-east-1.amazonaws.com/prod/api';
 
 export interface Control {
   id: string;
@@ -214,7 +214,22 @@ class ComplianceApi {
       params.append('include_framework_mappings', String(options.include_framework_mappings));
     }
 
-    const response = await fetch(`${this.baseUrl}/export?${params.toString()}`);
+    // Set proper Accept header for binary formats
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
+    
+    if (format === 'excel') {
+      headers['Accept'] = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+    } else if (format === 'pdf') {
+      headers['Accept'] = 'application/pdf';
+    } else {
+      headers['Accept'] = 'application/json';
+    }
+
+    const response = await fetch(`${this.baseUrl}/export?${params.toString()}`, {
+      headers,
+    });
     if (!response.ok) {
       throw new Error(`Export failed: ${response.statusText}`);
     }

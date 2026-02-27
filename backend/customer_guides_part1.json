@@ -1,0 +1,62 @@
+{
+  "pm-1": {
+    "title": "Information Security Program Plan",
+    "description": "Develop and maintain information security program plan",
+    "services": ["Organizations", "Security Hub", "Audit Manager"],
+    "implementation": "Document enterprise-wide security program. Use AWS Organizations for multi-account governance. Enable Security Hub across all accounts. Use Audit Manager for compliance tracking. Define security roles and responsibilities. Establish security metrics and reporting. Review program plan annually."
+  },
+  "pm-2": {
+    "title": "Senior Information Security Officer",
+    "description": "Appoint senior information security officer",
+    "services": ["IAM", "Organizations"],
+    "implementation": "Designate CISO or equivalent role. Grant appropriate IAM permissions for security oversight. Use Organizations for centralized security management. Document security officer responsibilities. Establish reporting structure. Provide access to Security Hub, GuardDuty, and audit tools."
+  },
+  "pm-3": {
+    "title": "Information Security Resources",
+    "description": "Ensure adequate security resources",
+    "services": ["Cost Explorer", "Budgets"],
+    "implementation": "Allocate budget for AWS security services. Use Cost Explorer to track security spending. Set up Budgets for security service costs. Include: Security Hub, GuardDuty, Config, CloudTrail, WAF, Shield. Plan for security tools, training, and staff. Review resource allocation quarterly."
+  },
+  "pm-4": {
+    "title": "Plan of Action Process",
+    "description": "Implement POA&M process",
+    "services": ["Security Hub", "Systems Manager", "Lambda"],
+    "implementation": "Establish process for tracking security weaknesses. Use Security Hub findings as input. Create OpsItems in Systems Manager for remediation tracking. Automate ticket creation with Lambda. Define SLAs for remediation by severity. Generate monthly POA&M reports."
+  },
+  "pm-5": {
+    "title": "Information System Inventory",
+    "description": "Develop and maintain system inventory",
+    "services": ["Config", "Systems Manager", "Resource Groups", "Tag Editor"],
+    "implementation": "Use Config to inventory all AWS resources. Implement tagging strategy (Environment, Owner, Application, DataClassification). Use Resource Groups to organize systems. Systems Manager Inventory for EC2 details. Create inventory reports with Athena. Update inventory automatically with Config."
+  },
+  "pm-6": {
+    "title": "Information Security Measures of Performance",
+    "description": "Develop security performance measures",
+    "services": ["CloudWatch", "Security Hub", "QuickSight"],
+    "implementation": "Define security KPIs: time to detect/respond, vulnerability remediation rate, compliance score, security findings trend. Create CloudWatch dashboards. Use Security Hub security score. Build QuickSight dashboards for executive reporting. Review metrics monthly."
+  },
+  "pm-7": {
+    "title": "Enterprise Architecture",
+    "description": "Develop enterprise architecture with security",
+    "services": ["Organizations", "Control Tower", "Service Catalog"],
+    "implementation": "Design multi-account architecture with Organizations. Implement landing zone with Control Tower. Use Service Catalog for approved architectures. Define security zones and network segmentation. Document reference architectures. Include security in architecture review board."
+  },
+  "pm-8": {
+    "title": "Critical Infrastructure Plan",
+    "description": "Address critical infrastructure protection",
+    "services": ["Shield Advanced", "WAF", "Route 53"],
+    "implementation": "Identify critical systems and data. Enable Shield Advanced for DDoS protection. Implement WAF for application protection. Use Route 53 for DNS resilience. Deploy across multiple regions. Implement backup and recovery. Document critical infrastructure dependencies."
+  },
+  "pm-9": {
+    "title": "Risk Management Strategy",
+    "description": "Develop risk management strategy",
+    "services": ["Security Hub", "GuardDuty", "Inspector"],
+    "implementation": "Document risk management framework. Use Security Hub for risk visibility. Enable GuardDuty for threat detection. Run Inspector for vulnerability assessment. Define risk appetite and tolerance. Implement risk register in DynamoDB. Review risks quarterly."
+  },
+  "pm-10": {
+    "title": "Security Authorization Process",
+    "description": "Manage security authorization process",
+    "services": ["Audit Manager", "S3"],
+    "implementation": "Define authorization process and criteria. Use Audit Manager for evidence collection. Store authorization packages in S3. Define authorization boundaries. Establish continuous monitoring requirements. Set reauthorization schedule. Document authorization decisions."
+  }
+}

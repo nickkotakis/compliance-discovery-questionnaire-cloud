@@ -1,0 +1,12 @@
+{
+  "ca-2": {
+    "title": "Control Assessments",
+    "description": "Develop and implement control assessment procedures",
+    "services": ["Security Hub", "Config", "Audit Manager", "Inspector"],
+    "config_rules": [],
+    "security_hub_controls": [],
+    "control_tower_ids": [],
+    "frameworks": ["NIST-800-53"],
+    "implementation": "Conduct annual security control assessments. Use Security Hub for continuous assessment. Enable Config rules for automated control testing. Use Audit Manager to manage assessment process. Run Inspector for vulnerability assessments. Document assessment procedures and results. Create assessment reports with findings and recommendations. Track remediation of assessment findings."
+  }
+}

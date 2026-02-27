@@ -1,5 +1,10 @@
 import React from 'react';
-import { CheckCircle, Clock, AlertTriangle, TrendingUp } from 'lucide-react';
+import Container from '@cloudscape-design/components/container';
+import Header from '@cloudscape-design/components/header';
+import SpaceBetween from '@cloudscape-design/components/space-between';
+import Box from '@cloudscape-design/components/box';
+import ProgressBar from '@cloudscape-design/components/progress-bar';
+import ColumnLayout from '@cloudscape-design/components/column-layout';
 
 interface DashboardProps {
   totalControls: number;
@@ -7,92 +12,81 @@ interface DashboardProps {
   totalQuestions: number;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ totalControls, answeredQuestions, totalQuestions }) => {
-  const completionRate = totalQuestions > 0 ? Math.round((answeredQuestions / totalQuestions) * 100) : 0;
-  
-  const stats = [
-    {
-      label: 'Total Controls',
-      value: totalControls,
-      icon: CheckCircle,
-      color: 'blue',
-      bgColor: 'bg-blue-50',
-      iconColor: 'text-blue-600',
-      borderColor: 'border-blue-200'
-    },
-    {
-      label: 'Questions Answered',
-      value: `${answeredQuestions}/${totalQuestions}`,
-      icon: Clock,
-      color: 'green',
-      bgColor: 'bg-green-50',
-      iconColor: 'text-green-600',
-      borderColor: 'border-green-200'
-    },
-    {
-      label: 'Completion Rate',
-      value: `${completionRate}%`,
-      icon: TrendingUp,
-      color: 'purple',
-      bgColor: 'bg-purple-50',
-      iconColor: 'text-purple-600',
-      borderColor: 'border-purple-200'
-    },
-    {
-      label: 'Pending Review',
-      value: totalQuestions - answeredQuestions,
-      icon: AlertTriangle,
-      color: 'orange',
-      bgColor: 'bg-orange-50',
-      iconColor: 'text-orange-600',
-      borderColor: 'border-orange-200'
-    }
-  ];
+const Dashboard: React.FC<DashboardProps> = ({ 
+  totalControls, 
+  answeredQuestions, 
+  totalQuestions 
+}) => {
+  const completionRate = totalQuestions > 0 
+    ? Math.round((answeredQuestions / totalQuestions) * 100) 
+    : 0;
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Assessment Overview</h2>
-        <p className="text-gray-600">Track your compliance assessment progress</p>
-      </div>
+    <SpaceBetween size="l">
+      <Header variant="h1" description="Track your compliance assessment progress">
+        Assessment overview
+      </Header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, index) => {
-          const Icon = stat.icon;
-          return (
-            <div
-              key={index}
-              className={`${stat.bgColor} border ${stat.borderColor} rounded-xl p-6 transition-all hover:shadow-lg`}
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div className={`p-3 ${stat.bgColor} rounded-lg`}>
-                  <Icon className={stat.iconColor} size={24} />
-                </div>
-              </div>
-              <div className="text-3xl font-bold text-gray-900 mb-1">{stat.value}</div>
-              <div className="text-sm text-gray-600">{stat.label}</div>
-            </div>
-          );
-        })}
-      </div>
+      <ColumnLayout columns={4} variant="text-grid">
+        <div>
+          <Box variant="awsui-key-label">Total controls</Box>
+          <Box variant="h1" fontSize="display-l" fontWeight="bold">
+            {totalControls}
+          </Box>
+          <Box variant="small" color="text-body-secondary">
+            NIST 800-53 Rev 5
+          </Box>
+        </div>
 
-      {/* Progress Bar */}
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-lg font-semibold text-gray-900">Overall Progress</h3>
-          <span className="text-2xl font-bold text-blue-600">{completionRate}%</span>
+        <div>
+          <Box variant="awsui-key-label">Questions answered</Box>
+          <Box variant="h1" fontSize="display-l" fontWeight="bold">
+            {answeredQuestions}/{totalQuestions}
+          </Box>
+          <Box variant="small" color="text-body-secondary">
+            Total responses
+          </Box>
         </div>
-        <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
-          <div
-            className="bg-gradient-to-r from-blue-500 to-blue-600 h-full rounded-full transition-all duration-500 ease-out"
-            style={{ width: `${completionRate}%` }}
-          />
+
+        <div>
+          <Box variant="awsui-key-label">Completion rate</Box>
+          <Box variant="h1" fontSize="display-l" fontWeight="bold">
+            {completionRate}%
+          </Box>
+          <Box variant="small" color="text-body-secondary">
+            Overall progress
+          </Box>
         </div>
-        <p className="text-sm text-gray-600 mt-3">
-          {answeredQuestions} of {totalQuestions} questions completed
-        </p>
-      </div>
-    </div>
+
+        <div>
+          <Box variant="awsui-key-label">Pending review</Box>
+          <Box variant="h1" fontSize="display-l" fontWeight="bold">
+            {totalQuestions - answeredQuestions}
+          </Box>
+          <Box variant="small" color="text-body-secondary">
+            Remaining questions
+          </Box>
+        </div>
+      </ColumnLayout>
+
+      <Container
+        header={
+          <Header
+            variant="h2"
+            description={`${answeredQuestions} of ${totalQuestions} questions completed`}
+          >
+            Overall progress
+          </Header>
+        }
+      >
+        <ProgressBar
+          value={completionRate}
+          label="Assessment completion"
+          description={`${completionRate}% complete`}
+          resultText={`${answeredQuestions} of ${totalQuestions} questions`}
+        />
+      </Container>
+    </SpaceBetween>
   );
 };
 

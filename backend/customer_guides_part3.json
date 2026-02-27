@@ -1,0 +1,170 @@
+{
+  "ra-1": {
+    "title": "Risk Assessment Policy",
+    "description": "Establish risk assessment policies",
+    "services": ["Security Hub", "Inspector", "GuardDuty"],
+    "implementation": "Document risk assessment methodology. Define assessment frequency (annual minimum). Use Security Hub for continuous risk visibility. Run Inspector for vulnerability assessments. Enable GuardDuty for threat assessment. Document risk assessment procedures. Store results in S3."
+  },
+  "ra-2": {
+    "title": "Security Categorization",
+    "description": "Categorize information and systems",
+    "services": ["Tags", "Macie", "Organizations"],
+    "implementation": "Implement FIPS 199 categorization (Low, Moderate, High). Use tags to mark system categorization. Apply tags to accounts, resources, and data. Use Macie to classify data sensitivity. Document categorization decisions. Review categorizations annually. Adjust controls based on categorization."
+  },
+  "ra-3": {
+    "title": "Risk Assessment",
+    "description": "Conduct risk assessments",
+    "services": ["Security Hub", "Inspector", "Trusted Advisor"],
+    "implementation": "Conduct annual risk assessments. Use Security Hub for security posture. Run Inspector for vulnerabilities. Review Trusted Advisor recommendations. Assess threats, vulnerabilities, likelihood, and impact. Document risk assessment results. Update risk register. Implement risk treatment plans."
+  },
+  "sa-1": {
+    "title": "System and Services Acquisition Policy",
+    "description": "Establish acquisition policies",
+    "services": ["Service Catalog", "Organizations"],
+    "implementation": "Document security requirements for new systems. Use Service Catalog for approved solutions. Define security review process for acquisitions. Include security in procurement decisions. Document vendor security requirements. Review acquisition policy annually."
+  },
+  "sa-2": {
+    "title": "Allocation of Resources",
+    "description": "Determine security requirements and allocate resources",
+    "services": ["Budgets", "Cost Explorer"],
+    "implementation": "Include security in project planning. Allocate budget for security controls. Use Budgets to track security spending. Plan for: encryption, monitoring, backup, DR, security tools. Document resource allocation decisions. Review security budget quarterly."
+  },
+  "sa-3": {
+    "title": "System Development Life Cycle",
+    "description": "Manage system using SDLC",
+    "services": ["CodePipeline", "CodeBuild", "Security Hub"],
+    "implementation": "Integrate security into SDLC. Use CodePipeline for CI/CD with security gates. Run security scans in CodeBuild. Implement security testing in each phase. Use Infrastructure as Code with security reviews. Document SDLC security requirements."
+  },
+  "sa-4": {
+    "title": "Acquisition Process",
+    "description": "Include security requirements in acquisition",
+    "services": ["Marketplace", "Service Catalog"],
+    "implementation": "Define security requirements for AWS Marketplace purchases. Review vendor security documentation. Require security certifications. Use Service Catalog for approved vendors. Document vendor security assessments. Include security in contracts."
+  },
+  "sa-5": {
+    "title": "Information System Documentation",
+    "description": "Obtain and protect system documentation",
+    "services": ["S3", "Systems Manager", "CloudFormation"],
+    "implementation": "Maintain architecture diagrams and documentation. Store documentation in S3 with encryption. Use CloudFormation templates as infrastructure documentation. Document in Systems Manager Parameter Store. Protect documentation with IAM policies. Update documentation with changes."
+  },
+  "sa-8": {
+    "title": "Security Engineering Principles",
+    "description": "Apply security engineering principles",
+    "services": ["Well-Architected Tool", "CloudFormation"],
+    "implementation": "Follow AWS Well-Architected Framework Security Pillar. Implement defense in depth. Use least privilege. Enable logging and monitoring. Encrypt data at rest and in transit. Implement automated security. Use Well-Architected Tool for reviews."
+  },
+  "sa-9": {
+    "title": "External Information System Services",
+    "description": "Require security controls for external services",
+    "services": ["Organizations", "IAM"],
+    "implementation": "Document security requirements for third-party services. Review vendor security certifications. Use IAM roles for external service access. Implement least privilege for integrations. Monitor external service usage with CloudTrail. Document approved external services."
+  },
+  "sa-10": {
+    "title": "Developer Configuration Management",
+    "description": "Require developers to perform configuration management",
+    "services": ["CodeCommit", "CodePipeline", "CloudFormation"],
+    "implementation": "Use CodeCommit for version control. Implement branch protection. Require code reviews. Use CloudFormation for infrastructure as code. Implement automated testing. Track configuration changes. Document development standards."
+  },
+  "sa-11": {
+    "title": "Developer Security Testing",
+    "description": "Require security testing in development",
+    "services": ["CodeBuild", "CodePipeline", "Inspector"],
+    "implementation": "Integrate security testing in CI/CD. Use SAST tools in CodeBuild. Run DAST against test environments. Use Inspector for container scanning. Implement dependency scanning. Require security testing before production. Document testing requirements."
+  },
+  "sa-15": {
+    "title": "Development Process and Criteria",
+    "description": "Require secure development practices",
+    "services": ["CodeGuru", "CodeCommit"],
+    "implementation": "Define secure coding standards. Use CodeGuru for code review. Implement security training for developers. Require code reviews. Use secure coding libraries. Document development security requirements. Conduct security code reviews."
+  },
+  "sa-16": {
+    "title": "Developer-Provided Training",
+    "description": "Require developer security training",
+    "services": ["S3", "Lambda"],
+    "implementation": "Provide secure coding training. Cover AWS security best practices. Train on: IAM, encryption, secrets management, secure APIs. Use hands-on labs. Track training completion. Update training annually. Document training requirements."
+  },
+  "sa-17": {
+    "title": "Developer Security Architecture",
+    "description": "Require security architecture documentation",
+    "services": ["CloudFormation", "S3"],
+    "implementation": "Document security architecture for applications. Include: authentication, authorization, encryption, logging. Use CloudFormation to codify architecture. Store architecture docs in S3. Review architecture before deployment. Update with changes."
+  },
+  "sc-5": {
+    "title": "Denial of Service Protection",
+    "description": "Protect against DoS attacks",
+    "services": ["Shield", "WAF", "CloudFront", "Route 53"],
+    "implementation": "Enable Shield Standard (automatic). Consider Shield Advanced for critical apps. Use WAF rate limiting. Deploy CloudFront for DDoS mitigation. Use Route 53 for DNS resilience. Implement auto-scaling. Monitor with CloudWatch. Document DoS response procedures."
+  },
+  "sc-15": {
+    "title": "Collaborative Computing Devices",
+    "description": "Prohibit remote activation of collaborative devices",
+    "services": ["Chime", "WorkSpaces"],
+    "implementation": "Document policies for video conferencing. Use Chime with security controls. Disable camera/mic when not in use. Use WorkSpaces for secure remote access. Implement meeting access controls. Document approved collaboration tools."
+  },
+  "sc-20": {
+    "title": "Secure Name/Address Resolution",
+    "description": "Provide secure DNS resolution",
+    "services": ["Route 53", "Route 53 Resolver"],
+    "implementation": "Use Route 53 for DNS with DNSSEC. Implement Route 53 Resolver for VPC DNS. Use private hosted zones for internal names. Enable DNS query logging. Monitor DNS with CloudWatch. Protect against DNS attacks."
+  },
+  "sc-21": {
+    "title": "Secure Name/Address Resolution (Authoritative)",
+    "description": "Provide authoritative name resolution",
+    "services": ["Route 53"],
+    "implementation": "Use Route 53 as authoritative DNS. Enable DNSSEC signing. Implement health checks. Use alias records for AWS resources. Monitor DNS queries. Document DNS architecture. Implement DNS failover."
+  },
+  "si-5": {
+    "title": "Security Alerts and Advisories",
+    "description": "Receive and respond to security alerts",
+    "services": ["Security Hub", "SNS", "Personal Health Dashboard"],
+    "implementation": "Subscribe to AWS Security Bulletins. Enable Personal Health Dashboard notifications. Use Security Hub for aggregated alerts. Create SNS topics for security notifications. Monitor AWS security advisories. Document alert response procedures. Review alerts daily."
+  },
+  "si-6": {
+    "title": "Security Function Verification",
+    "description": "Verify security functions operate correctly",
+    "services": ["Config", "Lambda", "CloudWatch"],
+    "implementation": "Use Config rules to verify security controls. Implement Lambda functions for security testing. Create CloudWatch alarms for security failures. Test encryption, logging, access controls. Verify backups and DR. Document verification procedures. Test quarterly."
+  },
+  "si-8": {
+    "title": "Spam Protection",
+    "description": "Implement spam protection",
+    "services": ["SES", "WAF", "API Gateway"],
+    "implementation": "Use SES with spam filtering for email. Implement WAF rules for form spam. Use API Gateway throttling. Implement CAPTCHA for public forms. Use rate limiting. Monitor for spam patterns. Document spam protection measures."
+  },
+  "si-10": {
+    "title": "Information Input Validation",
+    "description": "Check information inputs for validity",
+    "services": ["WAF", "API Gateway", "Lambda"],
+    "implementation": "Implement input validation in applications. Use WAF for SQL injection and XSS protection. Validate inputs in API Gateway. Use Lambda for custom validation. Implement allow-lists for inputs. Sanitize user inputs. Document validation requirements."
+  },
+  "si-11": {
+    "title": "Error Handling",
+    "description": "Generate error messages without sensitive information",
+    "services": ["CloudWatch Logs", "Lambda"],
+    "implementation": "Implement secure error handling in applications. Avoid exposing stack traces to users. Log detailed errors to CloudWatch Logs. Use generic error messages for users. Implement error monitoring. Document error handling standards."
+  },
+  "si-16": {
+    "title": "Memory Protection",
+    "description": "Implement memory protection",
+    "services": ["Lambda", "Fargate", "EC2"],
+    "implementation": "Use managed services (Lambda, Fargate) with built-in protections. For EC2, enable ASLR and DEP. Use memory-safe languages. Implement bounds checking. Use AWS Graviton processors with memory tagging. Document memory protection measures."
+  },
+  "sr-1": {
+    "title": "Supply Chain Risk Management Policy",
+    "description": "Establish supply chain risk management",
+    "services": ["Marketplace", "Artifact"],
+    "implementation": "Document supply chain security requirements. Review AWS Marketplace vendor security. Use AWS Artifact for compliance reports. Assess third-party service risks. Document approved vendors. Review supply chain risks quarterly."
+  },
+  "sr-2": {
+    "title": "Supply Chain Risk Management Plan",
+    "description": "Develop supply chain risk management plan",
+    "services": ["Organizations", "Config"],
+    "implementation": "Create supply chain risk management plan. Identify critical suppliers and dependencies. Assess supplier security. Use Config to track third-party integrations. Document risk mitigation strategies. Review plan annually."
+  },
+  "sr-3": {
+    "title": "Supply Chain Controls and Processes",
+    "description": "Implement supply chain security controls",
+    "services": ["IAM", "CloudTrail", "Marketplace"],
+    "implementation": "Implement controls for third-party access. Use IAM roles for vendor access. Monitor vendor activity with CloudTrail. Review Marketplace purchases. Conduct vendor security assessments. Document supply chain controls."
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "ca-9": {
+    "title": "Internal System Connections",
+    "description": "Authorize internal system connections",
+    "services": ["VPC", "PrivateLink", "Transit Gateway"],
+    "implementation": "Document all internal connections between VPCs and services. Use VPC peering with least privilege security groups. Implement PrivateLink for service-to-service connections. Use Transit Gateway for hub-and-spoke architecture. Monitor connections with VPC Flow Logs. Review connections quarterly."
+  },
+  "ia-11": {
+    "title": "Re-authentication",
+    "description": "Require re-authentication for privileged functions",
+    "services": ["IAM", "Cognito", "Lambda"],
+    "implementation": "Require MFA for privileged operations. Implement step-up authentication in Cognito. Use IAM policies with MFA conditions. Require re-authentication for sensitive actions. Implement session timeout for privileged access. Use Lambda to enforce re-authentication policies."
+  },
+  "ia-12": {
+    "title": "Identity Proofing",
+    "description": "Require identity proofing for user registration",
+    "services": ["Cognito", "Lambda", "Rekognition"],
+    "implementation": "Implement identity verification in Cognito user pools. Use Lambda for custom identity proofing logic. Consider Rekognition for document verification. Require multiple forms of identification. Document identity proofing procedures. Store verification records securely in S3."
+  },
+  "ir-2": {
+    "title": "Incident Response Training",
+    "description": "Provide incident response training",
+    "services": ["CloudFormation", "Lambda", "GameDay"],
+    "implementation": "Conduct AWS-specific IR training. Use GameDay for hands-on exercises. Train on GuardDuty, Security Hub, CloudTrail analysis. Create test scenarios with CloudFormation. Practice EC2 forensics and S3 breach response. Document training completion. Conduct training annually."
+  },
+  "mp-4": {
+    "title": "Media Storage",
+    "description": "Physically control and securely store media",
+    "services": ["S3", "Glacier", "Backup"],
+    "implementation": "Store backups in S3 with encryption. Use Glacier for long-term retention. Enable S3 Object Lock for immutability. Use AWS Backup for centralized management. Implement cross-region replication. Document storage procedures. Review storage quarterly."
+  },
+  "pl-8": {
+    "title": "Information Security Architecture",
+    "description": "Develop information security architecture",
+    "services": ["Organizations", "Control Tower", "Well-Architected Tool"],
+    "implementation": "Design multi-account security architecture. Use Control Tower for landing zone. Implement security zones and network segmentation. Follow Well-Architected Security Pillar. Document reference architectures. Use CloudFormation for infrastructure as code. Review architecture quarterly."
+  },
+  "sc-10": {
+    "title": "Network Disconnect",
+    "description": "Terminate network connection after period",
+    "services": ["ALB", "NLB", "API Gateway"],
+    "implementation": "Configure ALB idle timeout (default 60 seconds). Set NLB idle timeout for TCP connections. Implement API Gateway timeout (29 seconds max). Configure session timeout in applications. Use Lambda to enforce connection limits. Document timeout policies."
+  },
+  "sc-23": {
+    "title": "Session Authenticity",
+    "description": "Protect authenticity of communications sessions",
+    "services": ["Certificate Manager", "CloudFront", "ALB"],
+    "implementation": "Use TLS 1.2+ for all connections. Implement certificate pinning where appropriate. Use Certificate Manager for SSL/TLS certificates. Enable HTTPS-only with CloudFront. Configure ALB with secure listeners. Implement HSTS headers. Monitor certificate expiration."
+  },
+  "sr-5": {
+    "title": "Acquisition Strategies",
+    "description": "Employ acquisition strategies to reduce supply chain risks",
+    "services": ["Marketplace", "Organizations"],
+    "implementation": "Use AWS Marketplace for vetted vendors. Review vendor security certifications. Implement multi-vendor strategy. Use AWS services to reduce third-party dependencies. Document acquisition security requirements. Review vendor security annually."
+  },
+  "sr-11": {
+    "title": "Component Authenticity",
+    "description": "Develop anti-counterfeit policy for components",
+    "services": ["ECR", "CodeArtifact", "Inspector"],
+    "implementation": "Use ECR for trusted container images. Scan images with Inspector. Use CodeArtifact for package management. Verify software signatures. Use official AWS AMIs. Document trusted sources. Implement software bill of materials."
+  },
+  "sr-12": {
+    "title": "Component Disposal",
+    "description": "Dispose of system components securely",
+    "services": ["S3", "EBS", "KMS"],
+    "implementation": "Delete S3 objects and verify deletion. Delete EBS volumes and snapshots. Delete KMS keys to make encrypted data unrecoverable. Use S3 Object Lock delete markers. AWS handles physical media destruction. Document disposal procedures. Maintain deletion audit logs."
+  },
+  "sa-22": {
+    "title": "Unsupported System Components",
+    "description": "Replace unsupported components",
+    "services": ["Systems Manager", "Inspector", "Config"],
+    "implementation": "Use Systems Manager to inventory software versions. Run Inspector to detect unsupported software. Create Config rules for version compliance. Implement patching schedule. Plan for end-of-life migrations. Document supported versions. Review quarterly."
+  }
+}

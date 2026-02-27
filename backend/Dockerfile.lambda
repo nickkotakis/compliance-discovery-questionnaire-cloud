@@ -1,0 +1,32 @@
+# Dockerfile for building Lambda deployment package with reportlab and Pillow
+# Uses AWS Lambda Python 3.11 base image to ensure compatibility
+
+FROM public.ecr.aws/lambda/python:3.11
+
+# Install system dependencies for Pillow
+RUN yum install -y \
+    gcc \
+    libjpeg-devel \
+    zlib-devel \
+    freetype-devel \
+    lcms2-devel \
+    openjpeg2-devel \
+    libtiff-devel \
+    libwebp-devel \
+    && yum clean all
+
+# Copy requirements
+COPY requirements.txt .
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt -t /asset
+
+# Copy application code
+COPY compliance_discovery /asset/compliance_discovery/
+COPY lambda_handler.py /asset/
+
+# Set working directory
+WORKDIR /asset
+
+# The output will be in /asset directory
+CMD ["echo", "Lambda package built successfully"]

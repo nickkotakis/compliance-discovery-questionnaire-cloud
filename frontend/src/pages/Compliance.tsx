@@ -1,5 +1,13 @@
 import React, { useState } from 'react';
-import { Download, Plus } from 'lucide-react';
+import AppLayout from '@cloudscape-design/components/app-layout';
+import TopNavigation from '@cloudscape-design/components/top-navigation';
+import Button from '@cloudscape-design/components/button';
+import Modal from '@cloudscape-design/components/modal';
+import Box from '@cloudscape-design/components/box';
+import SpaceBetween from '@cloudscape-design/components/space-between';
+import FormField from '@cloudscape-design/components/form-field';
+import Input from '@cloudscape-design/components/input';
+import Alert from '@cloudscape-design/components/alert';
 import ComplianceQuestionnaire from '../components/ComplianceQuestionnaire';
 import { complianceApi } from '../services/complianceApi';
 
@@ -47,112 +55,87 @@ const Compliance: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <h1 className="text-2xl font-bold text-gray-900">
-                Compliance Discovery Questionnaire
-              </h1>
-            </div>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={handleExportTemplate}
-                className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                <Download size={18} />
-                Export Template
-              </button>
-              {!sessionId && (
-                <button
-                  onClick={() => setShowNewSessionForm(true)}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  <Plus size={18} />
-                  New Session
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
+    <>
+      <TopNavigation
+        identity={{
+          href: '#',
+          title: 'Compliance Discovery',
+          logo: {
+            src: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiByeD0iOCIgZmlsbD0iIzIzMkYzRSIvPgo8cGF0aCBkPSJNMjAgMTBMMjggMjBMMjAgMzBMMTIgMjBMMjAgMTBaIiBmaWxsPSIjRkY5OTAwIi8+Cjwvc3ZnPgo=',
+            alt: 'Compliance Discovery'
+          }
+        }}
+        utilities={[
+          {
+            type: 'button',
+            text: 'Export Template',
+            onClick: handleExportTemplate
+          },
+          {
+            type: 'button',
+            text: 'New Session',
+            variant: 'primary-button',
+            onClick: () => setShowNewSessionForm(true)
+          }
+        ]}
+      />
 
-      {/* New Session Form Modal */}
-      {showNewSessionForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Create New Assessment Session
-            </h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Customer Name
-                </label>
-                <input
-                  type="text"
-                  value={customerName}
-                  onChange={(e) => setCustomerName(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter customer name"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Analyst Name
-                </label>
-                <input
-                  type="text"
-                  value={analystName}
-                  onChange={(e) => setAnalystName(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter analyst name"
-                />
-              </div>
-              <div className="flex gap-3 pt-4">
-                <button
-                  onClick={() => setShowNewSessionForm(false)}
-                  className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleCreateSession}
-                  disabled={!customerName || !analystName}
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
-                >
-                  Create Session
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Session Info */}
       {sessionId && (
-        <div className="bg-blue-50 border-b border-blue-200">
-          <div className="max-w-7xl mx-auto px-6 py-3">
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-blue-900">
-                <strong>Active Session:</strong> {sessionId}
-              </div>
-              <button
-                onClick={() => setSessionId(null)}
-                className="text-sm text-blue-700 hover:text-blue-900 underline"
-              >
-                End Session
-              </button>
-            </div>
-          </div>
-        </div>
+        <Alert
+          type="info"
+          dismissible
+          onDismiss={() => setSessionId(null)}
+          header="Active Session"
+        >
+          Session ID: {sessionId}
+        </Alert>
       )}
 
-      {/* Main Content */}
-      <ComplianceQuestionnaire sessionId={sessionId || undefined} />
-    </div>
+      <AppLayout
+        navigationHide
+        toolsHide
+        content={<ComplianceQuestionnaire sessionId={sessionId || undefined} />}
+      />
+
+      <Modal
+        visible={showNewSessionForm}
+        onDismiss={() => setShowNewSessionForm(false)}
+        header="Create New Assessment Session"
+        footer={
+          <Box float="right">
+            <SpaceBetween direction="horizontal" size="xs">
+              <Button variant="link" onClick={() => setShowNewSessionForm(false)}>
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                onClick={handleCreateSession}
+                disabled={!customerName || !analystName}
+              >
+                Create Session
+              </Button>
+            </SpaceBetween>
+          </Box>
+        }
+      >
+        <SpaceBetween size="l">
+          <FormField label="Customer Name" description="Enter the customer organization name">
+            <Input
+              value={customerName}
+              onChange={({ detail }) => setCustomerName(detail.value)}
+              placeholder="Enter customer name"
+            />
+          </FormField>
+          <FormField label="Analyst Name" description="Enter the analyst conducting the assessment">
+            <Input
+              value={analystName}
+              onChange={({ detail }) => setAnalystName(detail.value)}
+              placeholder="Enter analyst name"
+            />
+          </FormField>
+        </SpaceBetween>
+      </Modal>
+    </>
   );
 };
 

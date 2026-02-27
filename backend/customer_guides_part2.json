@@ -1,0 +1,98 @@
+{
+  "pm-11": {
+    "title": "Mission/Business Process Definition",
+    "description": "Define mission and business processes",
+    "services": ["Service Catalog", "Systems Manager"],
+    "implementation": "Document business processes supported by AWS. Map processes to AWS services and accounts. Define criticality and recovery objectives. Use Service Catalog to provision approved solutions. Document process dependencies. Include in business continuity planning."
+  },
+  "pm-12": {
+    "title": "Insider Threat Program",
+    "description": "Implement insider threat program",
+    "services": ["CloudTrail", "GuardDuty", "Macie", "Detective"],
+    "implementation": "Enable CloudTrail in all accounts. Use GuardDuty for anomalous behavior detection. Enable Macie for data exfiltration detection. Use Detective for investigation. Monitor privileged user activity. Implement user behavior analytics. Define insider threat indicators."
+  },
+  "pm-13": {
+    "title": "Information Security Workforce",
+    "description": "Establish information security workforce",
+    "services": ["IAM", "Organizations"],
+    "implementation": "Define security roles and responsibilities. Create IAM roles for security functions. Use Organizations for centralized security team access. Provide security team training and certifications. Document security team structure. Establish on-call rotation for security incidents."
+  },
+  "pm-14": {
+    "title": "Testing, Training, and Monitoring",
+    "description": "Implement security testing and monitoring",
+    "services": ["Security Hub", "GuardDuty", "Inspector", "Config"],
+    "implementation": "Conduct regular security assessments. Use Inspector for vulnerability scanning. Enable GuardDuty for continuous monitoring. Run penetration tests (with AWS approval). Implement security testing in CI/CD. Monitor with Security Hub. Document testing results."
+  },
+  "pm-15": {
+    "title": "Contacts with Security Groups",
+    "description": "Establish security community contacts",
+    "services": ["Support", "Security Hub"],
+    "implementation": "Maintain AWS Enterprise Support relationship. Subscribe to AWS Security Bulletins. Join AWS security community forums. Establish relationships with AWS Security team. Participate in AWS security events. Document external security contacts. Share threat intelligence."
+  },
+  "pm-16": {
+    "title": "Threat Awareness Program",
+    "description": "Implement threat awareness program",
+    "services": ["GuardDuty", "Security Hub", "SNS"],
+    "implementation": "Subscribe to AWS security advisories. Enable GuardDuty for threat intelligence. Use Security Hub for threat aggregation. Create SNS topics for threat notifications. Share threat information with security team. Conduct threat briefings. Update defenses based on threats."
+  },
+  "ps-1": {
+    "title": "Personnel Security Policy",
+    "description": "Establish personnel security policies",
+    "services": ["IAM", "Organizations"],
+    "implementation": "Document personnel security requirements. Define background check requirements. Establish access provisioning/deprovisioning procedures. Document acceptable use policies. Define security training requirements. Store policies in S3 with versioning."
+  },
+  "ps-2": {
+    "title": "Position Risk Designation",
+    "description": "Assign risk designations to positions",
+    "services": ["IAM", "Tags"],
+    "implementation": "Classify positions by risk level (High, Moderate, Low). Map IAM roles to position risk levels. Apply tags to IAM users indicating risk designation. Define additional requirements for high-risk positions (background checks, training). Document position risk designations."
+  },
+  "ps-3": {
+    "title": "Personnel Screening",
+    "description": "Screen individuals before access",
+    "services": ["IAM", "S3"],
+    "implementation": "Conduct background checks before granting AWS access. Document screening requirements by position risk. Store screening records securely in S3. Verify identity before creating IAM users. Implement rescreening schedule. Document screening procedures."
+  },
+  "ps-4": {
+    "title": "Personnel Termination",
+    "description": "Terminate access upon personnel actions",
+    "services": ["IAM", "Lambda", "EventBridge"],
+    "implementation": "Disable IAM users immediately upon termination. Revoke MFA devices and access keys. Remove from IAM groups. Rotate credentials they had access to. Use Lambda to automate termination workflow. Conduct exit interviews. Document termination procedures."
+  },
+  "ps-5": {
+    "title": "Personnel Transfer",
+    "description": "Review access upon personnel transfer",
+    "services": ["IAM", "CloudTrail"],
+    "implementation": "Review and adjust IAM permissions upon role change. Remove access no longer needed. Add new required permissions. Update IAM groups and roles. Document transfer procedures. Monitor access changes with CloudTrail. Conduct access recertification."
+  },
+  "ps-6": {
+    "title": "Access Agreements",
+    "description": "Complete access agreements before access",
+    "services": ["S3", "Lambda", "DynamoDB"],
+    "implementation": "Require signed NDAs and acceptable use agreements. Store signed agreements in S3. Track agreement status in DynamoDB. Use Lambda to enforce agreement before IAM user creation. Include AWS-specific terms. Review and update agreements annually."
+  },
+  "ps-7": {
+    "title": "Third-Party Personnel Security",
+    "description": "Establish requirements for third-party personnel",
+    "services": ["IAM", "Organizations", "CloudTrail"],
+    "implementation": "Define security requirements for contractors and vendors. Use separate IAM accounts or roles for third parties. Implement time-limited access. Require MFA for third-party access. Monitor third-party activity with CloudTrail. Document third-party agreements."
+  },
+  "ps-8": {
+    "title": "Personnel Sanctions",
+    "description": "Employ sanctions for security violations",
+    "services": ["CloudTrail", "GuardDuty"],
+    "implementation": "Define sanctions for security policy violations. Monitor for violations with CloudTrail and GuardDuty. Document violation investigation procedures. Implement progressive discipline. Disable access during investigations. Document sanctions process."
+  },
+  "pt-1": {
+    "title": "PII Processing Policy",
+    "description": "Establish PII processing policies",
+    "services": ["Macie", "S3", "KMS"],
+    "implementation": "Document PII handling requirements. Use Macie to discover and classify PII. Encrypt PII with KMS. Implement data minimization. Define PII retention periods. Use S3 lifecycle policies for PII deletion. Document PII processing activities."
+  },
+  "pt-2": {
+    "title": "Authority to Process PII",
+    "description": "Determine authority to process PII",
+    "services": ["Macie", "IAM"],
+    "implementation": "Document legal basis for PII processing. Obtain consent where required. Use IAM policies to restrict PII access. Implement purpose limitation. Use Macie to monitor PII usage. Document data processing agreements. Review authority annually."
+  }
+}
