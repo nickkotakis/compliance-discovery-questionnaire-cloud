@@ -80,33 +80,112 @@ python -m compliance_discovery.api_server
 
 The API runs on `http://localhost:5000` by default.
 
-## Deployment
+## Deployment (Full Rebuild Guide)
 
-### Infrastructure (CDK)
+### What Gets Deployed
 
-The stack deploys:
-- Lambda function (Python 3.11) with the backend API
-- API Gateway (REST) with proxy integration
-- S3 bucket for frontend static hosting
-- CloudFront distribution
-- DynamoDB table for session persistence
+The CDK stack (`cdk/cdk/compliance_discovery_stack.py`) creates:
+- Lambda function (Python 3.11) — backend API served via Mangum
+- API Gateway (REST) — proxy integration to Lambda
+- S3 bucket — frontend static hosting (React build output)
+- CloudFront distribution — CDN in front of S3 + API Gateway
+- DynamoDB table — session persistence for assessment responses
+
+### Step 1: AWS Account Setup
+
+You need an AWS account with admin-level access. If using Isengard:
+
+```bash
+isengardcli assume <your-isengard-alias>
+```
+
+This configures a profile named `<your-alias>-Admin` in `~/.aws/config`.
+
+### Step 2: CDK Bootstrap (First Time Only)
+
+CDK requires a one-time bootstrap per account/region:
 
 ```bash
 cd cdk
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-npx cdk deploy --profile <your-aws-profile>
+npx cdk bootstrap --profile <your-aws-profile>
 ```
 
-### Frontend Deployment (after CDK is set up)
+### Step 3: Deploy Infrastructure + Backend
+
+The Lambda function code comes from `backend/lambda_package/` (not `backend/compliance_discovery/` directly). When you modify backend code, you must copy changes to both locations.
+
+```bash
+cd cdk
+source .venv/bin/activate
+npx cdk deploy --require-approval never --profile <your-aws-profile>
+```
+
+CDK outputs will show:
+- `ApiUrl` — the API Gateway endpoint (e.g., `https://xxxxx.execute-api.us-east-1.amazonaws.com/prod/`)
+- `FrontendUrl` — the CloudFront URL (e.g., `https://dxxxxxxxxxx.cloudfront.net`)
+- `FrontendBucketName` — the S3 bucket for frontend files
+
+### Step 4: Configure Frontend API Endpoint
+
+Update the API base URL in the frontend to point to your deployed API:
+
+```bash
+# Check current API URL in the frontend
+grep -r "execute-api" frontend/src/
+```
+
+Edit `frontend/src/services/complianceApi.ts` and set the `API_BASE_URL` to your `ApiUrl` output from Step 3.
+
+### Step 5: Build and Deploy Frontend
+
+```bash
+cd frontend
+npm install
+npm run build
+aws s3 sync dist/ s3://<FrontendBucketName> --delete --profile <your-aws-profile>
+aws cloudfront create-invalidation --distribution-id <DistributionId> --paths "/*" --profile <your-aws-profile>
+```
+
+To find your CloudFront distribution ID:
+```bash
+aws cloudfront list-distributions --profile <your-aws-profile> --query "DistributionList.Items[].{Id:Id,Domain:DomainName}" --output table
+```
+
+### Quick Redeploy (Backend Only)
+
+When only Lambda code changes (Python files, JSON data files):
+
+```bash
+cd cdk
+source .venv/bin/activate
+npx cdk deploy --require-approval never --profile <your-aws-profile>
+```
+
+### Quick Redeploy (Frontend Only)
+
+When only React code changes (no Lambda/infrastructure changes):
 
 ```bash
 cd frontend
 npm run build
-aws s3 sync dist/ s3://<frontend-bucket-name> --delete --profile <your-aws-profile>
-aws cloudfront create-invalidation --distribution-id <distribution-id> --paths "/*" --profile <your-aws-profile>
+aws s3 sync dist/ s3://<FrontendBucketName> --delete --profile <your-aws-profile>
+aws cloudfront create-invalidation --distribution-id <DistributionId> --paths "/*" --profile <your-aws-profile>
 ```
+
+### Important: Backend Code Locations
+
+The backend code exists in two places:
+- `backend/compliance_discovery/` — source of truth for local development
+- `backend/lambda_package/compliance_discovery/` — what CDK packages into the Lambda
+
+When modifying backend files, copy changes to both locations before deploying. Key files that must stay in sync:
+- `api_server.py`, `question_generator.py`, `defense_line_questions.py`
+- `control_questions.py`, `csf_custom_questions.py`, `evidence_questions.py`
+- `csf_control_mapping.py`, `aws_control_mapping.py`
+- `aws_controls_mcp_data.json`, `csf_aws_mappings.json`
 
 ## Question Generation
 
@@ -153,9 +232,12 @@ For NIST CSF 2.0:
 | `control_questions.py` | 134 NIST 800-53 controls with custom implementation and evidence questions |
 | `csf_custom_questions.py` | 103 CSF subcategories with custom implementation questions + 103 evidence questions |
 | `evidence_questions.py` | 20 family-level evidence templates for 800-53 (policy, technical, keyword variants) |
+| `defense_line_questions.py` | Family-specific second line (risk management) and third line (internal audit) questions for all 20 NIST 800-53 families and 6 CSF functions |
 | `question_generator.py` | Core engine that assembles questions from all sources |
-| `csf_aws_mappings.json` | 718 AWS control entries mapped to 105 CSF subcategories |
-| `aws_controls_data.json` | AWS Config rules, Security Hub controls, and services mapped to 800-53 controls |
+| `csf_aws_mappings.json` | 440 verified AWS control entries mapped to 105 CSF subcategories |
+| `aws_controls_mcp_data.json` | 222 verified AWS Config rules, Security Hub controls, and services mapped to 800-53 controls |
+| `csf_control_mapping.py` | CSF subcategory ownership model (AWS / Shared / Customer) |
+| `aws_control_mapping.py` | NIST 800-53 control ownership model (AWS / Shared / Customer) |
 
 ## Disclaimer
 
