@@ -100,12 +100,13 @@ class CompliancePDF(FPDF):
         self.set_text_color(0, 0, 0)
         self.cell(0, 6, label, 0, 1)
         
-        # Draw response box
+        # Draw response box within margins (page width 210 - left 10 - right 10 = 190, use 180 for safety)
         self.set_fill_color(255, 250, 205)  # Light yellow
         self.set_draw_color(200, 200, 200)  # Gray border
         x = self.get_x()
         y = self.get_y()
-        self.rect(x, y, 190, height, 'D')
+        box_width = self.w - self.l_margin - self.r_margin
+        self.rect(x, y, box_width, height, 'D')
         self.ln(height + 2)
 
 
@@ -243,15 +244,35 @@ def generate_simple_pdf(template_data):
             for idx, q in enumerate(questions, 1):
                 q_type = q['question_type'].upper()
                 
-                # Question
-                pdf.set_font('Arial', 'B', 9)
+                # Shorten long question type labels for display
+                type_labels = {
+                    'IMPLEMENTATION': 'IMPL',
+                    'EVIDENCE': 'EVIDENCE',
+                    'SECOND_LINE_DEFENSE': '2ND LINE',
+                    'THIRD_LINE_DEFENSE': '3RD LINE',
+                    'AUDIT_READINESS': 'AUDIT',
+                    'POLICY': 'POLICY',
+                    'TECHNICAL': 'TECHNICAL',
+                }
+                display_type = type_labels.get(q_type, q_type)
+                
+                # Question type on its own line as a small tag
+                pdf.set_font('Arial', 'B', 8)
+                pdf.set_text_color(255, 255, 255)
+                pdf.set_fill_color(54, 96, 146)
+                tag_width = pdf.get_string_width(display_type) + 6
+                pdf.cell(tag_width, 5, display_type, 0, 1, 'C', 1)
                 pdf.set_text_color(0, 0, 0)
-                pdf.cell(30, 6, f"[{q_type}]", 0, 0)
+                pdf.ln(1)
+                
+                # Question text with left indent
                 pdf.set_font('Arial', '', 9)
-                pdf.multi_cell(0, 6, sanitize_text(f"{idx}. {q['question_text']}"))
+                pdf.set_x(pdf.l_margin + 5)
+                pdf.multi_cell(pdf.w - pdf.l_margin - pdf.r_margin - 5, 5, sanitize_text(f"{idx}. {q['question_text']}"))
+                pdf.ln(1)
                 
                 # Response field
-                pdf.add_response_field('RESPONSE:', 15)
+                pdf.add_response_field('Response:', 15)
                 pdf.ln(2)
         
         # Evidence section
