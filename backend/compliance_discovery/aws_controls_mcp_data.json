@@ -1,8 +1,10 @@
 {
   "metadata": {
-    "source": "AWS best practices and service documentation",
+    "source": "AWS Control Guides from ControlCompass (verified)",
     "description": "AWS implementation guides for NIST 800-53 controls",
-    "total_controls": 177
+    "total_controls": 177,
+    "total_controls_with_guides": 80,
+    "total_aws_control_guides": 222
   },
   "controls": {
     "ac-2": [
@@ -2634,561 +2636,15 @@
         ]
       }
     ],
-    "ac-4": [
-      {
-        "control_id": "AWS-CG-AC-4-01",
-        "title": "Implement network segmentation with VPC and Security Groups",
-        "description": "Use Amazon VPC to create isolated network segments and Security Groups to control traffic flow between resources",
-        "services": [
-          "Amazon VPC",
-          "Security Groups",
-          "Network ACLs",
-          "AWS Transit Gateway"
-        ],
-        "config_rules": [
-          "vpc-sg-open-only-to-authorized-ports",
-          "vpc-default-security-group-closed",
-          "restricted-ssh",
-          "restricted-common-ports"
-        ],
-        "security_hub_controls": [
-          "EC2.2",
-          "EC2.13",
-          "EC2.14",
-          "EC2.21"
-        ],
-        "control_tower_ids": [
-          "CT.EC2.PR.1",
-          "CT.EC2.PR.3"
-        ],
-        "frameworks": [
-          "NIST 800-53",
-          "PCI-DSS",
-          "HIPAA"
-        ]
-      },
-      {
-        "control_id": "AWS-CG-AC-4-02",
-        "title": "Use AWS Network Firewall for stateful traffic inspection",
-        "description": "Deploy AWS Network Firewall to inspect and filter traffic between VPCs and to/from the internet",
-        "services": [
-          "AWS Network Firewall",
-          "AWS Firewall Manager"
-        ],
-        "config_rules": [
-          "netfw-policy-rule-group-associated",
-          "netfw-stateless-rule-group-not-empty"
-        ],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST 800-53",
-          "PCI-DSS"
-        ]
-      },
-      {
-        "control_id": "AWS-CG-AC-4-03",
-        "title": "Implement VPC Flow Logs for traffic monitoring",
-        "description": "Enable VPC Flow Logs to capture information about IP traffic going to and from network interfaces",
-        "services": [
-          "VPC Flow Logs",
-          "Amazon CloudWatch Logs"
-        ],
-        "config_rules": [
-          "vpc-flow-logs-enabled"
-        ],
-        "security_hub_controls": [
-          "EC2.6"
-        ],
-        "control_tower_ids": [
-          "CT.EC2.PR.14"
-        ],
-        "frameworks": [
-          "NIST 800-53",
-          "PCI-DSS",
-          "HIPAA"
-        ]
-      }
-    ],
-    "au-11": [
-      {
-        "control_id": "AWS-CG-AU-11-01",
-        "title": "Configure S3 bucket lifecycle policies for log retention",
-        "description": "Use S3 lifecycle policies to automatically transition and expire log files based on retention requirements",
-        "services": [
-          "Amazon S3",
-          "S3 Lifecycle",
-          "S3 Glacier"
-        ],
-        "config_rules": [
-          "s3-lifecycle-policy-check"
-        ],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST 800-53",
-          "PCI-DSS",
-          "HIPAA",
-          "SOX"
-        ]
-      },
-      {
-        "control_id": "AWS-CG-AU-11-02",
-        "title": "Enable S3 Object Lock for immutable audit logs",
-        "description": "Use S3 Object Lock in compliance mode to prevent deletion or modification of audit logs during retention period",
-        "services": [
-          "Amazon S3",
-          "S3 Object Lock"
-        ],
-        "config_rules": [
-          "s3-bucket-versioning-enabled"
-        ],
-        "security_hub_controls": [
-          "S3.14"
-        ],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST 800-53",
-          "SEC Rule 17a-4",
-          "FINRA"
-        ]
-      },
-      {
-        "control_id": "AWS-CG-AU-11-03",
-        "title": "Use AWS Backup for long-term audit log retention",
-        "description": "Configure AWS Backup to create and manage backups of audit logs with defined retention policies",
-        "services": [
-          "AWS Backup",
-          "Amazon S3"
-        ],
-        "config_rules": [
-          "backup-plan-min-frequency-and-min-retention-check"
-        ],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST 800-53",
-          "HIPAA"
-        ]
-      }
-    ],
-    "au-12": [
-      {
-        "control_id": "AWS-CG-AU-12-01",
-        "title": "Enable CloudTrail for comprehensive audit logging",
-        "description": "Configure AWS CloudTrail to log all API calls and management events across your AWS account",
-        "services": [
-          "AWS CloudTrail",
-          "Amazon S3",
-          "CloudWatch Logs"
-        ],
-        "config_rules": [
-          "cloud-trail-enabled",
-          "cloud-trail-log-file-validation-enabled",
-          "multi-region-cloud-trail-enabled"
-        ],
-        "security_hub_controls": [
-          "CloudTrail.1",
-          "CloudTrail.2",
-          "CloudTrail.4"
-        ],
-        "control_tower_ids": [
-          "CT.CLOUDTRAIL.PR.1",
-          "CT.CLOUDTRAIL.PR.2"
-        ],
-        "frameworks": [
-          "NIST 800-53",
-          "PCI-DSS",
-          "HIPAA",
-          "SOX"
-        ]
-      },
-      {
-        "control_id": "AWS-CG-AU-12-02",
-        "title": "Configure VPC Flow Logs for network traffic auditing",
-        "description": "Enable VPC Flow Logs to capture detailed information about network traffic for security analysis",
-        "services": [
-          "VPC Flow Logs",
-          "Amazon CloudWatch Logs",
-          "Amazon S3"
-        ],
-        "config_rules": [
-          "vpc-flow-logs-enabled"
-        ],
-        "security_hub_controls": [
-          "EC2.6"
-        ],
-        "control_tower_ids": [
-          "CT.EC2.PR.14"
-        ],
-        "frameworks": [
-          "NIST 800-53",
-          "PCI-DSS"
-        ]
-      },
-      {
-        "control_id": "AWS-CG-AU-12-03",
-        "title": "Enable AWS Config for resource configuration auditing",
-        "description": "Use AWS Config to record configuration changes and evaluate compliance against desired configurations",
-        "services": [
-          "AWS Config",
-          "Amazon S3"
-        ],
-        "config_rules": [
-          "config-enabled"
-        ],
-        "security_hub_controls": [],
-        "control_tower_ids": [
-          "CT.CONFIG.PR.1"
-        ],
-        "frameworks": [
-          "NIST 800-53",
-          "PCI-DSS",
-          "HIPAA"
-        ]
-      }
-    ],
-    "au-4": [
-      {
-        "control_id": "AWS-CG-AU-4-01",
-        "title": "Configure CloudWatch Logs with sufficient retention",
-        "description": "Set appropriate retention periods for CloudWatch Log Groups to ensure adequate storage capacity",
-        "services": [
-          "Amazon CloudWatch Logs",
-          "Amazon S3"
-        ],
-        "config_rules": [
-          "cloudwatch-log-group-retention-period-check"
-        ],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST 800-53",
-          "PCI-DSS"
-        ]
-      },
-      {
-        "control_id": "AWS-CG-AU-4-02",
-        "title": "Use S3 for scalable audit log storage",
-        "description": "Store audit logs in Amazon S3 for virtually unlimited storage capacity with automatic scaling",
-        "services": [
-          "Amazon S3",
-          "S3 Intelligent-Tiering"
-        ],
-        "config_rules": [
-          "s3-bucket-versioning-enabled"
-        ],
-        "security_hub_controls": [
-          "S3.1"
-        ],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST 800-53",
-          "PCI-DSS",
-          "HIPAA"
-        ]
-      },
-      {
-        "control_id": "AWS-CG-AU-4-03",
-        "title": "Set up CloudWatch alarms for log storage capacity",
-        "description": "Create CloudWatch alarms to monitor S3 bucket size and CloudWatch Logs storage to prevent capacity issues",
-        "services": [
-          "Amazon CloudWatch",
-          "Amazon SNS"
-        ],
-        "config_rules": [
-          "cloudwatch-alarm-action-check"
-        ],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST 800-53"
-        ]
-      }
-    ],
-    "cm-6": [
-      {
-        "control_id": "AWS-CG-CM-6-01",
-        "title": "Use AWS Config Rules for configuration compliance",
-        "description": "Deploy AWS Config managed and custom rules to continuously evaluate resource configurations against security baselines",
-        "services": [
-          "AWS Config",
-          "AWS Config Rules",
-          "AWS Systems Manager"
-        ],
-        "config_rules": [
-          "approved-amis-by-id",
-          "ec2-instance-managed-by-systems-manager",
-          "encrypted-volumes",
-          "required-tags"
-        ],
-        "security_hub_controls": [
-          "Config.1"
-        ],
-        "control_tower_ids": [
-          "CT.CONFIG.PR.1"
-        ],
-        "frameworks": [
-          "NIST 800-53",
-          "PCI-DSS",
-          "HIPAA"
-        ]
-      },
-      {
-        "control_id": "AWS-CG-CM-6-02",
-        "title": "Implement AWS Systems Manager for configuration management",
-        "description": "Use Systems Manager State Manager to define and maintain consistent configuration across EC2 instances",
-        "services": [
-          "AWS Systems Manager",
-          "State Manager",
-          "Parameter Store"
-        ],
-        "config_rules": [
-          "ec2-instance-managed-by-systems-manager"
-        ],
-        "security_hub_controls": [
-          "SSM.1",
-          "SSM.2"
-        ],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST 800-53",
-          "PCI-DSS"
-        ]
-      },
-      {
-        "control_id": "AWS-CG-CM-6-03",
-        "title": "Use AWS Service Catalog for standardized configurations",
-        "description": "Deploy AWS Service Catalog to provide pre-approved, standardized resource configurations",
-        "services": [
-          "AWS Service Catalog",
-          "AWS CloudFormation"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST 800-53"
-        ]
-      }
-    ],
-    "cp-10": [
-      {
-        "control_id": "AWS-CG-CP-10-01",
-        "title": "Use AWS Backup for automated recovery",
-        "description": "Configure AWS Backup to create recovery points and automate restoration of resources",
-        "services": [
-          "AWS Backup",
-          "Amazon EBS",
-          "Amazon RDS",
-          "Amazon DynamoDB"
-        ],
-        "config_rules": [
-          "backup-plan-min-frequency-and-min-retention-check",
-          "backup-recovery-point-encrypted",
-          "backup-recovery-point-minimum-retention-check"
-        ],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST 800-53",
-          "HIPAA"
-        ]
-      },
-      {
-        "control_id": "AWS-CG-CP-10-02",
-        "title": "Implement automated disaster recovery with AWS Elastic Disaster Recovery",
-        "description": "Use AWS Elastic Disaster Recovery (DRS) for automated failover and recovery of applications",
-        "services": [
-          "AWS Elastic Disaster Recovery",
-          "Amazon EC2"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST 800-53"
-        ]
-      },
-      {
-        "control_id": "AWS-CG-CP-10-03",
-        "title": "Use CloudFormation for infrastructure reconstitution",
-        "description": "Maintain CloudFormation templates to quickly reconstitute infrastructure in recovery scenarios",
-        "services": [
-          "AWS CloudFormation",
-          "AWS CloudFormation StackSets"
-        ],
-        "config_rules": [
-          "cloudformation-stack-drift-detection-check"
-        ],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST 800-53"
-        ]
-      }
-    ],
-    "cp-6": [
-      {
-        "control_id": "AWS-CG-CP-6-01",
-        "title": "Configure S3 Cross-Region Replication for alternate storage",
-        "description": "Use S3 Cross-Region Replication to maintain copies of data in geographically separate regions",
-        "services": [
-          "Amazon S3",
-          "S3 Replication"
-        ],
-        "config_rules": [
-          "s3-bucket-replication-enabled"
-        ],
-        "security_hub_controls": [
-          "S3.9"
-        ],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST 800-53",
-          "HIPAA"
-        ]
-      },
-      {
-        "control_id": "AWS-CG-CP-6-02",
-        "title": "Use AWS Backup for cross-region backup copies",
-        "description": "Configure AWS Backup to automatically copy backups to alternate regions",
-        "services": [
-          "AWS Backup",
-          "Amazon S3"
-        ],
-        "config_rules": [
-          "backup-recovery-point-encrypted"
-        ],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST 800-53",
-          "HIPAA"
-        ]
-      },
-      {
-        "control_id": "AWS-CG-CP-6-03",
-        "title": "Implement RDS automated backups with cross-region copies",
-        "description": "Enable automated backups for RDS and configure cross-region snapshot copies",
-        "services": [
-          "Amazon RDS",
-          "RDS Automated Backups"
-        ],
-        "config_rules": [
-          "rds-automatic-minor-version-upgrade-enabled",
-          "db-backup-enabled"
-        ],
-        "security_hub_controls": [
-          "RDS.1"
-        ],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST 800-53",
-          "PCI-DSS"
-        ]
-      }
-    ],
-    "cp-7": [
-      {
-        "control_id": "AWS-CG-CP-7-01",
-        "title": "Deploy multi-region architecture for alternate processing",
-        "description": "Use multiple AWS regions to maintain alternate processing sites with automated failover capabilities",
-        "services": [
-          "Amazon Route 53",
-          "AWS Global Accelerator",
-          "Amazon CloudFront"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST 800-53",
-          "HIPAA"
-        ]
-      },
-      {
-        "control_id": "AWS-CG-CP-7-02",
-        "title": "Use AWS Elastic Disaster Recovery for alternate site",
-        "description": "Configure AWS Elastic Disaster Recovery to maintain a ready alternate processing site",
-        "services": [
-          "AWS Elastic Disaster Recovery",
-          "Amazon EC2"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST 800-53"
-        ]
-      },
-      {
-        "control_id": "AWS-CG-CP-7-03",
-        "title": "Implement Auto Scaling for rapid capacity provisioning",
-        "description": "Use Auto Scaling groups to quickly provision processing capacity in alternate regions",
-        "services": [
-          "Amazon EC2 Auto Scaling",
-          "Application Auto Scaling"
-        ],
-        "config_rules": [
-          "autoscaling-group-elb-healthcheck-required"
-        ],
-        "security_hub_controls": [
-          "AutoScaling.1"
-        ],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST 800-53"
-        ]
-      }
-    ],
+    "ac-4": [],
+    "au-11": [],
+    "au-12": [],
+    "au-4": [],
+    "cm-6": [],
+    "cp-10": [],
+    "cp-6": [],
+    "cp-7": [],
     "ia-3": [
-      {
-        "control_id": "AWS-CG-IA-3-01",
-        "title": "Use AWS IoT Device Defender for device authentication",
-        "description": "Implement AWS IoT Device Defender to authenticate and authorize IoT devices",
-        "services": [
-          "AWS IoT Core",
-          "AWS IoT Device Defender"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST 800-53"
-        ]
-      },
-      {
-        "control_id": "AWS-CG-IA-3-02",
-        "title": "Implement certificate-based authentication for devices",
-        "description": "Use AWS Certificate Manager and IoT Core certificates for device authentication",
-        "services": [
-          "AWS Certificate Manager",
-          "AWS IoT Core"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST 800-53",
-          "PCI-DSS"
-        ]
-      },
-      {
-        "control_id": "AWS-CG-IA-3-03",
-        "title": "Use VPC endpoints for private device connectivity",
-        "description": "Configure VPC endpoints to ensure devices connect through private network paths",
-        "services": [
-          "Amazon VPC",
-          "VPC Endpoints"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST 800-53"
-        ]
-      },
       {
         "control_id": "AWS-CG-0000325",
         "title": "Enable Network Firewall multi-AZ deployment",
@@ -3224,328 +2680,13 @@
         ]
       }
     ],
-    "ia-4": [
-      {
-        "control_id": "AWS-CG-IA-4-01",
-        "title": "Implement IAM user naming conventions and tagging",
-        "description": "Use consistent naming conventions and tags for IAM users to manage identifiers effectively",
-        "services": [
-          "AWS IAM",
-          "AWS Organizations"
-        ],
-        "config_rules": [
-          "iam-user-unused-credentials-check",
-          "required-tags"
-        ],
-        "security_hub_controls": [
-          "IAM.4"
-        ],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST 800-53",
-          "PCI-DSS"
-        ]
-      },
-      {
-        "control_id": "AWS-CG-IA-4-02",
-        "title": "Use AWS SSO for centralized identifier management",
-        "description": "Implement AWS IAM Identity Center (SSO) to centrally manage user identifiers across AWS accounts",
-        "services": [
-          "AWS IAM Identity Center",
-          "AWS Organizations"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST 800-53"
-        ]
-      },
-      {
-        "control_id": "AWS-CG-IA-4-03",
-        "title": "Automate user provisioning with SCIM",
-        "description": "Use SCIM (System for Cross-domain Identity Management) to automate user identifier provisioning",
-        "services": [
-          "AWS IAM Identity Center",
-          "SCIM"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST 800-53"
-        ]
-      }
-    ],
-    "ia-8": [
-      {
-        "control_id": "AWS-CG-IA-8-01",
-        "title": "Use IAM Identity Center for federated access",
-        "description": "Configure AWS IAM Identity Center to authenticate non-organizational users through external identity providers",
-        "services": [
-          "AWS IAM Identity Center",
-          "SAML 2.0",
-          "OpenID Connect"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST 800-53",
-          "FedRAMP"
-        ]
-      },
-      {
-        "control_id": "AWS-CG-IA-8-02",
-        "title": "Implement Amazon Cognito for external user authentication",
-        "description": "Use Amazon Cognito to authenticate and authorize external users accessing applications",
-        "services": [
-          "Amazon Cognito",
-          "Cognito User Pools",
-          "Cognito Identity Pools"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST 800-53"
-        ]
-      },
-      {
-        "control_id": "AWS-CG-IA-8-03",
-        "title": "Configure cross-account access with IAM roles",
-        "description": "Use IAM roles and trust policies to authenticate users from external AWS accounts",
-        "services": [
-          "AWS IAM",
-          "IAM Roles",
-          "AWS STS"
-        ],
-        "config_rules": [
-          "iam-role-managed-policy-check"
-        ],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST 800-53"
-        ]
-      }
-    ],
-    "ir-5": [
-      {
-        "control_id": "AWS-CG-IR-5-01",
-        "title": "Use Amazon GuardDuty for threat detection and monitoring",
-        "description": "Enable GuardDuty to continuously monitor for malicious activity and unauthorized behavior",
-        "services": [
-          "Amazon GuardDuty",
-          "AWS Security Hub"
-        ],
-        "config_rules": [
-          "guardduty-enabled-centralized"
-        ],
-        "security_hub_controls": [
-          "GuardDuty.1"
-        ],
-        "control_tower_ids": [
-          "CT.GUARDDUTY.PR.1"
-        ],
-        "frameworks": [
-          "NIST 800-53",
-          "PCI-DSS"
-        ]
-      },
-      {
-        "control_id": "AWS-CG-IR-5-02",
-        "title": "Implement AWS Security Hub for centralized monitoring",
-        "description": "Use Security Hub to aggregate and monitor security findings from multiple AWS services",
-        "services": [
-          "AWS Security Hub",
-          "Amazon EventBridge"
-        ],
-        "config_rules": [
-          "securityhub-enabled"
-        ],
-        "security_hub_controls": [],
-        "control_tower_ids": [
-          "CT.SECURITYHUB.PR.1"
-        ],
-        "frameworks": [
-          "NIST 800-53",
-          "PCI-DSS",
-          "HIPAA"
-        ]
-      },
-      {
-        "control_id": "AWS-CG-IR-5-03",
-        "title": "Configure CloudWatch Logs Insights for incident analysis",
-        "description": "Use CloudWatch Logs Insights to query and analyze log data for incident detection",
-        "services": [
-          "Amazon CloudWatch Logs",
-          "CloudWatch Logs Insights"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST 800-53"
-        ]
-      }
-    ],
-    "ir-6": [
-      {
-        "control_id": "AWS-CG-IR-6-01",
-        "title": "Use AWS Security Hub for automated incident reporting",
-        "description": "Configure Security Hub to automatically send findings to incident management systems",
-        "services": [
-          "AWS Security Hub",
-          "Amazon EventBridge",
-          "Amazon SNS"
-        ],
-        "config_rules": [
-          "securityhub-enabled"
-        ],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST 800-53",
-          "PCI-DSS"
-        ]
-      },
-      {
-        "control_id": "AWS-CG-IR-6-02",
-        "title": "Configure GuardDuty notifications for security incidents",
-        "description": "Set up GuardDuty to send notifications to security teams when threats are detected",
-        "services": [
-          "Amazon GuardDuty",
-          "Amazon SNS",
-          "Amazon EventBridge"
-        ],
-        "config_rules": [
-          "guardduty-enabled-centralized"
-        ],
-        "security_hub_controls": [
-          "GuardDuty.1"
-        ],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST 800-53",
-          "PCI-DSS"
-        ]
-      },
-      {
-        "control_id": "AWS-CG-IR-6-03",
-        "title": "Implement AWS Systems Manager Incident Manager",
-        "description": "Use Systems Manager Incident Manager to track and manage incident response activities",
-        "services": [
-          "AWS Systems Manager Incident Manager",
-          "Amazon SNS"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST 800-53"
-        ]
-      }
-    ],
-    "si-7": [
-      {
-        "control_id": "AWS-CG-SI-7-01",
-        "title": "Use Amazon Inspector for software integrity scanning",
-        "description": "Enable Amazon Inspector to continuously scan for software vulnerabilities and integrity issues",
-        "services": [
-          "Amazon Inspector",
-          "AWS Security Hub"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST 800-53",
-          "PCI-DSS"
-        ]
-      },
-      {
-        "control_id": "AWS-CG-SI-7-02",
-        "title": "Implement AWS Signer for code signing",
-        "description": "Use AWS Signer to digitally sign code and verify software integrity",
-        "services": [
-          "AWS Signer",
-          "AWS Lambda"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST 800-53"
-        ]
-      },
-      {
-        "control_id": "AWS-CG-SI-7-03",
-        "title": "Enable EC2 Instance Metadata Service v2 (IMDSv2)",
-        "description": "Use IMDSv2 to protect instance metadata from unauthorized access and ensure integrity",
-        "services": [
-          "Amazon EC2",
-          "EC2 Instance Metadata Service"
-        ],
-        "config_rules": [
-          "ec2-imdsv2-check"
-        ],
-        "security_hub_controls": [
-          "EC2.8"
-        ],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST 800-53",
-          "PCI-DSS"
-        ]
-      }
-    ],
-    "ac-5": [
-      {
-        "control_id": "AWS-CG-AC-5",
-        "title": "Separation of Duties",
-        "description": "Implement separation of duties using IAM roles and policies",
-        "services": [
-          "IAM",
-          "AWS Organizations",
-          "CloudTrail"
-        ],
-        "config_rules": [
-          "IAM_ROOT_ACCESS_KEY_CHECK",
-          "IAM_USER_UNUSED_CREDENTIALS_CHECK"
-        ],
-        "security_hub_controls": [
-          "IAM.4",
-          "IAM.22"
-        ],
-        "control_tower_ids": [
-          "CT.IAM.PR.4"
-        ],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Use IAM roles to separate administrative functions. Create distinct roles for different job functions (e.g., SecurityAdmin, DatabaseAdmin, NetworkAdmin). Use AWS Organizations SCPs to enforce separation at the organizational level. Monitor role usage with CloudTrail."
-      }
-    ],
+    "ia-4": [],
+    "ia-8": [],
+    "ir-5": [],
+    "ir-6": [],
+    "si-7": [],
+    "ac-5": [],
     "ac-7": [
-      {
-        "control_id": "AWS-CG-AC-7",
-        "title": "Unsuccessful Logon Attempts",
-        "description": "Enforce account lockout after failed login attempts",
-        "services": [
-          "Cognito",
-          "IAM",
-          "CloudWatch",
-          "Lambda"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "For application users: Configure Cognito user pools with account lockout policies. For AWS Console: Use CloudWatch Events to detect failed console logins and trigger Lambda functions to disable IAM users after threshold. Implement custom authentication with lockout logic in your applications."
-      },
       {
         "control_id": "AWS-CG-0000048",
         "title": "Implement MFA for the AWS root account",
@@ -3630,23 +2771,6 @@
     ],
     "ac-8": [
       {
-        "control_id": "AWS-CG-AC-8",
-        "title": "System Use Notification",
-        "description": "Display system use notification messages",
-        "services": [
-          "Cognito",
-          "API Gateway",
-          "CloudFront"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Display banner messages in your applications before authentication. Use Cognito pre-authentication Lambda triggers to present terms of use. Add consent banners to web applications served through CloudFront. Include usage notifications in API Gateway responses."
-      },
-      {
         "control_id": "AWS-CG-0000263",
         "title": "Restrict and monitor the use of AWS root account",
         "description": "Restrict and monitor root user usage to support system use notification requirements.",
@@ -3664,23 +2788,6 @@
       }
     ],
     "ac-11": [
-      {
-        "control_id": "AWS-CG-AC-11",
-        "title": "Session Lock",
-        "description": "Implement automatic session lock after inactivity",
-        "services": [
-          "Cognito",
-          "Application Load Balancer",
-          "Lambda"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Configure Cognito token expiration and refresh token policies. Implement session timeout in your application code. Use ALB session stickiness with appropriate timeout values. For web apps, implement client-side session timeout with automatic logout."
-      },
       {
         "control_id": "AWS-CG-0000207",
         "title": "Enable Amazon S3 bucket object lock",
@@ -3732,23 +2839,6 @@
     ],
     "ac-12": [
       {
-        "control_id": "AWS-CG-AC-12",
-        "title": "Session Termination",
-        "description": "Automatically terminate sessions after defined conditions",
-        "services": [
-          "Cognito",
-          "Lambda",
-          "DynamoDB"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Set Cognito access token lifetime (default 1 hour, max 24 hours). Implement server-side session management with DynamoDB TTL for automatic cleanup. Use Lambda functions to enforce session termination policies based on time or conditions."
-      },
-      {
         "control_id": "AWS-CG-0000229",
         "title": "Configure custom TLS policies for ELB listeners",
         "description": "Configure custom TLS policies for ELB listeners to manage session security.",
@@ -3792,923 +2882,54 @@
         ]
       }
     ],
-    "ac-14": [
-      {
-        "control_id": "AWS-CG-AC-14",
-        "title": "Permitted Actions Without Identification",
-        "description": "Identify and control actions permitted without authentication",
-        "services": [
-          "API Gateway",
-          "Lambda",
-          "S3",
-          "CloudFront"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Document all unauthenticated endpoints in API Gateway. Use S3 bucket policies to explicitly define public access. Implement least privilege for unauthenticated Lambda functions. Review CloudFront distributions for public content. Use AWS Config to detect unintended public access."
-      }
-    ],
-    "ac-18": [
-      {
-        "control_id": "AWS-CG-AC-18",
-        "title": "Wireless Access",
-        "description": "Establish wireless access restrictions and controls",
-        "services": [
-          "VPC",
-          "Direct Connect",
-          "Client VPN"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "For AWS Workspaces: Configure wireless network policies. For remote access: Use AWS Client VPN with certificate-based authentication. Avoid wireless for production AWS access - use Direct Connect or VPN over wired connections. Document wireless usage policies for accessing AWS Console."
-      }
-    ],
-    "ac-19": [
-      {
-        "control_id": "AWS-CG-AC-19",
-        "title": "Access Control for Mobile Devices",
-        "description": "Establish mobile device access restrictions",
-        "services": [
-          "WorkSpaces",
-          "AppStream",
-          "IAM",
-          "Device Farm"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Use AWS WorkSpaces for secure mobile access to corporate resources. Implement IAM policies that restrict access based on device compliance. Use AppStream 2.0 for application streaming to mobile devices. Require MFA for mobile device access to AWS Console."
-      }
-    ],
-    "ac-20": [
-      {
-        "control_id": "AWS-CG-AC-20",
-        "title": "Use of External Systems",
-        "description": "Control use of external information systems",
-        "services": [
-          "IAM",
-          "Organizations",
-          "CloudTrail"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Use IAM policies to restrict access from external systems. Implement SCPs in AWS Organizations to control cross-account access. Monitor external access with CloudTrail. Use VPC endpoints to keep traffic within AWS network. Document approved external systems and access methods."
-      }
-    ],
-    "ac-21": [
-      {
-        "control_id": "AWS-CG-AC-21",
-        "title": "Information Sharing",
-        "description": "Control information sharing with external parties",
-        "services": [
-          "S3",
-          "Transfer Family",
-          "DataSync",
-          "IAM"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Use S3 bucket policies with time-limited presigned URLs for external sharing. Implement AWS Transfer Family for secure file transfers. Use IAM roles for cross-account access with external AWS accounts. Enable S3 Object Lock for immutable sharing. Monitor sharing with CloudTrail and S3 Access Logs."
-      }
-    ],
-    "ac-22": [
-      {
-        "control_id": "AWS-CG-AC-22",
-        "title": "Publicly Accessible Content",
-        "description": "Control publicly accessible information",
-        "services": [
-          "S3",
-          "CloudFront",
-          "API Gateway",
-          "Config"
-        ],
-        "config_rules": [
-          "s3-bucket-public-read-prohibited",
-          "s3-bucket-public-write-prohibited"
-        ],
-        "security_hub_controls": [
-          "S3.1",
-          "S3.2"
-        ],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Use S3 Block Public Access at account and bucket level. Implement approval workflow for making content public. Use CloudFront with OAI for controlled public access. Enable AWS Config rules to detect public S3 buckets. Review public content regularly with Access Analyzer."
-      }
-    ],
-    "pm-1": [
-      {
-        "control_id": "AWS-CG-PM-1",
-        "title": "Information Security Program Plan",
-        "description": "Develop and maintain information security program plan",
-        "services": [
-          "Organizations",
-          "Security Hub",
-          "Audit Manager"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Document enterprise-wide security program. Use AWS Organizations for multi-account governance. Enable Security Hub across all accounts. Use Audit Manager for compliance tracking. Define security roles and responsibilities. Establish security metrics and reporting. Review program plan annually."
-      }
-    ],
-    "pm-2": [
-      {
-        "control_id": "AWS-CG-PM-2",
-        "title": "Senior Information Security Officer",
-        "description": "Appoint senior information security officer",
-        "services": [
-          "IAM",
-          "Organizations"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Designate CISO or equivalent role. Grant appropriate IAM permissions for security oversight. Use Organizations for centralized security management. Document security officer responsibilities. Establish reporting structure. Provide access to Security Hub, GuardDuty, and audit tools."
-      }
-    ],
-    "pm-3": [
-      {
-        "control_id": "AWS-CG-PM-3",
-        "title": "Information Security Resources",
-        "description": "Ensure adequate security resources",
-        "services": [
-          "Cost Explorer",
-          "Budgets"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Allocate budget for AWS security services. Use Cost Explorer to track security spending. Set up Budgets for security service costs. Include: Security Hub, GuardDuty, Config, CloudTrail, WAF, Shield. Plan for security tools, training, and staff. Review resource allocation quarterly."
-      }
-    ],
-    "pm-4": [
-      {
-        "control_id": "AWS-CG-PM-4",
-        "title": "Plan of Action Process",
-        "description": "Implement POA&M process",
-        "services": [
-          "Security Hub",
-          "Systems Manager",
-          "Lambda"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Establish process for tracking security weaknesses. Use Security Hub findings as input. Create OpsItems in Systems Manager for remediation tracking. Automate ticket creation with Lambda. Define SLAs for remediation by severity. Generate monthly POA&M reports."
-      }
-    ],
-    "pm-5": [
-      {
-        "control_id": "AWS-CG-PM-5",
-        "title": "Information System Inventory",
-        "description": "Develop and maintain system inventory",
-        "services": [
-          "Config",
-          "Systems Manager",
-          "Resource Groups",
-          "Tag Editor"
-        ],
-        "config_rules": [
-          "REQUIRED_TAGS"
-        ],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Use Config to inventory all AWS resources. Implement tagging strategy (Environment, Owner, Application, DataClassification). Use Resource Groups to organize systems. Systems Manager Inventory for EC2 details. Create inventory reports with Athena. Update inventory automatically with Config."
-      }
-    ],
-    "pm-6": [
-      {
-        "control_id": "AWS-CG-PM-6",
-        "title": "Information Security Measures of Performance",
-        "description": "Develop security performance measures",
-        "services": [
-          "CloudWatch",
-          "Security Hub",
-          "QuickSight"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Define security KPIs: time to detect/respond, vulnerability remediation rate, compliance score, security findings trend. Create CloudWatch dashboards. Use Security Hub security score. Build QuickSight dashboards for executive reporting. Review metrics monthly."
-      }
-    ],
-    "pm-7": [
-      {
-        "control_id": "AWS-CG-PM-7",
-        "title": "Enterprise Architecture",
-        "description": "Develop enterprise architecture with security",
-        "services": [
-          "Organizations",
-          "Control Tower",
-          "Service Catalog"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Design multi-account architecture with Organizations. Implement landing zone with Control Tower. Use Service Catalog for approved architectures. Define security zones and network segmentation. Document reference architectures. Include security in architecture review board."
-      }
-    ],
-    "pm-8": [
-      {
-        "control_id": "AWS-CG-PM-8",
-        "title": "Critical Infrastructure Plan",
-        "description": "Address critical infrastructure protection",
-        "services": [
-          "Shield Advanced",
-          "WAF",
-          "Route 53"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Identify critical systems and data. Enable Shield Advanced for DDoS protection. Implement WAF for application protection. Use Route 53 for DNS resilience. Deploy across multiple regions. Implement backup and recovery. Document critical infrastructure dependencies."
-      }
-    ],
-    "pm-9": [
-      {
-        "control_id": "AWS-CG-PM-9",
-        "title": "Risk Management Strategy",
-        "description": "Develop risk management strategy",
-        "services": [
-          "Security Hub",
-          "GuardDuty",
-          "Inspector"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Document risk management framework. Use Security Hub for risk visibility. Enable GuardDuty for threat detection. Run Inspector for vulnerability assessment. Define risk appetite and tolerance. Implement risk register in DynamoDB. Review risks quarterly."
-      }
-    ],
-    "pm-10": [
-      {
-        "control_id": "AWS-CG-PM-10",
-        "title": "Security Authorization Process",
-        "description": "Manage security authorization process",
-        "services": [
-          "Audit Manager",
-          "S3"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Define authorization process and criteria. Use Audit Manager for evidence collection. Store authorization packages in S3. Define authorization boundaries. Establish continuous monitoring requirements. Set reauthorization schedule. Document authorization decisions."
-      }
-    ],
-    "pm-11": [
-      {
-        "control_id": "AWS-CG-PM-11",
-        "title": "Mission/Business Process Definition",
-        "description": "Define mission and business processes",
-        "services": [
-          "Service Catalog",
-          "Systems Manager"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Document business processes supported by AWS. Map processes to AWS services and accounts. Define criticality and recovery objectives. Use Service Catalog to provision approved solutions. Document process dependencies. Include in business continuity planning."
-      }
-    ],
-    "pm-12": [
-      {
-        "control_id": "AWS-CG-PM-12",
-        "title": "Insider Threat Program",
-        "description": "Implement insider threat program",
-        "services": [
-          "CloudTrail",
-          "GuardDuty",
-          "Macie",
-          "Detective"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Enable CloudTrail in all accounts. Use GuardDuty for anomalous behavior detection. Enable Macie for data exfiltration detection. Use Detective for investigation. Monitor privileged user activity. Implement user behavior analytics. Define insider threat indicators."
-      }
-    ],
-    "pm-13": [
-      {
-        "control_id": "AWS-CG-PM-13",
-        "title": "Information Security Workforce",
-        "description": "Establish information security workforce",
-        "services": [
-          "IAM",
-          "Organizations"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Define security roles and responsibilities. Create IAM roles for security functions. Use Organizations for centralized security team access. Provide security team training and certifications. Document security team structure. Establish on-call rotation for security incidents."
-      }
-    ],
-    "pm-14": [
-      {
-        "control_id": "AWS-CG-PM-14",
-        "title": "Testing, Training, and Monitoring",
-        "description": "Implement security testing and monitoring",
-        "services": [
-          "Security Hub",
-          "GuardDuty",
-          "Inspector",
-          "Config"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Conduct regular security assessments. Use Inspector for vulnerability scanning. Enable GuardDuty for continuous monitoring. Run penetration tests (with AWS approval). Implement security testing in CI/CD. Monitor with Security Hub. Document testing results."
-      }
-    ],
-    "pm-15": [
-      {
-        "control_id": "AWS-CG-PM-15",
-        "title": "Contacts with Security Groups",
-        "description": "Establish security community contacts",
-        "services": [
-          "Support",
-          "Security Hub"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Maintain AWS Enterprise Support relationship. Subscribe to AWS Security Bulletins. Join AWS security community forums. Establish relationships with AWS Security team. Participate in AWS security events. Document external security contacts. Share threat intelligence."
-      }
-    ],
-    "pm-16": [
-      {
-        "control_id": "AWS-CG-PM-16",
-        "title": "Threat Awareness Program",
-        "description": "Implement threat awareness program",
-        "services": [
-          "GuardDuty",
-          "Security Hub",
-          "SNS"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Subscribe to AWS security advisories. Enable GuardDuty for threat intelligence. Use Security Hub for threat aggregation. Create SNS topics for threat notifications. Share threat information with security team. Conduct threat briefings. Update defenses based on threats."
-      }
-    ],
-    "ps-1": [
-      {
-        "control_id": "AWS-CG-PS-1",
-        "title": "Personnel Security Policy",
-        "description": "Establish personnel security policies",
-        "services": [
-          "IAM",
-          "Organizations"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Document personnel security requirements. Define background check requirements. Establish access provisioning/deprovisioning procedures. Document acceptable use policies. Define security training requirements. Store policies in S3 with versioning."
-      }
-    ],
-    "ps-2": [
-      {
-        "control_id": "AWS-CG-PS-2",
-        "title": "Position Risk Designation",
-        "description": "Assign risk designations to positions",
-        "services": [
-          "IAM",
-          "Tags"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Classify positions by risk level (High, Moderate, Low). Map IAM roles to position risk levels. Apply tags to IAM users indicating risk designation. Define additional requirements for high-risk positions (background checks, training). Document position risk designations."
-      }
-    ],
-    "ps-3": [
-      {
-        "control_id": "AWS-CG-PS-3",
-        "title": "Personnel Screening",
-        "description": "Screen individuals before access",
-        "services": [
-          "IAM",
-          "S3"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Conduct background checks before granting AWS access. Document screening requirements by position risk. Store screening records securely in S3. Verify identity before creating IAM users. Implement rescreening schedule. Document screening procedures."
-      }
-    ],
-    "ps-4": [
-      {
-        "control_id": "AWS-CG-PS-4",
-        "title": "Personnel Termination",
-        "description": "Terminate access upon personnel actions",
-        "services": [
-          "IAM",
-          "Lambda",
-          "EventBridge"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Disable IAM users immediately upon termination. Revoke MFA devices and access keys. Remove from IAM groups. Rotate credentials they had access to. Use Lambda to automate termination workflow. Conduct exit interviews. Document termination procedures."
-      }
-    ],
-    "ps-5": [
-      {
-        "control_id": "AWS-CG-PS-5",
-        "title": "Personnel Transfer",
-        "description": "Review access upon personnel transfer",
-        "services": [
-          "IAM",
-          "CloudTrail"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Review and adjust IAM permissions upon role change. Remove access no longer needed. Add new required permissions. Update IAM groups and roles. Document transfer procedures. Monitor access changes with CloudTrail. Conduct access recertification."
-      }
-    ],
-    "ps-6": [
-      {
-        "control_id": "AWS-CG-PS-6",
-        "title": "Access Agreements",
-        "description": "Complete access agreements before access",
-        "services": [
-          "S3",
-          "Lambda",
-          "DynamoDB"
-        ],
-        "config_rules": [
-          "IAM_USER_UNUSED_CREDENTIALS_CHECK"
-        ],
-        "security_hub_controls": [
-          "IAM.22"
-        ],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Require signed NDAs and acceptable use agreements. Store signed agreements in S3. Track agreement status in DynamoDB. Use Lambda to enforce agreement before IAM user creation. Include AWS-specific terms. Review and update agreements annually."
-      }
-    ],
-    "ps-7": [
-      {
-        "control_id": "AWS-CG-PS-7",
-        "title": "Third-Party Personnel Security",
-        "description": "Establish requirements for third-party personnel",
-        "services": [
-          "IAM",
-          "Organizations",
-          "CloudTrail"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Define security requirements for contractors and vendors. Use separate IAM accounts or roles for third parties. Implement time-limited access. Require MFA for third-party access. Monitor third-party activity with CloudTrail. Document third-party agreements."
-      }
-    ],
-    "ps-8": [
-      {
-        "control_id": "AWS-CG-PS-8",
-        "title": "Personnel Sanctions",
-        "description": "Employ sanctions for security violations",
-        "services": [
-          "CloudTrail",
-          "GuardDuty"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Define sanctions for security policy violations. Monitor for violations with CloudTrail and GuardDuty. Document violation investigation procedures. Implement progressive discipline. Disable access during investigations. Document sanctions process."
-      }
-    ],
-    "pt-1": [
-      {
-        "control_id": "AWS-CG-PT-1",
-        "title": "PII Processing Policy",
-        "description": "Establish PII processing policies",
-        "services": [
-          "Macie",
-          "S3",
-          "KMS"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Document PII handling requirements. Use Macie to discover and classify PII. Encrypt PII with KMS. Implement data minimization. Define PII retention periods. Use S3 lifecycle policies for PII deletion. Document PII processing activities."
-      }
-    ],
-    "pt-2": [
-      {
-        "control_id": "AWS-CG-PT-2",
-        "title": "Authority to Process PII",
-        "description": "Determine authority to process PII",
-        "services": [
-          "Macie",
-          "IAM"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Document legal basis for PII processing. Obtain consent where required. Use IAM policies to restrict PII access. Implement purpose limitation. Use Macie to monitor PII usage. Document data processing agreements. Review authority annually."
-      }
-    ],
-    "ra-2": [
-      {
-        "control_id": "AWS-CG-RA-2",
-        "title": "Security Categorization",
-        "description": "Categorize information and systems",
-        "services": [
-          "Tags",
-          "Macie",
-          "Organizations"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Implement FIPS 199 categorization (Low, Moderate, High). Use tags to mark system categorization. Apply tags to accounts, resources, and data. Use Macie to classify data sensitivity. Document categorization decisions. Review categorizations annually. Adjust controls based on categorization."
-      }
-    ],
-    "ra-3": [
-      {
-        "control_id": "AWS-CG-RA-3",
-        "title": "Risk Assessment",
-        "description": "Conduct risk assessments",
-        "services": [
-          "Security Hub",
-          "Inspector",
-          "Trusted Advisor"
-        ],
-        "config_rules": [
-          "GUARDDUTY_ENABLED_CENTRALIZED",
-          "SECURITYHUB_ENABLED"
-        ],
-        "security_hub_controls": [
-          "GuardDuty.1"
-        ],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Conduct annual risk assessments. Use Security Hub for security posture. Run Inspector for vulnerabilities. Review Trusted Advisor recommendations. Assess threats, vulnerabilities, likelihood, and impact. Document risk assessment results. Update risk register. Implement risk treatment plans."
-      }
-    ],
-    "sa-1": [
-      {
-        "control_id": "AWS-CG-SA-1",
-        "title": "System and Services Acquisition Policy",
-        "description": "Establish acquisition policies",
-        "services": [
-          "Service Catalog",
-          "Organizations"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Document security requirements for new systems. Use Service Catalog for approved solutions. Define security review process for acquisitions. Include security in procurement decisions. Document vendor security requirements. Review acquisition policy annually."
-      }
-    ],
-    "sa-2": [
-      {
-        "control_id": "AWS-CG-SA-2",
-        "title": "Allocation of Resources",
-        "description": "Determine security requirements and allocate resources",
-        "services": [
-          "Budgets",
-          "Cost Explorer"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Include security in project planning. Allocate budget for security controls. Use Budgets to track security spending. Plan for: encryption, monitoring, backup, DR, security tools. Document resource allocation decisions. Review security budget quarterly."
-      }
-    ],
-    "sa-3": [
-      {
-        "control_id": "AWS-CG-SA-3",
-        "title": "System Development Life Cycle",
-        "description": "Manage system using SDLC",
-        "services": [
-          "CodePipeline",
-          "CodeBuild",
-          "Security Hub"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Integrate security into SDLC. Use CodePipeline for CI/CD with security gates. Run security scans in CodeBuild. Implement security testing in each phase. Use Infrastructure as Code with security reviews. Document SDLC security requirements."
-      }
-    ],
-    "sa-4": [
-      {
-        "control_id": "AWS-CG-SA-4",
-        "title": "Acquisition Process",
-        "description": "Include security requirements in acquisition",
-        "services": [
-          "Marketplace",
-          "Service Catalog"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Define security requirements for AWS Marketplace purchases. Review vendor security documentation. Require security certifications. Use Service Catalog for approved vendors. Document vendor security assessments. Include security in contracts."
-      }
-    ],
-    "sa-5": [
-      {
-        "control_id": "AWS-CG-SA-5",
-        "title": "Information System Documentation",
-        "description": "Obtain and protect system documentation",
-        "services": [
-          "S3",
-          "Systems Manager",
-          "CloudFormation"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Maintain architecture diagrams and documentation. Store documentation in S3 with encryption. Use CloudFormation templates as infrastructure documentation. Document in Systems Manager Parameter Store. Protect documentation with IAM policies. Update documentation with changes."
-      }
-    ],
-    "sa-8": [
-      {
-        "control_id": "AWS-CG-SA-8",
-        "title": "Security Engineering Principles",
-        "description": "Apply security engineering principles",
-        "services": [
-          "Well-Architected Tool",
-          "CloudFormation"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Follow AWS Well-Architected Framework Security Pillar. Implement defense in depth. Use least privilege. Enable logging and monitoring. Encrypt data at rest and in transit. Implement automated security. Use Well-Architected Tool for reviews."
-      }
-    ],
-    "sa-9": [
-      {
-        "control_id": "AWS-CG-SA-9",
-        "title": "External Information System Services",
-        "description": "Require security controls for external services",
-        "services": [
-          "Organizations",
-          "IAM"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Document security requirements for third-party services. Review vendor security certifications. Use IAM roles for external service access. Implement least privilege for integrations. Monitor external service usage with CloudTrail. Document approved external services."
-      }
-    ],
-    "sa-10": [
-      {
-        "control_id": "AWS-CG-SA-10",
-        "title": "Developer Configuration Management",
-        "description": "Require developers to perform configuration management",
-        "services": [
-          "CodeCommit",
-          "CodePipeline",
-          "CloudFormation"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Use CodeCommit for version control. Implement branch protection. Require code reviews. Use CloudFormation for infrastructure as code. Implement automated testing. Track configuration changes. Document development standards."
-      }
-    ],
-    "sa-11": [
-      {
-        "control_id": "AWS-CG-SA-11",
-        "title": "Developer Security Testing",
-        "description": "Require security testing in development",
-        "services": [
-          "CodeBuild",
-          "CodePipeline",
-          "Inspector"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Integrate security testing in CI/CD. Use SAST tools in CodeBuild. Run DAST against test environments. Use Inspector for container scanning. Implement dependency scanning. Require security testing before production. Document testing requirements."
-      }
-    ],
-    "sa-15": [
-      {
-        "control_id": "AWS-CG-SA-15",
-        "title": "Development Process and Criteria",
-        "description": "Require secure development practices",
-        "services": [
-          "CodeGuru",
-          "CodeCommit"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Define secure coding standards. Use CodeGuru for code review. Implement security training for developers. Require code reviews. Use secure coding libraries. Document development security requirements. Conduct security code reviews."
-      }
-    ],
-    "sa-16": [
-      {
-        "control_id": "AWS-CG-SA-16",
-        "title": "Developer-Provided Training",
-        "description": "Require developer security training",
-        "services": [
-          "S3",
-          "Lambda"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Provide secure coding training. Cover AWS security best practices. Train on: IAM, encryption, secrets management, secure APIs. Use hands-on labs. Track training completion. Update training annually. Document training requirements."
-      }
-    ],
-    "sa-17": [
-      {
-        "control_id": "AWS-CG-SA-17",
-        "title": "Developer Security Architecture",
-        "description": "Require security architecture documentation",
-        "services": [
-          "CloudFormation",
-          "S3"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Document security architecture for applications. Include: authentication, authorization, encryption, logging. Use CloudFormation to codify architecture. Store architecture docs in S3. Review architecture before deployment. Update with changes."
-      }
-    ],
-    "sc-5": [
-      {
-        "control_id": "AWS-CG-SC-5",
-        "title": "Denial of Service Protection",
-        "description": "Protect against DoS attacks",
-        "services": [
-          "Shield",
-          "WAF",
-          "CloudFront",
-          "Route 53"
-        ],
-        "config_rules": [
-          "SHIELD_ADVANCED_ENABLED_AUTORENEW"
-        ],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Enable Shield Standard (automatic). Consider Shield Advanced for critical apps. Use WAF rate limiting. Deploy CloudFront for DDoS mitigation. Use Route 53 for DNS resilience. Implement auto-scaling. Monitor with CloudWatch. Document DoS response procedures."
-      }
-    ],
+    "ac-14": [],
+    "ac-18": [],
+    "ac-19": [],
+    "ac-20": [],
+    "ac-21": [],
+    "ac-22": [],
+    "pm-1": [],
+    "pm-2": [],
+    "pm-3": [],
+    "pm-4": [],
+    "pm-5": [],
+    "pm-6": [],
+    "pm-7": [],
+    "pm-8": [],
+    "pm-9": [],
+    "pm-10": [],
+    "pm-11": [],
+    "pm-12": [],
+    "pm-13": [],
+    "pm-14": [],
+    "pm-15": [],
+    "pm-16": [],
+    "ps-1": [],
+    "ps-2": [],
+    "ps-3": [],
+    "ps-4": [],
+    "ps-5": [],
+    "ps-6": [],
+    "ps-7": [],
+    "ps-8": [],
+    "pt-1": [],
+    "pt-2": [],
+    "ra-2": [],
+    "ra-3": [],
+    "sa-1": [],
+    "sa-2": [],
+    "sa-3": [],
+    "sa-4": [],
+    "sa-5": [],
+    "sa-8": [],
+    "sa-9": [],
+    "sa-10": [],
+    "sa-11": [],
+    "sa-15": [],
+    "sa-16": [],
+    "sa-17": [],
+    "sc-5": [],
     "sc-15": [
-      {
-        "control_id": "AWS-CG-SC-15",
-        "title": "Collaborative Computing Devices",
-        "description": "Prohibit remote activation of collaborative devices",
-        "services": [
-          "Chime",
-          "WorkSpaces"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Document policies for video conferencing. Use Chime with security controls. Disable camera/mic when not in use. Use WorkSpaces for secure remote access. Implement meeting access controls. Document approved collaboration tools."
-      },
       {
         "control_id": "AWS-CG-0000062",
         "title": "Enable VPC flow logs",
@@ -4751,47 +2972,8 @@
         ]
       }
     ],
-    "si-5": [
-      {
-        "control_id": "AWS-CG-SI-5",
-        "title": "Security Alerts and Advisories",
-        "description": "Receive and respond to security alerts",
-        "services": [
-          "Security Hub",
-          "SNS",
-          "Personal Health Dashboard"
-        ],
-        "config_rules": [
-          "GUARDDUTY_ENABLED_CENTRALIZED"
-        ],
-        "security_hub_controls": [
-          "GuardDuty.1"
-        ],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Subscribe to AWS Security Bulletins. Enable Personal Health Dashboard notifications. Use Security Hub for aggregated alerts. Create SNS topics for security notifications. Monitor AWS security advisories. Document alert response procedures. Review alerts daily."
-      }
-    ],
+    "si-5": [],
     "si-6": [
-      {
-        "control_id": "AWS-CG-SI-6",
-        "title": "Security Function Verification",
-        "description": "Verify security functions operate correctly",
-        "services": [
-          "Config",
-          "Lambda",
-          "CloudWatch"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Use Config rules to verify security controls. Implement Lambda functions for security testing. Create CloudWatch alarms for security failures. Test encryption, logging, access controls. Verify backups and DR. Document verification procedures. Test quarterly."
-      },
       {
         "control_id": "AWS-CG-0000095",
         "title": "Enable ECR private image scanning",
@@ -4849,23 +3031,6 @@
     ],
     "si-8": [
       {
-        "control_id": "AWS-CG-SI-8",
-        "title": "Spam Protection",
-        "description": "Implement spam protection",
-        "services": [
-          "SES",
-          "WAF",
-          "API Gateway"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Use SES with spam filtering for email. Implement WAF rules for form spam. Use API Gateway throttling. Implement CAPTCHA for public forms. Use rate limiting. Monitor for spam patterns. Document spam protection measures."
-      },
-      {
         "control_id": "AWS-CG-0000338",
         "title": "Ensure WAFv2 rule groups are not empty",
         "description": "Ensure WAFv2 rule groups contain rules to filter spam and malicious content.",
@@ -4900,23 +3065,6 @@
     ],
     "si-10": [
       {
-        "control_id": "AWS-CG-SI-10",
-        "title": "Information Input Validation",
-        "description": "Check information inputs for validity",
-        "services": [
-          "WAF",
-          "API Gateway",
-          "Lambda"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Implement input validation in applications. Use WAF for SQL injection and XSS protection. Validate inputs in API Gateway. Use Lambda for custom validation. Implement allow-lists for inputs. Sanitize user inputs. Document validation requirements."
-      },
-      {
         "control_id": "AWS-CG-0000338",
         "title": "Ensure WAFv2 rule groups are not empty",
         "description": "Ensure WAFv2 rule groups contain rules for input validation.",
@@ -4950,22 +3098,6 @@
       }
     ],
     "si-11": [
-      {
-        "control_id": "AWS-CG-SI-11",
-        "title": "Error Handling",
-        "description": "Generate error messages without sensitive information",
-        "services": [
-          "CloudWatch Logs",
-          "Lambda"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Implement secure error handling in applications. Avoid exposing stack traces to users. Log detailed errors to CloudWatch Logs. Use generic error messages for users. Implement error monitoring. Document error handling standards."
-      },
       {
         "control_id": "AWS-CG-0000017",
         "title": "Ensure CloudWatch alarms cannot be disabled",
@@ -5007,23 +3139,6 @@
       }
     ],
     "si-16": [
-      {
-        "control_id": "AWS-CG-SI-16",
-        "title": "Memory Protection",
-        "description": "Implement memory protection",
-        "services": [
-          "Lambda",
-          "Fargate",
-          "EC2"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Use managed services (Lambda, Fargate) with built-in protections. For EC2, enable ASLR and DEP. Use memory-safe languages. Implement bounds checking. Use AWS Graviton processors with memory tagging. Document memory protection measures."
-      },
       {
         "control_id": "AWS-CG-0000095",
         "title": "Enable ECR private image scanning",
@@ -5075,79 +3190,10 @@
         ]
       }
     ],
-    "sr-1": [
-      {
-        "control_id": "AWS-CG-SR-1",
-        "title": "Supply Chain Risk Management Policy",
-        "description": "Establish supply chain risk management",
-        "services": [
-          "Marketplace",
-          "Artifact"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Document supply chain security requirements. Review AWS Marketplace vendor security. Use AWS Artifact for compliance reports. Assess third-party service risks. Document approved vendors. Review supply chain risks quarterly."
-      }
-    ],
-    "sr-2": [
-      {
-        "control_id": "AWS-CG-SR-2",
-        "title": "Supply Chain Risk Management Plan",
-        "description": "Develop supply chain risk management plan",
-        "services": [
-          "Organizations",
-          "Config"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Create supply chain risk management plan. Identify critical suppliers and dependencies. Assess supplier security. Use Config to track third-party integrations. Document risk mitigation strategies. Review plan annually."
-      }
-    ],
-    "sr-3": [
-      {
-        "control_id": "AWS-CG-SR-3",
-        "title": "Supply Chain Controls and Processes",
-        "description": "Implement supply chain security controls",
-        "services": [
-          "IAM",
-          "CloudTrail",
-          "Marketplace"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Implement controls for third-party access. Use IAM roles for vendor access. Monitor vendor activity with CloudTrail. Review Marketplace purchases. Conduct vendor security assessments. Document supply chain controls."
-      }
-    ],
+    "sr-1": [],
+    "sr-2": [],
+    "sr-3": [],
     "ca-9": [
-      {
-        "control_id": "AWS-CG-CA-9",
-        "title": "Internal System Connections",
-        "description": "Authorize internal system connections",
-        "services": [
-          "VPC",
-          "PrivateLink",
-          "Transit Gateway"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Document all internal connections between VPCs and services. Use VPC peering with least privilege security groups. Implement PrivateLink for service-to-service connections. Use Transit Gateway for hub-and-spoke architecture. Monitor connections with VPC Flow Logs. Review connections quarterly."
-      },
       {
         "control_id": "AWS-CG-0000062",
         "title": "Enable VPC flow logs",
@@ -5189,23 +3235,6 @@
     ],
     "ia-11": [
       {
-        "control_id": "AWS-CG-IA-11",
-        "title": "Re-authentication",
-        "description": "Require re-authentication for privileged functions",
-        "services": [
-          "IAM",
-          "Cognito",
-          "Lambda"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Require MFA for privileged operations. Implement step-up authentication in Cognito. Use IAM policies with MFA conditions. Require re-authentication for sensitive actions. Implement session timeout for privileged access. Use Lambda to enforce re-authentication policies."
-      },
-      {
         "control_id": "AWS-CG-0000138",
         "title": "Enable MFA for IAM console users",
         "description": "Enable MFA for IAM console users to support re-authentication requirements.",
@@ -5246,23 +3275,6 @@
       }
     ],
     "ia-12": [
-      {
-        "control_id": "AWS-CG-IA-12",
-        "title": "Identity Proofing",
-        "description": "Require identity proofing for user registration",
-        "services": [
-          "Cognito",
-          "Lambda",
-          "Rekognition"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Implement identity verification in Cognito user pools. Use Lambda for custom identity proofing logic. Consider Rekognition for document verification. Require multiple forms of identification. Document identity proofing procedures. Store verification records securely in S3."
-      },
       {
         "control_id": "AWS-CG-0000138",
         "title": "Enable MFA for IAM console users",
@@ -5307,23 +3319,6 @@
     ],
     "ir-2": [
       {
-        "control_id": "AWS-CG-IR-2",
-        "title": "Incident Response Training",
-        "description": "Provide incident response training",
-        "services": [
-          "CloudFormation",
-          "Lambda",
-          "GameDay"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Conduct AWS-specific IR training. Use GameDay for hands-on exercises. Train on GuardDuty, Security Hub, CloudTrail analysis. Create test scenarios with CloudFormation. Practice EC2 forensics and S3 breach response. Document training completion. Conduct training annually."
-      },
-      {
         "control_id": "AWS-CG-0000645",
         "title": "Enable GuardDuty malware protection",
         "description": "Enable GuardDuty malware protection to support incident response training scenarios.",
@@ -5360,62 +3355,9 @@
         ]
       }
     ],
-    "mp-4": [
-      {
-        "control_id": "AWS-CG-MP-4",
-        "title": "Media Storage",
-        "description": "Physically control and securely store media",
-        "services": [
-          "S3",
-          "Glacier",
-          "Backup"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Store backups in S3 with encryption. Use Glacier for long-term retention. Enable S3 Object Lock for immutability. Use AWS Backup for centralized management. Implement cross-region replication. Document storage procedures. Review storage quarterly."
-      }
-    ],
-    "pl-8": [
-      {
-        "control_id": "AWS-CG-PL-8",
-        "title": "Information Security Architecture",
-        "description": "Develop information security architecture",
-        "services": [
-          "Organizations",
-          "Control Tower",
-          "Well-Architected Tool"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Design multi-account security architecture. Use Control Tower for landing zone. Implement security zones and network segmentation. Follow Well-Architected Security Pillar. Document reference architectures. Use CloudFormation for infrastructure as code. Review architecture quarterly."
-      }
-    ],
+    "mp-4": [],
+    "pl-8": [],
     "sc-10": [
-      {
-        "control_id": "AWS-CG-SC-10",
-        "title": "Network Disconnect",
-        "description": "Terminate network connection after period",
-        "services": [
-          "ALB",
-          "NLB",
-          "API Gateway"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Configure ALB idle timeout (default 60 seconds). Set NLB idle timeout for TCP connections. Implement API Gateway timeout (29 seconds max). Configure session timeout in applications. Use Lambda to enforce connection limits. Document timeout policies."
-      },
       {
         "control_id": "AWS-CG-0000229",
         "title": "Configure custom TLS policies for ELB listeners",
@@ -5462,23 +3404,6 @@
     ],
     "sc-23": [
       {
-        "control_id": "AWS-CG-SC-23",
-        "title": "Session Authenticity",
-        "description": "Protect authenticity of communications sessions",
-        "services": [
-          "Certificate Manager",
-          "CloudFront",
-          "ALB"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Use TLS 1.2+ for all connections. Implement certificate pinning where appropriate. Use Certificate Manager for SSL/TLS certificates. Enable HTTPS-only with CloudFront. Configure ALB with secure listeners. Implement HSTS headers. Monitor certificate expiration."
-      },
-      {
         "control_id": "AWS-CG-0000229",
         "title": "Configure custom TLS policies for ELB listeners",
         "description": "Configure TLS policies for ELB to ensure session authenticity.",
@@ -5518,120 +3443,12 @@
         ]
       }
     ],
-    "sr-5": [
-      {
-        "control_id": "AWS-CG-SR-5",
-        "title": "Acquisition Strategies",
-        "description": "Employ acquisition strategies to reduce supply chain risks",
-        "services": [
-          "Marketplace",
-          "Organizations"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Use AWS Marketplace for vetted vendors. Review vendor security certifications. Implement multi-vendor strategy. Use AWS services to reduce third-party dependencies. Document acquisition security requirements. Review vendor security annually."
-      }
-    ],
-    "sr-11": [
-      {
-        "control_id": "AWS-CG-SR-11",
-        "title": "Component Authenticity",
-        "description": "Develop anti-counterfeit policy for components",
-        "services": [
-          "ECR",
-          "CodeArtifact",
-          "Inspector"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Use ECR for trusted container images. Scan images with Inspector. Use CodeArtifact for package management. Verify software signatures. Use official AWS AMIs. Document trusted sources. Implement software bill of materials."
-      }
-    ],
-    "sr-12": [
-      {
-        "control_id": "AWS-CG-SR-12",
-        "title": "Component Disposal",
-        "description": "Dispose of system components securely",
-        "services": [
-          "S3",
-          "EBS",
-          "KMS"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Delete S3 objects and verify deletion. Delete EBS volumes and snapshots. Delete KMS keys to make encrypted data unrecoverable. Use S3 Object Lock delete markers. AWS handles physical media destruction. Document disposal procedures. Maintain deletion audit logs."
-      }
-    ],
-    "sa-22": [
-      {
-        "control_id": "AWS-CG-SA-22",
-        "title": "Unsupported System Components",
-        "description": "Replace unsupported components",
-        "services": [
-          "Systems Manager",
-          "Inspector",
-          "Config"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Use Systems Manager to inventory software versions. Run Inspector to detect unsupported software. Create Config rules for version compliance. Implement patching schedule. Plan for end-of-life migrations. Document supported versions. Review quarterly."
-      }
-    ],
-    "cm-4": [
-      {
-        "control_id": "AWS-CG-CM-4",
-        "title": "Impact Analyses",
-        "description": "Analyze changes for security impact",
-        "services": [
-          "Config",
-          "CloudFormation",
-          "Systems Manager"
-        ],
-        "config_rules": [
-          "SECURITYHUB_ENABLED"
-        ],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Analyze security impact before changes. Use Config to track configuration changes. Test changes in non-production first. Use CloudFormation change sets to preview impacts. Document impact analysis procedures. Review high-impact changes with security team."
-      }
-    ],
+    "sr-5": [],
+    "sr-11": [],
+    "sr-12": [],
+    "sa-22": [],
+    "cm-4": [],
     "cm-9": [
-      {
-        "control_id": "AWS-CG-CM-9",
-        "title": "Configuration Management Plan",
-        "description": "Develop configuration management plan",
-        "services": [
-          "Config",
-          "Systems Manager",
-          "CloudFormation"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Document configuration management procedures. Use Config for baseline tracking. Implement CloudFormation for infrastructure as code. Use Systems Manager for configuration enforcement. Define change control process. Review plan annually."
-      },
       {
         "control_id": "AWS-CG-0000169",
         "title": "Enable AWS Security Hub",
@@ -5675,23 +3492,6 @@
     ],
     "cm-10": [
       {
-        "control_id": "AWS-CG-CM-10",
-        "title": "Software Usage Restrictions",
-        "description": "Enforce software usage restrictions",
-        "services": [
-          "Systems Manager",
-          "Config",
-          "License Manager"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Document approved software list. Use Systems Manager to inventory installed software. Create Config rules for unauthorized software. Use License Manager to track licenses. Implement software allow-listing. Monitor with Inspector."
-      },
-      {
         "control_id": "AWS-CG-0000046",
         "title": "Restrict IAM policies with blacklisted actions",
         "description": "Restrict IAM policies to enforce software usage restrictions.",
@@ -5713,22 +3513,6 @@
       }
     ],
     "cm-11": [
-      {
-        "control_id": "AWS-CG-CM-11",
-        "title": "User-installed Software",
-        "description": "Govern user-installed software",
-        "services": [
-          "Systems Manager",
-          "AppStream"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Restrict user ability to install software. Use Systems Manager to control installations. Provide approved software via AppStream. Implement least privilege for installations. Monitor unauthorized installations with Config. Document approval process."
-      },
       {
         "control_id": "AWS-CG-0000046",
         "title": "Restrict IAM policies with blacklisted actions",
@@ -5772,23 +3556,6 @@
     ],
     "cm-12": [
       {
-        "control_id": "AWS-CG-CM-12",
-        "title": "Information Location",
-        "description": "Identify information requiring special protection",
-        "services": [
-          "Macie",
-          "S3",
-          "Tags"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Use Macie to discover sensitive data locations. Tag resources with data classification. Document where sensitive data resides. Implement geographic restrictions if needed. Use S3 inventory for data location tracking. Review data locations quarterly."
-      },
-      {
         "control_id": "AWS-CG-0000169",
         "title": "Enable AWS Security Hub",
         "description": "Enable Security Hub to track and monitor information location across AWS resources.",
@@ -5810,22 +3577,6 @@
       }
     ],
     "cp-3": [
-      {
-        "control_id": "AWS-CG-CP-3",
-        "title": "Contingency Training",
-        "description": "Provide contingency plan training",
-        "services": [
-          "CloudFormation",
-          "Lambda"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Train personnel on DR procedures. Conduct DR exercises using CloudFormation. Practice failover procedures. Train on backup restoration. Document training completion. Conduct training annually. Test DR plans during training."
-      },
       {
         "control_id": "AWS-CG-0000152",
         "title": "Include EBS volumes in backup plans",
@@ -5901,22 +3652,6 @@
     ],
     "ia-6": [
       {
-        "control_id": "AWS-CG-IA-6",
-        "title": "Authentication Feedback",
-        "description": "Obscure authentication feedback",
-        "services": [
-          "Cognito",
-          "Lambda"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Implement generic error messages for failed authentication. Don't reveal whether username or password was incorrect. Use Cognito with secure feedback. Avoid account enumeration. Implement rate limiting. Document authentication feedback standards."
-      },
-      {
         "control_id": "AWS-CG-0000138",
         "title": "Enable MFA for IAM console users",
         "description": "Enable MFA for IAM console users to provide secure authentication feedback.",
@@ -5956,96 +3691,11 @@
         ]
       }
     ],
-    "mp-7": [
-      {
-        "control_id": "AWS-CG-MP-7",
-        "title": "Media Use",
-        "description": "Restrict use of certain types of media",
-        "services": [
-          "S3",
-          "WorkSpaces",
-          "AppStream"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Define approved media types. Restrict USB access on WorkSpaces. Use AppStream for controlled application access. Implement DLP policies. Monitor media usage with CloudTrail. Document media use policies."
-      }
-    ],
-    "pl-1": [
-      {
-        "control_id": "AWS-CG-PL-1",
-        "title": "Planning Policy and Procedures",
-        "description": "Establish planning policies",
-        "services": [
-          "S3",
-          "Organizations"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Document security planning procedures. Define system authorization process. Establish security architecture requirements. Store policies in S3 with versioning. Review policies annually. Communicate policies to stakeholders."
-      }
-    ],
-    "pl-11": [
-      {
-        "control_id": "AWS-CG-PL-11",
-        "title": "Baseline Tailoring",
-        "description": "Tailor security control baseline",
-        "services": [
-          "Security Hub",
-          "Config"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Document baseline tailoring decisions. Justify control modifications. Use Security Hub with custom standards. Implement tailored controls with Config rules. Document compensating controls. Review tailoring annually."
-      }
-    ],
-    "ps-9": [
-      {
-        "control_id": "AWS-CG-PS-9",
-        "title": "Position Descriptions",
-        "description": "Incorporate security roles in position descriptions",
-        "services": [
-          "IAM",
-          "S3"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Define security responsibilities in job descriptions. Document required security training by role. Map positions to IAM roles. Store position descriptions in S3. Include security clearance requirements. Review descriptions annually."
-      }
-    ],
+    "mp-7": [],
+    "pl-1": [],
+    "pl-11": [],
+    "ps-9": [],
     "ra-7": [
-      {
-        "control_id": "AWS-CG-RA-7",
-        "title": "Risk Response",
-        "description": "Respond to findings from security assessments",
-        "services": [
-          "Security Hub",
-          "Systems Manager"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Establish risk response procedures. Use Security Hub for findings management. Create OpsItems for remediation. Define risk acceptance criteria. Document risk decisions. Track remediation with Systems Manager. Review risks quarterly."
-      },
       {
         "control_id": "AWS-CG-0000169",
         "title": "Enable AWS Security Hub",
@@ -6103,23 +3753,6 @@
     ],
     "ra-9": [
       {
-        "control_id": "AWS-CG-RA-9",
-        "title": "Criticality Analysis",
-        "description": "Identify critical components and functions",
-        "services": [
-          "Tags",
-          "Config",
-          "Systems Manager"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Identify mission-critical systems and data. Tag critical resources. Document dependencies. Use Config to track critical resources. Implement enhanced monitoring for critical systems. Review criticality quarterly."
-      },
-      {
         "control_id": "AWS-CG-0000169",
         "title": "Enable AWS Security Hub",
         "description": "Enable Security Hub to support criticality analysis of AWS resources.",
@@ -6158,23 +3791,6 @@
     ],
     "sc-2": [
       {
-        "control_id": "AWS-CG-SC-2",
-        "title": "Separation of System and User Functionality",
-        "description": "Separate user and system functionality",
-        "services": [
-          "IAM",
-          "Organizations",
-          "VPC"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Separate management and data planes. Use dedicated VPCs for management. Implement separate IAM roles for admin vs user functions. Use Organizations for account separation. Document separation architecture."
-      },
-      {
         "control_id": "AWS-CG-0000338",
         "title": "Ensure WAFv2 rule groups are not empty",
         "description": "Ensure WAFv2 rule groups contain rules to separate user functionality from system management.",
@@ -6209,23 +3825,6 @@
     ],
     "sc-4": [
       {
-        "control_id": "AWS-CG-SC-4",
-        "title": "Information in Shared Resources",
-        "description": "Prevent unauthorized information transfer",
-        "services": [
-          "KMS",
-          "S3",
-          "EBS"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Encrypt data at rest with KMS. Use dedicated EBS volumes per tenant. Implement S3 bucket policies for isolation. Clear memory after use. Use encryption for data in transit. Document data isolation procedures."
-      },
-      {
         "control_id": "AWS-CG-0000063",
         "title": "Close VPC default security groups",
         "description": "Close VPC default security groups to prevent information leakage in shared resources.",
@@ -6248,22 +3847,6 @@
       }
     ],
     "sc-17": [
-      {
-        "control_id": "AWS-CG-SC-17",
-        "title": "Public Key Infrastructure Certificates",
-        "description": "Issue public key certificates",
-        "services": [
-          "Certificate Manager",
-          "Private CA"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Use Certificate Manager for public certificates. Use Private CA for internal PKI. Implement certificate lifecycle management. Monitor certificate expiration with CloudWatch. Automate certificate renewal. Document PKI procedures."
-      },
       {
         "control_id": "AWS-CG-0000733",
         "title": "Check IAM server certificate expiration",
@@ -6301,23 +3884,6 @@
     ],
     "sc-18": [
       {
-        "control_id": "AWS-CG-SC-18",
-        "title": "Mobile Code",
-        "description": "Define acceptable and unacceptable mobile code",
-        "services": [
-          "WAF",
-          "Lambda",
-          "CloudFront"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Define mobile code policies (JavaScript, Java applets). Use WAF to control mobile code. Implement Content Security Policy headers. Use Lambda@Edge for code inspection. Document approved mobile code. Review policies annually."
-      },
-      {
         "control_id": "AWS-CG-0000338",
         "title": "Ensure WAFv2 rule groups are not empty",
         "description": "Ensure WAFv2 rule groups contain rules to control mobile code execution.",
@@ -6351,22 +3917,6 @@
       }
     ],
     "sc-22": [
-      {
-        "control_id": "AWS-CG-SC-22",
-        "title": "Architecture for Name/Address Resolution",
-        "description": "Ensure DNS architecture is fault-tolerant",
-        "services": [
-          "Route 53",
-          "Route 53 Resolver"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Use Route 53 with multiple name servers. Implement Route 53 Resolver for VPC DNS. Use health checks for failover. Deploy across multiple regions. Enable DNSSEC. Document DNS architecture."
-      },
       {
         "control_id": "AWS-CG-0000325",
         "title": "Enable Network Firewall multi-AZ deployment",
@@ -6407,23 +3957,6 @@
       }
     ],
     "sc-39": [
-      {
-        "control_id": "AWS-CG-SC-39",
-        "title": "Process Isolation",
-        "description": "Maintain separate execution domains",
-        "services": [
-          "Lambda",
-          "Fargate",
-          "EC2"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Use Lambda for isolated function execution. Use Fargate for container isolation. Implement EC2 with separate security groups. Use separate VPCs for isolation. Document isolation architecture."
-      },
       {
         "control_id": "AWS-CG-0000063",
         "title": "Close VPC default security groups",
@@ -6466,23 +3999,6 @@
     ],
     "si-12": [
       {
-        "control_id": "AWS-CG-SI-12",
-        "title": "Information Management and Retention",
-        "description": "Manage and retain information",
-        "services": [
-          "S3",
-          "Glacier",
-          "Backup"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Define retention policies by data type. Use S3 lifecycle policies for automated retention. Use Glacier for long-term archival. Implement S3 Object Lock for compliance. Use AWS Backup for retention management. Document retention schedules."
-      },
-      {
         "control_id": "AWS-CG-0000244",
         "title": "Configure CloudWatch log group retention period",
         "description": "Set retention periods on CloudWatch log groups for information management.",
@@ -6518,157 +4034,14 @@
         ]
       }
     ],
-    "sr-6": [
-      {
-        "control_id": "AWS-CG-SR-6",
-        "title": "Supplier Assessments",
-        "description": "Assess supplier security practices",
-        "services": [
-          "Artifact",
-          "Marketplace"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Review AWS Marketplace vendor security. Request vendor security documentation. Review AWS Artifact for AWS compliance. Conduct vendor security assessments. Document assessment results. Review vendors annually."
-      }
-    ],
-    "sr-8": [
-      {
-        "control_id": "AWS-CG-SR-8",
-        "title": "Notification Agreements",
-        "description": "Establish notification agreements with suppliers",
-        "services": [
-          "SNS",
-          "EventBridge"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Establish notification procedures with vendors. Use SNS for vendor notifications. Implement EventBridge for automated notifications. Document notification requirements in contracts. Test notification procedures. Review agreements annually."
-      }
-    ],
-    "sr-10": [
-      {
-        "control_id": "AWS-CG-SR-10",
-        "title": "Inspection of Systems",
-        "description": "Inspect systems and components for tampering",
-        "services": [
-          "Inspector",
-          "Systems Manager",
-          "CloudTrail"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Use Inspector for vulnerability scanning. Monitor for unauthorized changes with Config. Use Systems Manager for integrity checking. Review CloudTrail for suspicious activity. Implement file integrity monitoring. Conduct inspections quarterly."
-      }
-    ],
-    "at-1": [
-      {
-        "control_id": "AWS-CG-AT-1",
-        "title": "Security Awareness and Training Policy",
-        "description": "Establish security awareness and training policies",
-        "services": [
-          "IAM",
-          "CloudWatch",
-          "Security Hub"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Document security training requirements in your security policy. Use IAM to track user roles and required training. Maintain training records in a secure S3 bucket. Use CloudWatch Events to trigger training reminders. Integrate with your LMS or use AWS Partner solutions for training delivery."
-      }
-    ],
-    "at-2": [
-      {
-        "control_id": "AWS-CG-AT-2",
-        "title": "Security Awareness Training",
-        "description": "Provide security awareness training to all users",
-        "services": [
-          "WorkDocs",
-          "Chime",
-          "S3"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Deliver training materials via S3-hosted content or WorkDocs. Use Chime for virtual training sessions. Track completion with Lambda functions and DynamoDB. Cover AWS-specific topics: IAM best practices, MFA usage, phishing awareness, data classification, incident reporting."
-      }
-    ],
-    "at-3": [
-      {
-        "control_id": "AWS-CG-AT-3",
-        "title": "Role-Based Security Training",
-        "description": "Provide role-based security training",
-        "services": [
-          "IAM",
-          "Organizations",
-          "CloudWatch"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Map IAM roles to training requirements. Provide specialized training for: AWS administrators (IAM, security services), developers (secure coding, secrets management), security team (GuardDuty, Security Hub, incident response). Track role-based training completion in DynamoDB."
-      }
-    ],
-    "at-4": [
-      {
-        "control_id": "AWS-CG-AT-4",
-        "title": "Security Training Records",
-        "description": "Document and monitor security training",
-        "services": [
-          "S3",
-          "DynamoDB",
-          "Lambda",
-          "CloudWatch"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Store training records in S3 with encryption. Use DynamoDB to track completion dates and expiration. Create CloudWatch dashboards for training compliance. Set up Lambda functions to send reminders for expiring training. Generate compliance reports with Athena queries."
-      }
-    ],
+    "sr-6": [],
+    "sr-8": [],
+    "sr-10": [],
+    "at-1": [],
+    "at-2": [],
+    "at-3": [],
+    "at-4": [],
     "au-5": [
-      {
-        "control_id": "AWS-CG-AU-5",
-        "title": "Response to Audit Processing Failures",
-        "description": "Alert on audit processing failures",
-        "services": [
-          "CloudWatch",
-          "SNS",
-          "Lambda",
-          "EventBridge"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Create CloudWatch alarms for CloudTrail delivery failures, S3 bucket access errors, and log storage capacity. Use SNS to alert security team. Implement Lambda functions to take corrective action (e.g., increase storage, fix permissions). Monitor CloudWatch Logs delivery with EventBridge rules."
-      },
       {
         "control_id": "AWS-CG-0000017",
         "title": "Ensure CloudWatch alarms cannot be disabled",
@@ -6727,24 +4100,6 @@
     ],
     "au-7": [
       {
-        "control_id": "AWS-CG-AU-7",
-        "title": "Audit Reduction and Report Generation",
-        "description": "Provide audit analysis and reporting capabilities",
-        "services": [
-          "Athena",
-          "QuickSight",
-          "CloudWatch Insights",
-          "OpenSearch"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Use Athena to query CloudTrail logs in S3. Create QuickSight dashboards for audit visualization. Use CloudWatch Logs Insights for real-time analysis. Deploy OpenSearch for advanced log analytics. Create saved queries for common audit reports (failed logins, privilege escalation, data access)."
-      },
-      {
         "control_id": "AWS-CG-0000244",
         "title": "Configure CloudWatch log group retention period",
         "description": "Set retention periods on CloudWatch log groups to support audit record management.",
@@ -6784,23 +4139,6 @@
       }
     ],
     "au-8": [
-      {
-        "control_id": "AWS-CG-AU-8",
-        "title": "Time Stamps",
-        "description": "Use synchronized time stamps for audit records",
-        "services": [
-          "CloudTrail",
-          "CloudWatch",
-          "NTP"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "AWS services automatically use UTC timestamps. For EC2 instances, configure NTP using Amazon Time Sync Service (169.254.169.123). Verify time synchronization with Systems Manager. All CloudTrail events include precise timestamps. Use CloudWatch Logs timestamp for correlation across services."
-      },
       {
         "control_id": "AWS-CG-0000014",
         "title": "Enable CloudTrail log file validation",
@@ -6843,44 +4181,8 @@
         ]
       }
     ],
-    "ca-1": [
-      {
-        "control_id": "AWS-CG-CA-1",
-        "title": "Security Assessment and Authorization Policies",
-        "description": "Establish assessment and authorization policies",
-        "services": [
-          "Audit Manager",
-          "Security Hub",
-          "Config"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Document assessment procedures in your security policy. Use AWS Audit Manager to automate evidence collection. Define authorization boundaries for AWS accounts and workloads. Implement continuous monitoring with Security Hub and Config. Document system authorization decisions in S3 with versioning."
-      }
-    ],
+    "ca-1": [],
     "ca-3": [
-      {
-        "control_id": "AWS-CG-CA-3",
-        "title": "System Interconnections",
-        "description": "Authorize and monitor system interconnections",
-        "services": [
-          "VPC",
-          "Transit Gateway",
-          "PrivateLink",
-          "CloudTrail"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Document all VPC peering connections, Transit Gateway attachments, and PrivateLink endpoints. Use VPC Flow Logs to monitor interconnection traffic. Implement security groups and NACLs at interconnection points. Review and approve new interconnections through change management. Monitor with CloudTrail and Config."
-      },
       {
         "control_id": "AWS-CG-0000229",
         "title": "Configure custom TLS policies for ELB listeners",
@@ -6943,89 +4245,10 @@
         ]
       }
     ],
-    "ca-5": [
-      {
-        "control_id": "AWS-CG-CA-5",
-        "title": "Plan of Action and Milestones",
-        "description": "Develop and maintain POA&M for security weaknesses",
-        "services": [
-          "Security Hub",
-          "Systems Manager",
-          "Jira integration"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Use Security Hub findings as input for POA&M. Track remediation in Systems Manager OpsCenter or integrate with Jira. Document milestones and responsible parties. Use Lambda to auto-create tickets for critical findings. Generate POA&M reports with Athena queries on Security Hub data."
-      }
-    ],
-    "ca-6": [
-      {
-        "control_id": "AWS-CG-CA-6",
-        "title": "Security Authorization",
-        "description": "Assign senior official to authorize system operation",
-        "services": [
-          "Audit Manager",
-          "S3",
-          "IAM"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Document authorization process and approving officials. Use AWS Audit Manager to collect authorization evidence. Store authorization packages in S3 with encryption and versioning. Implement IAM policies to restrict system access until authorized. Set authorization expiration dates with CloudWatch Events reminders."
-      }
-    ],
-    "ca-7": [
-      {
-        "control_id": "AWS-CG-CA-7",
-        "title": "Continuous Monitoring",
-        "description": "Develop and implement continuous monitoring strategy",
-        "services": [
-          "Security Hub",
-          "Config",
-          "GuardDuty",
-          "CloudWatch",
-          "Systems Manager"
-        ],
-        "config_rules": [
-          "GUARDDUTY_ENABLED_CENTRALIZED",
-          "SECURITYHUB_ENABLED"
-        ],
-        "security_hub_controls": [
-          "GuardDuty.1"
-        ],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Enable Security Hub for centralized monitoring. Use Config for configuration compliance. Enable GuardDuty for threat detection. Create CloudWatch dashboards for security metrics. Use Systems Manager for patch compliance. Implement automated remediation with Lambda. Generate monthly monitoring reports."
-      }
-    ],
+    "ca-5": [],
+    "ca-6": [],
+    "ca-7": [],
     "cm-5": [
-      {
-        "control_id": "AWS-CG-CM-5",
-        "title": "Access Restrictions for Change",
-        "description": "Define and enforce access restrictions for changes",
-        "services": [
-          "IAM",
-          "Organizations",
-          "CloudFormation",
-          "CodePipeline"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Use IAM policies to restrict who can modify infrastructure. Implement SCPs in Organizations to prevent unauthorized changes. Require all changes through CloudFormation or Terraform. Use CodePipeline with approval stages. Enable MFA delete on S3 buckets. Monitor changes with CloudTrail and Config."
-      },
       {
         "control_id": "AWS-CG-0000772",
         "title": "Audit bucket policy changes prohibited",
@@ -7081,23 +4304,6 @@
     ],
     "cp-8": [
       {
-        "control_id": "AWS-CG-CP-8",
-        "title": "Telecommunications Services",
-        "description": "Establish alternate telecommunications services",
-        "services": [
-          "Direct Connect",
-          "VPN",
-          "Route 53"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Implement redundant connectivity: primary Direct Connect with VPN backup. Use multiple Direct Connect locations for diversity. Configure Route 53 health checks for automatic failover. Document telecommunications providers and SLAs. Test failover procedures quarterly. Consider multiple ISPs for VPN connections."
-      },
-      {
         "control_id": "AWS-CG-0000267",
         "title": "Protect S3 resources with backup plans",
         "description": "Protect S3 resources with backup plans for telecommunications service continuity.",
@@ -7151,23 +4357,6 @@
       }
     ],
     "ia-7": [
-      {
-        "control_id": "AWS-CG-IA-7",
-        "title": "Cryptographic Module Authentication",
-        "description": "Implement authentication mechanisms for cryptographic modules",
-        "services": [
-          "KMS",
-          "CloudHSM",
-          "IAM"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Use AWS KMS with IAM policies for key access control. For FIPS 140-2 Level 3, use CloudHSM with client authentication. Implement key policies requiring multiple approvers for sensitive operations. Use CloudTrail to audit all cryptographic operations. Rotate CloudHSM credentials regularly."
-      },
       {
         "control_id": "AWS-CG-0000033",
         "title": "Enable EBS encryption by default",
@@ -7227,23 +4416,6 @@
     ],
     "ir-3": [
       {
-        "control_id": "AWS-CG-IR-3",
-        "title": "Incident Response Testing",
-        "description": "Test incident response capability",
-        "services": [
-          "CloudFormation",
-          "Lambda",
-          "EventBridge"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Conduct tabletop exercises quarterly. Perform technical tests in isolated AWS accounts. Use CloudFormation to create test scenarios. Simulate incidents: compromised IAM credentials, data exfiltration, ransomware, DDoS. Use Lambda to inject test events. Document test results and lessons learned in S3."
-      },
-      {
         "control_id": "AWS-CG-0000645",
         "title": "Enable GuardDuty malware protection",
         "description": "Enable GuardDuty malware protection to support incident response testing.",
@@ -7300,23 +4472,6 @@
     ],
     "ir-7": [
       {
-        "control_id": "AWS-CG-IR-7",
-        "title": "Incident Response Assistance",
-        "description": "Provide incident response support resources",
-        "services": [
-          "Support",
-          "Security Hub",
-          "Systems Manager"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Maintain AWS Enterprise Support for 24/7 incident assistance. Document AWS Support contact procedures. Create Systems Manager runbooks for common incidents. Establish relationships with AWS Security team. Use AWS Professional Services for complex incidents. Document internal and external support contacts."
-      },
-      {
         "control_id": "AWS-CG-0000169",
         "title": "Enable AWS Security Hub",
         "description": "Enable Security Hub to provide centralized incident response assistance.",
@@ -7353,209 +4508,15 @@
         ]
       }
     ],
-    "ma-1": [
-      {
-        "control_id": "AWS-CG-MA-1",
-        "title": "System Maintenance Policy and Procedures",
-        "description": "Establish maintenance policies",
-        "services": [
-          "Systems Manager",
-          "CloudWatch",
-          "Config"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Document maintenance procedures for AWS resources. Use Systems Manager Maintenance Windows for scheduled maintenance. Define approval requirements for maintenance activities. Track maintenance with Config and CloudTrail. Implement change management for infrastructure updates. Document emergency maintenance procedures."
-      }
-    ],
-    "mp-1": [
-      {
-        "control_id": "AWS-CG-MP-1",
-        "title": "Media Protection Policy and Procedures",
-        "description": "Establish media protection policies",
-        "services": [
-          "S3",
-          "EBS",
-          "Backup",
-          "Storage Gateway"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Document policies for protecting data at rest. Require encryption for all storage: S3, EBS, RDS, EFS. Define data classification and handling procedures. Use S3 Object Lock for immutable storage. Implement backup retention policies with AWS Backup. Document media sanitization procedures (delete with verification)."
-      }
-    ],
-    "mp-2": [
-      {
-        "control_id": "AWS-CG-MP-2",
-        "title": "Media Access",
-        "description": "Restrict access to digital and non-digital media",
-        "services": [
-          "S3",
-          "IAM",
-          "KMS",
-          "Macie"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Use IAM policies to control S3 bucket access. Enable S3 Block Public Access. Encrypt data with KMS and control key access. Use Macie to discover sensitive data. Implement least privilege for EBS volume access. Monitor access with CloudTrail and S3 Access Logs. Use VPC endpoints to keep traffic private."
-      }
-    ],
-    "mp-3": [
-      {
-        "control_id": "AWS-CG-MP-3",
-        "title": "Media Marking",
-        "description": "Mark media indicating distribution limitations",
-        "services": [
-          "S3",
-          "Tags",
-          "Macie"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Use S3 object tags to mark data classification (Public, Internal, Confidential, Restricted). Apply tags to EBS volumes and snapshots. Use Macie to auto-classify and tag sensitive data. Implement tag-based IAM policies for access control. Create CloudWatch dashboards showing data classification distribution. Enforce tagging with Config rules."
-      }
-    ],
-    "mp-5": [
-      {
-        "control_id": "AWS-CG-MP-5",
-        "title": "Media Transport",
-        "description": "Protect and control media during transport",
-        "services": [
-          "Snowball",
-          "DataSync",
-          "Transfer Family",
-          "S3"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Use AWS Snowball for large data transfers with built-in encryption. Use DataSync for secure online transfers. Implement Transfer Family with encryption for file transfers. Use S3 Transfer Acceleration with TLS. For physical media transport, use AWS Import/Export with encryption. Document chain of custody procedures."
-      }
-    ],
-    "mp-6": [
-      {
-        "control_id": "AWS-CG-MP-6",
-        "title": "Media Sanitization",
-        "description": "Sanitize media before disposal or reuse",
-        "services": [
-          "S3",
-          "EBS",
-          "KMS"
-        ],
-        "config_rules": [
-          "S3_BUCKET_PUBLIC_READ_PROHIBITED",
-          "S3_BUCKET_PUBLIC_WRITE_PROHIBITED"
-        ],
-        "security_hub_controls": [
-          "S3.1",
-          "S3.2"
-        ],
-        "control_tower_ids": [
-          "CT.S3.PR.2"
-        ],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Delete S3 objects and verify deletion. Delete EBS volumes and snapshots. For encrypted data, delete KMS keys to make data unrecoverable. Use S3 Object Lock delete markers for audit trail. AWS handles physical media destruction per NIST 800-88. Document sanitization procedures and maintain deletion logs in CloudTrail."
-      }
-    ],
-    "pl-2": [
-      {
-        "control_id": "AWS-CG-PL-2",
-        "title": "System Security Plan",
-        "description": "Develop and maintain system security plan",
-        "services": [
-          "Audit Manager",
-          "S3",
-          "Systems Manager"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Document security plan for each AWS workload/account. Use AWS Audit Manager templates as starting point. Include: system architecture, security controls, data flows, interconnections, responsible parties. Store plans in S3 with versioning. Use Systems Manager Parameter Store for configuration details. Review and update plans annually or after significant changes."
-      }
-    ],
-    "pl-4": [
-      {
-        "control_id": "AWS-CG-PL-4",
-        "title": "Rules of Behavior",
-        "description": "Establish rules of behavior for system users",
-        "services": [
-          "IAM",
-          "Cognito",
-          "S3"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Document acceptable use policies for AWS resources. Present rules during user onboarding. Use Cognito pre-authentication triggers to require acceptance. Store signed acknowledgments in S3. Include rules for: password management, MFA usage, data handling, incident reporting, remote access. Review and update rules annually."
-      }
-    ],
-    "pl-10": [
-      {
-        "control_id": "AWS-CG-PL-10",
-        "title": "Baseline Selection",
-        "description": "Select security control baseline",
-        "services": [
-          "Security Hub",
-          "Config",
-          "Audit Manager"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Select appropriate NIST 800-53 baseline (Low, Moderate, High). Enable Security Hub standards (AWS Foundational, CIS, PCI-DSS). Use Config conformance packs for baseline enforcement. Document baseline selection rationale. Implement baseline controls with CloudFormation. Use Audit Manager to track baseline compliance."
-      }
-    ],
-    "ca-2": [
-      {
-        "control_id": "AWS-CG-CA-2",
-        "title": "Control Assessments",
-        "description": "Develop and implement control assessment procedures",
-        "services": [
-          "Security Hub",
-          "Config",
-          "Audit Manager",
-          "Inspector"
-        ],
-        "config_rules": [
-          "SECURITYHUB_ENABLED"
-        ],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-800-53"
-        ],
-        "implementation_guidance": "Conduct annual security control assessments. Use Security Hub for continuous assessment. Enable Config rules for automated control testing. Use Audit Manager to manage assessment process. Run Inspector for vulnerability assessments. Document assessment procedures and results. Create assessment reports with findings and recommendations. Track remediation of assessment findings."
-      }
-    ]
+    "ma-1": [],
+    "mp-1": [],
+    "mp-2": [],
+    "mp-3": [],
+    "mp-5": [],
+    "mp-6": [],
+    "pl-2": [],
+    "pl-4": [],
+    "pl-10": [],
+    "ca-2": []
   }
 }
