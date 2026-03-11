@@ -3188,6 +3188,40 @@
         "frameworks": [
           "NIST 800-53"
         ]
+      },
+      {
+        "control_id": "AWS-CG-0000325",
+        "title": "Enable Network Firewall multi-AZ deployment",
+        "description": "Enable multi-AZ for Network Firewall to support device identification at network boundaries.",
+        "services": [
+          "AWS Network Firewall"
+        ],
+        "config_rules": [
+          "NETFW_MULTI_AZ_ENABLED"
+        ],
+        "security_hub_controls": [
+          "NetworkFirewall.1"
+        ],
+        "control_tower_ids": [],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000247",
+        "title": "Configure Network Firewall policies",
+        "description": "Configure Network Firewall policies to enforce device authentication requirements.",
+        "services": [
+          "AWS Network Firewall"
+        ],
+        "config_rules": [],
+        "security_hub_controls": [
+          "NetworkFirewall.4"
+        ],
+        "control_tower_ids": [],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
       }
     ],
     "ia-4": [
@@ -3511,6 +3545,87 @@
           "NIST-800-53"
         ],
         "implementation_guidance": "For application users: Configure Cognito user pools with account lockout policies. For AWS Console: Use CloudWatch Events to detect failed console logins and trigger Lambda functions to disable IAM users after threshold. Implement custom authentication with lockout logic in your applications."
+      },
+      {
+        "control_id": "AWS-CG-0000048",
+        "title": "Implement MFA for the AWS root account",
+        "description": "Enable MFA for the root account to reduce brute-force and unauthorized access risk.",
+        "services": [
+          "AWS Identity and Access Management"
+        ],
+        "config_rules": [
+          "ROOT_ACCOUNT_MFA_ENABLED"
+        ],
+        "security_hub_controls": [
+          "IAM.9"
+        ],
+        "control_tower_ids": [
+          "AWS-GR_ROOT_ACCOUNT_MFA_ENABLED"
+        ],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000139",
+        "title": "Enable hardware MFA for the root account",
+        "description": "Enable hardware MFA for the root account to protect against unauthorized access.",
+        "services": [
+          "AWS Identity and Access Management"
+        ],
+        "config_rules": [
+          "ROOT_ACCOUNT_HARDWARE_MFA_ENABLED"
+        ],
+        "security_hub_controls": [
+          "IAM.6"
+        ],
+        "control_tower_ids": [
+          "SH.IAM.6"
+        ],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000184",
+        "title": "Enforce account password policy for IAM users",
+        "description": "Define strong password parameters within the AWS account password policy.",
+        "services": [
+          "AWS Identity and Access Management"
+        ],
+        "config_rules": [
+          "IAM_PASSWORD_POLICY"
+        ],
+        "security_hub_controls": [
+          "IAM.10"
+        ],
+        "control_tower_ids": [
+          "SH.IAM.7"
+        ],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000138",
+        "title": "Enable MFA for IAM console users",
+        "description": "Enable MFA for IAM users with console passwords to strengthen authentication.",
+        "services": [
+          "AWS Identity and Access Management"
+        ],
+        "config_rules": [
+          "MFA_ENABLED_FOR_IAM_CONSOLE_ACCESS"
+        ],
+        "security_hub_controls": [
+          "IAM.5"
+        ],
+        "control_tower_ids": [
+          "AWS-GR_MFA_ENABLED_FOR_IAM_CONSOLE_ACCESS",
+          "SH.IAM.5"
+        ],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
       }
     ],
     "ac-8": [
@@ -3530,6 +3645,22 @@
           "NIST-800-53"
         ],
         "implementation_guidance": "Display banner messages in your applications before authentication. Use Cognito pre-authentication Lambda triggers to present terms of use. Add consent banners to web applications served through CloudFront. Include usage notifications in API Gateway responses."
+      },
+      {
+        "control_id": "AWS-CG-0000263",
+        "title": "Restrict and monitor the use of AWS root account",
+        "description": "Restrict and monitor root user usage to support system use notification requirements.",
+        "services": [
+          "AWS Identity and Access Management"
+        ],
+        "config_rules": [],
+        "security_hub_controls": [
+          "CloudWatch.1"
+        ],
+        "control_tower_ids": [],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
       }
     ],
     "ac-11": [
@@ -3549,6 +3680,54 @@
           "NIST-800-53"
         ],
         "implementation_guidance": "Configure Cognito token expiration and refresh token policies. Implement session timeout in your application code. Use ALB session stickiness with appropriate timeout values. For web apps, implement client-side session timeout with automatic logout."
+      },
+      {
+        "control_id": "AWS-CG-0000207",
+        "title": "Enable Amazon S3 bucket object lock",
+        "description": "Enable object lock in S3 buckets to protect against unintentional changes or deletions.",
+        "services": [
+          "Amazon S3"
+        ],
+        "config_rules": [
+          "S3_BUCKET_DEFAULT_LOCK_ENABLED"
+        ],
+        "security_hub_controls": [
+          "S3.15"
+        ],
+        "control_tower_ids": [
+          "CONFIG.S3.DT.9"
+        ],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000198",
+        "title": "Block public access to Amazon S3 buckets",
+        "description": "Configure S3 to block public access to protect data from unauthorized access.",
+        "services": [
+          "Amazon S3"
+        ],
+        "config_rules": [
+          "S3_ACCOUNT_LEVEL_PUBLIC_ACCESS_BLOCKS",
+          "S3_BUCKET_PUBLIC_READ_PROHIBITED",
+          "S3_BUCKET_PUBLIC_WRITE_PROHIBITED"
+        ],
+        "security_hub_controls": [
+          "S3.1",
+          "S3.2",
+          "S3.3",
+          "S3.8"
+        ],
+        "control_tower_ids": [
+          "AWS-GR_S3_ACCOUNT_LEVEL_PUBLIC_ACCESS_BLOCKS_PERIODIC",
+          "CT.S3.PR.1",
+          "SH.S3.1",
+          "SH.S3.2"
+        ],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
       }
     ],
     "ac-12": [
@@ -3568,6 +3747,49 @@
           "NIST-800-53"
         ],
         "implementation_guidance": "Set Cognito access token lifetime (default 1 hour, max 24 hours). Implement server-side session management with DynamoDB TTL for automatic cleanup. Use Lambda functions to enforce session termination policies based on time or conditions."
+      },
+      {
+        "control_id": "AWS-CG-0000229",
+        "title": "Configure custom TLS policies for ELB listeners",
+        "description": "Configure custom TLS policies for ELB listeners to manage session security.",
+        "services": [
+          "AWS Elastic Load Balancing"
+        ],
+        "config_rules": [
+          "ELB_CUSTOM_SECURITY_POLICY_SSL_CHECK",
+          "ELB_TLS_HTTPS_LISTENERS_ONLY"
+        ],
+        "security_hub_controls": [
+          "ELB.3",
+          "ELB.8"
+        ],
+        "control_tower_ids": [
+          "SH.ELB.3",
+          "SH.ELB.8"
+        ],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000281",
+        "title": "Enable encryption for data in transit for DMS endpoints",
+        "description": "Enable encryption for DMS endpoints to prevent unauthorized access during data transfer.",
+        "services": [
+          "AWS Database Migration Service"
+        ],
+        "config_rules": [
+          "DMS_ENDPOINT_SSL_CONFIGURED"
+        ],
+        "security_hub_controls": [
+          "DMS.9"
+        ],
+        "control_tower_ids": [
+          "SH.DMS.9"
+        ],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
       }
     ],
     "ac-14": [
@@ -4486,6 +4708,47 @@
           "NIST-800-53"
         ],
         "implementation_guidance": "Document policies for video conferencing. Use Chime with security controls. Disable camera/mic when not in use. Use WorkSpaces for secure remote access. Implement meeting access controls. Document approved collaboration tools."
+      },
+      {
+        "control_id": "AWS-CG-0000062",
+        "title": "Enable VPC flow logs",
+        "description": "Enable VPC flow logs to monitor collaborative computing device network traffic.",
+        "services": [
+          "Amazon VPC"
+        ],
+        "config_rules": [
+          "VPC_FLOW_LOGS_ENABLED"
+        ],
+        "security_hub_controls": [
+          "EC2.6"
+        ],
+        "control_tower_ids": [
+          "AWS-GR_VPC_FLOW_LOGS_ENABLED"
+        ],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000063",
+        "title": "Close VPC default security groups",
+        "description": "Close default security groups to restrict collaborative computing device access.",
+        "services": [
+          "Amazon VPC"
+        ],
+        "config_rules": [
+          "VPC_DEFAULT_SECURITY_GROUP_CLOSED"
+        ],
+        "security_hub_controls": [
+          "EC2.2"
+        ],
+        "control_tower_ids": [
+          "AWS-GR_VPC_DEFAULT_SECURITY_GROUP_CLOSED",
+          "SH.EC2.2"
+        ],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
       }
     ],
     "si-5": [
@@ -4528,6 +4791,60 @@
           "NIST-800-53"
         ],
         "implementation_guidance": "Use Config rules to verify security controls. Implement Lambda functions for security testing. Create CloudWatch alarms for security failures. Test encryption, logging, access controls. Verify backups and DR. Document verification procedures. Test quarterly."
+      },
+      {
+        "control_id": "AWS-CG-0000095",
+        "title": "Enable ECR private image scanning",
+        "description": "Enable ECR private image scanning to verify security function integrity.",
+        "services": [
+          "Amazon ECR"
+        ],
+        "config_rules": [
+          "ECR_PRIVATE_IMAGE_SCANNING_ENABLED"
+        ],
+        "security_hub_controls": [
+          "ECR.1"
+        ],
+        "control_tower_ids": [],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000696",
+        "title": "Enable Inspector ECR scanning",
+        "description": "Enable Inspector ECR scanning for automated security function verification.",
+        "services": [
+          "Amazon Inspector"
+        ],
+        "config_rules": [
+          "INSPECTOR_ECR_SCAN_ENABLED"
+        ],
+        "security_hub_controls": [],
+        "control_tower_ids": [],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000169",
+        "title": "Enable AWS Security Hub",
+        "description": "Enable Security Hub to verify security function operation across AWS resources.",
+        "services": [
+          "AWS Security Hub"
+        ],
+        "config_rules": [
+          "SECURITYHUB_ENABLED"
+        ],
+        "security_hub_controls": [
+          "SecurityHub.1"
+        ],
+        "control_tower_ids": [
+          "AWS-GR_SECURITYHUB_ENABLED"
+        ],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
       }
     ],
     "si-8": [
@@ -4547,6 +4864,38 @@
           "NIST-800-53"
         ],
         "implementation_guidance": "Use SES with spam filtering for email. Implement WAF rules for form spam. Use API Gateway throttling. Implement CAPTCHA for public forms. Use rate limiting. Monitor for spam patterns. Document spam protection measures."
+      },
+      {
+        "control_id": "AWS-CG-0000338",
+        "title": "Ensure WAFv2 rule groups are not empty",
+        "description": "Ensure WAFv2 rule groups contain rules to filter spam and malicious content.",
+        "services": [
+          "AWS WAF"
+        ],
+        "config_rules": [
+          "WAFV2_RULEGROUP_NOT_EMPTY"
+        ],
+        "security_hub_controls": [],
+        "control_tower_ids": [],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000374",
+        "title": "Configure WAF web ACL rules",
+        "description": "Configure WAF web ACLs to protect against spam and unwanted traffic.",
+        "services": [
+          "AWS WAF"
+        ],
+        "config_rules": [],
+        "security_hub_controls": [
+          "WAF.1"
+        ],
+        "control_tower_ids": [],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
       }
     ],
     "si-10": [
@@ -4566,6 +4915,38 @@
           "NIST-800-53"
         ],
         "implementation_guidance": "Implement input validation in applications. Use WAF for SQL injection and XSS protection. Validate inputs in API Gateway. Use Lambda for custom validation. Implement allow-lists for inputs. Sanitize user inputs. Document validation requirements."
+      },
+      {
+        "control_id": "AWS-CG-0000338",
+        "title": "Ensure WAFv2 rule groups are not empty",
+        "description": "Ensure WAFv2 rule groups contain rules for input validation.",
+        "services": [
+          "AWS WAF"
+        ],
+        "config_rules": [
+          "WAFV2_RULEGROUP_NOT_EMPTY"
+        ],
+        "security_hub_controls": [],
+        "control_tower_ids": [],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000374",
+        "title": "Configure WAF web ACL rules",
+        "description": "Configure WAF web ACLs to validate and filter malicious input.",
+        "services": [
+          "AWS WAF"
+        ],
+        "config_rules": [],
+        "security_hub_controls": [
+          "WAF.1"
+        ],
+        "control_tower_ids": [],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
       }
     ],
     "si-11": [
@@ -4584,6 +4965,45 @@
           "NIST-800-53"
         ],
         "implementation_guidance": "Implement secure error handling in applications. Avoid exposing stack traces to users. Log detailed errors to CloudWatch Logs. Use generic error messages for users. Implement error monitoring. Document error handling standards."
+      },
+      {
+        "control_id": "AWS-CG-0000017",
+        "title": "Ensure CloudWatch alarms cannot be disabled",
+        "description": "Verify CloudWatch alarm actions are enabled to support error handling and alerting.",
+        "services": [
+          "Amazon CloudWatch"
+        ],
+        "config_rules": [
+          "CLOUDWATCH_ALARM_ACTION_ENABLED_CHECK"
+        ],
+        "security_hub_controls": [
+          "CloudWatch.17"
+        ],
+        "control_tower_ids": [],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000010",
+        "title": "Enable CloudTrail integration with CloudWatch Logs",
+        "description": "Integrate CloudTrail with CloudWatch for error detection and handling.",
+        "services": [
+          "AWS CloudTrail",
+          "Amazon CloudWatch"
+        ],
+        "config_rules": [
+          "CLOUD_TRAIL_CLOUD_WATCH_LOGS_ENABLED"
+        ],
+        "security_hub_controls": [
+          "CloudTrail.5"
+        ],
+        "control_tower_ids": [
+          "AWS-GR_CLOUD_TRAIL_CLOUD_WATCH_LOGS_ENABLED"
+        ],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
       }
     ],
     "si-16": [
@@ -4603,6 +5023,56 @@
           "NIST-800-53"
         ],
         "implementation_guidance": "Use managed services (Lambda, Fargate) with built-in protections. For EC2, enable ASLR and DEP. Use memory-safe languages. Implement bounds checking. Use AWS Graviton processors with memory tagging. Document memory protection measures."
+      },
+      {
+        "control_id": "AWS-CG-0000095",
+        "title": "Enable ECR private image scanning",
+        "description": "Enable ECR image scanning to detect vulnerabilities that could affect memory protection.",
+        "services": [
+          "Amazon ECR"
+        ],
+        "config_rules": [
+          "ECR_PRIVATE_IMAGE_SCANNING_ENABLED"
+        ],
+        "security_hub_controls": [
+          "ECR.1"
+        ],
+        "control_tower_ids": [],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000568",
+        "title": "Enable Inspector Lambda standard scanning",
+        "description": "Enable Inspector Lambda scanning to detect memory protection vulnerabilities.",
+        "services": [
+          "Amazon Inspector"
+        ],
+        "config_rules": [
+          "INSPECTOR_LAMBDA_STANDARD_SCAN_ENABLED"
+        ],
+        "security_hub_controls": [],
+        "control_tower_ids": [],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000645",
+        "title": "Enable GuardDuty malware protection",
+        "description": "Enable GuardDuty malware protection to detect memory-based threats.",
+        "services": [
+          "Amazon GuardDuty"
+        ],
+        "config_rules": [
+          "GUARDDUTY_MALWARE_PROTECTION_ENABLED"
+        ],
+        "security_hub_controls": [],
+        "control_tower_ids": [],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
       }
     ],
     "sr-1": [
@@ -4677,6 +5147,44 @@
           "NIST-800-53"
         ],
         "implementation_guidance": "Document all internal connections between VPCs and services. Use VPC peering with least privilege security groups. Implement PrivateLink for service-to-service connections. Use Transit Gateway for hub-and-spoke architecture. Monitor connections with VPC Flow Logs. Review connections quarterly."
+      },
+      {
+        "control_id": "AWS-CG-0000062",
+        "title": "Enable VPC flow logs",
+        "description": "Enable VPC flow logs to monitor internal system connections and network traffic.",
+        "services": [
+          "Amazon VPC"
+        ],
+        "config_rules": [
+          "VPC_FLOW_LOGS_ENABLED"
+        ],
+        "security_hub_controls": [
+          "EC2.6"
+        ],
+        "control_tower_ids": [
+          "AWS-GR_VPC_FLOW_LOGS_ENABLED"
+        ],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000066",
+        "title": "Enable VPC endpoint services",
+        "description": "Use VPC endpoints to manage and secure internal system connections.",
+        "services": [
+          "Amazon VPC"
+        ],
+        "config_rules": [
+          "SERVICE_VPC_ENDPOINT_ENABLED"
+        ],
+        "security_hub_controls": [
+          "EC2.10"
+        ],
+        "control_tower_ids": [],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
       }
     ],
     "ia-11": [
@@ -4696,6 +5204,45 @@
           "NIST-800-53"
         ],
         "implementation_guidance": "Require MFA for privileged operations. Implement step-up authentication in Cognito. Use IAM policies with MFA conditions. Require re-authentication for sensitive actions. Implement session timeout for privileged access. Use Lambda to enforce re-authentication policies."
+      },
+      {
+        "control_id": "AWS-CG-0000138",
+        "title": "Enable MFA for IAM console users",
+        "description": "Enable MFA for IAM console users to support re-authentication requirements.",
+        "services": [
+          "AWS Identity and Access Management"
+        ],
+        "config_rules": [
+          "MFA_ENABLED_FOR_IAM_CONSOLE_ACCESS"
+        ],
+        "security_hub_controls": [
+          "IAM.5"
+        ],
+        "control_tower_ids": [
+          "AWS-GR_MFA_ENABLED_FOR_IAM_CONSOLE_ACCESS",
+          "SH.IAM.5"
+        ],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000187",
+        "title": "Enable MFA for all IAM users",
+        "description": "Enable MFA for all IAM users to enforce re-authentication.",
+        "services": [
+          "AWS Identity and Access Management"
+        ],
+        "config_rules": [
+          "IAM_USER_MFA_ENABLED"
+        ],
+        "security_hub_controls": [
+          "IAM.19"
+        ],
+        "control_tower_ids": [],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
       }
     ],
     "ia-12": [
@@ -4715,6 +5262,47 @@
           "NIST-800-53"
         ],
         "implementation_guidance": "Implement identity verification in Cognito user pools. Use Lambda for custom identity proofing logic. Consider Rekognition for document verification. Require multiple forms of identification. Document identity proofing procedures. Store verification records securely in S3."
+      },
+      {
+        "control_id": "AWS-CG-0000138",
+        "title": "Enable MFA for IAM console users",
+        "description": "Enable MFA for IAM console users to support identity proofing.",
+        "services": [
+          "AWS Identity and Access Management"
+        ],
+        "config_rules": [
+          "MFA_ENABLED_FOR_IAM_CONSOLE_ACCESS"
+        ],
+        "security_hub_controls": [
+          "IAM.5"
+        ],
+        "control_tower_ids": [
+          "AWS-GR_MFA_ENABLED_FOR_IAM_CONSOLE_ACCESS",
+          "SH.IAM.5"
+        ],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000184",
+        "title": "Enforce account password policy for IAM users",
+        "description": "Enforce strong password policies to support identity proofing requirements.",
+        "services": [
+          "AWS Identity and Access Management"
+        ],
+        "config_rules": [
+          "IAM_PASSWORD_POLICY"
+        ],
+        "security_hub_controls": [
+          "IAM.10"
+        ],
+        "control_tower_ids": [
+          "SH.IAM.7"
+        ],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
       }
     ],
     "ir-2": [
@@ -4734,6 +5322,42 @@
           "NIST-800-53"
         ],
         "implementation_guidance": "Conduct AWS-specific IR training. Use GameDay for hands-on exercises. Train on GuardDuty, Security Hub, CloudTrail analysis. Create test scenarios with CloudFormation. Practice EC2 forensics and S3 breach response. Document training completion. Conduct training annually."
+      },
+      {
+        "control_id": "AWS-CG-0000645",
+        "title": "Enable GuardDuty malware protection",
+        "description": "Enable GuardDuty malware protection to support incident response training scenarios.",
+        "services": [
+          "Amazon GuardDuty"
+        ],
+        "config_rules": [
+          "GUARDDUTY_MALWARE_PROTECTION_ENABLED"
+        ],
+        "security_hub_controls": [],
+        "control_tower_ids": [],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000169",
+        "title": "Enable AWS Security Hub",
+        "description": "Enable Security Hub to provide incident data for response training.",
+        "services": [
+          "AWS Security Hub"
+        ],
+        "config_rules": [
+          "SECURITYHUB_ENABLED"
+        ],
+        "security_hub_controls": [
+          "SecurityHub.1"
+        ],
+        "control_tower_ids": [
+          "AWS-GR_SECURITYHUB_ENABLED"
+        ],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
       }
     ],
     "mp-4": [
@@ -4791,6 +5415,49 @@
           "NIST-800-53"
         ],
         "implementation_guidance": "Configure ALB idle timeout (default 60 seconds). Set NLB idle timeout for TCP connections. Implement API Gateway timeout (29 seconds max). Configure session timeout in applications. Use Lambda to enforce connection limits. Document timeout policies."
+      },
+      {
+        "control_id": "AWS-CG-0000229",
+        "title": "Configure custom TLS policies for ELB listeners",
+        "description": "Configure TLS policies for ELB to manage network session disconnection.",
+        "services": [
+          "AWS Elastic Load Balancing"
+        ],
+        "config_rules": [
+          "ELB_CUSTOM_SECURITY_POLICY_SSL_CHECK",
+          "ELB_TLS_HTTPS_LISTENERS_ONLY"
+        ],
+        "security_hub_controls": [
+          "ELB.3",
+          "ELB.8"
+        ],
+        "control_tower_ids": [
+          "SH.ELB.3",
+          "SH.ELB.8"
+        ],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000281",
+        "title": "Enable encryption for data in transit for DMS endpoints",
+        "description": "Enable DMS endpoint encryption to manage secure network disconnection.",
+        "services": [
+          "AWS Database Migration Service"
+        ],
+        "config_rules": [
+          "DMS_ENDPOINT_SSL_CONFIGURED"
+        ],
+        "security_hub_controls": [
+          "DMS.9"
+        ],
+        "control_tower_ids": [
+          "SH.DMS.9"
+        ],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
       }
     ],
     "sc-23": [
@@ -4810,6 +5477,45 @@
           "NIST-800-53"
         ],
         "implementation_guidance": "Use TLS 1.2+ for all connections. Implement certificate pinning where appropriate. Use Certificate Manager for SSL/TLS certificates. Enable HTTPS-only with CloudFront. Configure ALB with secure listeners. Implement HSTS headers. Monitor certificate expiration."
+      },
+      {
+        "control_id": "AWS-CG-0000229",
+        "title": "Configure custom TLS policies for ELB listeners",
+        "description": "Configure TLS policies for ELB to ensure session authenticity.",
+        "services": [
+          "AWS Elastic Load Balancing"
+        ],
+        "config_rules": [
+          "ELB_CUSTOM_SECURITY_POLICY_SSL_CHECK",
+          "ELB_TLS_HTTPS_LISTENERS_ONLY"
+        ],
+        "security_hub_controls": [
+          "ELB.3",
+          "ELB.8"
+        ],
+        "control_tower_ids": [
+          "SH.ELB.3",
+          "SH.ELB.8"
+        ],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000338",
+        "title": "Ensure WAFv2 rule groups are not empty",
+        "description": "Ensure WAFv2 rule groups contain rules to validate session authenticity.",
+        "services": [
+          "AWS WAF"
+        ],
+        "config_rules": [
+          "WAFV2_RULEGROUP_NOT_EMPTY"
+        ],
+        "security_hub_controls": [],
+        "control_tower_ids": [],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
       }
     ],
     "sr-5": [
@@ -4925,6 +5631,46 @@
           "NIST-800-53"
         ],
         "implementation_guidance": "Document configuration management procedures. Use Config for baseline tracking. Implement CloudFormation for infrastructure as code. Use Systems Manager for configuration enforcement. Define change control process. Review plan annually."
+      },
+      {
+        "control_id": "AWS-CG-0000169",
+        "title": "Enable AWS Security Hub",
+        "description": "Enable Security Hub to support configuration management monitoring.",
+        "services": [
+          "AWS Security Hub"
+        ],
+        "config_rules": [
+          "SECURITYHUB_ENABLED"
+        ],
+        "security_hub_controls": [
+          "SecurityHub.1"
+        ],
+        "control_tower_ids": [
+          "AWS-GR_SECURITYHUB_ENABLED"
+        ],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000046",
+        "title": "Restrict IAM policies with blacklisted actions",
+        "description": "Restrict IAM policies to enforce configuration management controls.",
+        "services": [
+          "AWS Identity and Access Management"
+        ],
+        "config_rules": [
+          "IAM_POLICY_BLACKLISTED_CHECK"
+        ],
+        "security_hub_controls": [
+          "IAM.2"
+        ],
+        "control_tower_ids": [
+          "SH.IAM.2"
+        ],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
       }
     ],
     "cm-10": [
@@ -4944,6 +5690,26 @@
           "NIST-800-53"
         ],
         "implementation_guidance": "Document approved software list. Use Systems Manager to inventory installed software. Create Config rules for unauthorized software. Use License Manager to track licenses. Implement software allow-listing. Monitor with Inspector."
+      },
+      {
+        "control_id": "AWS-CG-0000046",
+        "title": "Restrict IAM policies with blacklisted actions",
+        "description": "Restrict IAM policies to enforce software usage restrictions.",
+        "services": [
+          "AWS Identity and Access Management"
+        ],
+        "config_rules": [
+          "IAM_POLICY_BLACKLISTED_CHECK"
+        ],
+        "security_hub_controls": [
+          "IAM.2"
+        ],
+        "control_tower_ids": [
+          "SH.IAM.2"
+        ],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
       }
     ],
     "cm-11": [
@@ -4962,6 +5728,46 @@
           "NIST-800-53"
         ],
         "implementation_guidance": "Restrict user ability to install software. Use Systems Manager to control installations. Provide approved software via AppStream. Implement least privilege for installations. Monitor unauthorized installations with Config. Document approval process."
+      },
+      {
+        "control_id": "AWS-CG-0000046",
+        "title": "Restrict IAM policies with blacklisted actions",
+        "description": "Restrict IAM policies to control user-installed software.",
+        "services": [
+          "AWS Identity and Access Management"
+        ],
+        "config_rules": [
+          "IAM_POLICY_BLACKLISTED_CHECK"
+        ],
+        "security_hub_controls": [
+          "IAM.2"
+        ],
+        "control_tower_ids": [
+          "SH.IAM.2"
+        ],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000169",
+        "title": "Enable AWS Security Hub",
+        "description": "Enable Security Hub to detect unauthorized software installations.",
+        "services": [
+          "AWS Security Hub"
+        ],
+        "config_rules": [
+          "SECURITYHUB_ENABLED"
+        ],
+        "security_hub_controls": [
+          "SecurityHub.1"
+        ],
+        "control_tower_ids": [
+          "AWS-GR_SECURITYHUB_ENABLED"
+        ],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
       }
     ],
     "cm-12": [
@@ -4981,6 +5787,26 @@
           "NIST-800-53"
         ],
         "implementation_guidance": "Use Macie to discover sensitive data locations. Tag resources with data classification. Document where sensitive data resides. Implement geographic restrictions if needed. Use S3 inventory for data location tracking. Review data locations quarterly."
+      },
+      {
+        "control_id": "AWS-CG-0000169",
+        "title": "Enable AWS Security Hub",
+        "description": "Enable Security Hub to track and monitor information location across AWS resources.",
+        "services": [
+          "AWS Security Hub"
+        ],
+        "config_rules": [
+          "SECURITYHUB_ENABLED"
+        ],
+        "security_hub_controls": [
+          "SecurityHub.1"
+        ],
+        "control_tower_ids": [
+          "AWS-GR_SECURITYHUB_ENABLED"
+        ],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
       }
     ],
     "cp-3": [
@@ -4999,6 +5825,78 @@
           "NIST-800-53"
         ],
         "implementation_guidance": "Train personnel on DR procedures. Conduct DR exercises using CloudFormation. Practice failover procedures. Train on backup restoration. Document training completion. Conduct training annually. Test DR plans during training."
+      },
+      {
+        "control_id": "AWS-CG-0000152",
+        "title": "Include EBS volumes in backup plans",
+        "description": "Include EBS volumes in AWS Backup plans to support contingency and recovery training.",
+        "services": [
+          "Amazon EBS",
+          "AWS Backup"
+        ],
+        "config_rules": [
+          "EBS_IN_BACKUP_PLAN"
+        ],
+        "security_hub_controls": [
+          "EC2.28"
+        ],
+        "control_tower_ids": [],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000220",
+        "title": "Include EFS file systems in backup plans",
+        "description": "Include EFS file systems in AWS Backup plans for contingency preparedness.",
+        "services": [
+          "Amazon EFS",
+          "AWS Backup"
+        ],
+        "config_rules": [
+          "EFS_IN_BACKUP_PLAN"
+        ],
+        "security_hub_controls": [
+          "EFS.2"
+        ],
+        "control_tower_ids": [],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000109",
+        "title": "Enforce backup recovery point minimum retention",
+        "description": "Enforce minimum retention for backup recovery points to support contingency operations.",
+        "services": [
+          "AWS Backup"
+        ],
+        "config_rules": [
+          "BACKUP_RECOVERY_POINT_MINIMUM_RETENTION_CHECK"
+        ],
+        "security_hub_controls": [],
+        "control_tower_ids": [],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000275",
+        "title": "Encrypt backup recovery points",
+        "description": "Encrypt backup recovery points to protect contingency data.",
+        "services": [
+          "AWS Backup"
+        ],
+        "config_rules": [
+          "BACKUP_RECOVERY_POINT_ENCRYPTED"
+        ],
+        "security_hub_controls": [
+          "Backup.1"
+        ],
+        "control_tower_ids": [],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
       }
     ],
     "ia-6": [
@@ -5017,6 +5915,45 @@
           "NIST-800-53"
         ],
         "implementation_guidance": "Implement generic error messages for failed authentication. Don't reveal whether username or password was incorrect. Use Cognito with secure feedback. Avoid account enumeration. Implement rate limiting. Document authentication feedback standards."
+      },
+      {
+        "control_id": "AWS-CG-0000138",
+        "title": "Enable MFA for IAM console users",
+        "description": "Enable MFA for IAM console users to provide secure authentication feedback.",
+        "services": [
+          "AWS Identity and Access Management"
+        ],
+        "config_rules": [
+          "MFA_ENABLED_FOR_IAM_CONSOLE_ACCESS"
+        ],
+        "security_hub_controls": [
+          "IAM.5"
+        ],
+        "control_tower_ids": [
+          "AWS-GR_MFA_ENABLED_FOR_IAM_CONSOLE_ACCESS",
+          "SH.IAM.5"
+        ],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000187",
+        "title": "Enable MFA for all IAM users",
+        "description": "Enable MFA for all IAM users to strengthen authentication mechanisms.",
+        "services": [
+          "AWS Identity and Access Management"
+        ],
+        "config_rules": [
+          "IAM_USER_MFA_ENABLED"
+        ],
+        "security_hub_controls": [
+          "IAM.19"
+        ],
+        "control_tower_ids": [],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
       }
     ],
     "mp-7": [
@@ -5108,6 +6045,60 @@
           "NIST-800-53"
         ],
         "implementation_guidance": "Establish risk response procedures. Use Security Hub for findings management. Create OpsItems for remediation. Define risk acceptance criteria. Document risk decisions. Track remediation with Systems Manager. Review risks quarterly."
+      },
+      {
+        "control_id": "AWS-CG-0000169",
+        "title": "Enable AWS Security Hub",
+        "description": "Enable Security Hub to support risk response through centralized findings.",
+        "services": [
+          "AWS Security Hub"
+        ],
+        "config_rules": [
+          "SECURITYHUB_ENABLED"
+        ],
+        "security_hub_controls": [
+          "SecurityHub.1"
+        ],
+        "control_tower_ids": [
+          "AWS-GR_SECURITYHUB_ENABLED"
+        ],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000095",
+        "title": "Enable ECR private image scanning",
+        "description": "Enable ECR image scanning to identify risks requiring response.",
+        "services": [
+          "Amazon ECR"
+        ],
+        "config_rules": [
+          "ECR_PRIVATE_IMAGE_SCANNING_ENABLED"
+        ],
+        "security_hub_controls": [
+          "ECR.1"
+        ],
+        "control_tower_ids": [],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000696",
+        "title": "Enable Inspector ECR scanning",
+        "description": "Enable Inspector ECR scanning for automated risk identification.",
+        "services": [
+          "Amazon Inspector"
+        ],
+        "config_rules": [
+          "INSPECTOR_ECR_SCAN_ENABLED"
+        ],
+        "security_hub_controls": [],
+        "control_tower_ids": [],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
       }
     ],
     "ra-9": [
@@ -5127,6 +6118,42 @@
           "NIST-800-53"
         ],
         "implementation_guidance": "Identify mission-critical systems and data. Tag critical resources. Document dependencies. Use Config to track critical resources. Implement enhanced monitoring for critical systems. Review criticality quarterly."
+      },
+      {
+        "control_id": "AWS-CG-0000169",
+        "title": "Enable AWS Security Hub",
+        "description": "Enable Security Hub to support criticality analysis of AWS resources.",
+        "services": [
+          "AWS Security Hub"
+        ],
+        "config_rules": [
+          "SECURITYHUB_ENABLED"
+        ],
+        "security_hub_controls": [
+          "SecurityHub.1"
+        ],
+        "control_tower_ids": [
+          "AWS-GR_SECURITYHUB_ENABLED"
+        ],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000645",
+        "title": "Enable GuardDuty malware protection",
+        "description": "Enable GuardDuty malware protection to assess criticality of detected threats.",
+        "services": [
+          "Amazon GuardDuty"
+        ],
+        "config_rules": [
+          "GUARDDUTY_MALWARE_PROTECTION_ENABLED"
+        ],
+        "security_hub_controls": [],
+        "control_tower_ids": [],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
       }
     ],
     "sc-2": [
@@ -5146,6 +6173,38 @@
           "NIST-800-53"
         ],
         "implementation_guidance": "Separate management and data planes. Use dedicated VPCs for management. Implement separate IAM roles for admin vs user functions. Use Organizations for account separation. Document separation architecture."
+      },
+      {
+        "control_id": "AWS-CG-0000338",
+        "title": "Ensure WAFv2 rule groups are not empty",
+        "description": "Ensure WAFv2 rule groups contain rules to separate user functionality from system management.",
+        "services": [
+          "AWS WAF"
+        ],
+        "config_rules": [
+          "WAFV2_RULEGROUP_NOT_EMPTY"
+        ],
+        "security_hub_controls": [],
+        "control_tower_ids": [],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000374",
+        "title": "Configure WAF web ACL rules",
+        "description": "Configure WAF web ACLs to enforce separation of user and system functionality.",
+        "services": [
+          "AWS WAF"
+        ],
+        "config_rules": [],
+        "security_hub_controls": [
+          "WAF.1"
+        ],
+        "control_tower_ids": [],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
       }
     ],
     "sc-4": [
@@ -5165,6 +6224,27 @@
           "NIST-800-53"
         ],
         "implementation_guidance": "Encrypt data at rest with KMS. Use dedicated EBS volumes per tenant. Implement S3 bucket policies for isolation. Clear memory after use. Use encryption for data in transit. Document data isolation procedures."
+      },
+      {
+        "control_id": "AWS-CG-0000063",
+        "title": "Close VPC default security groups",
+        "description": "Close VPC default security groups to prevent information leakage in shared resources.",
+        "services": [
+          "Amazon VPC"
+        ],
+        "config_rules": [
+          "VPC_DEFAULT_SECURITY_GROUP_CLOSED"
+        ],
+        "security_hub_controls": [
+          "EC2.2"
+        ],
+        "control_tower_ids": [
+          "AWS-GR_VPC_DEFAULT_SECURITY_GROUP_CLOSED",
+          "SH.EC2.2"
+        ],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
       }
     ],
     "sc-17": [
@@ -5183,6 +6263,40 @@
           "NIST-800-53"
         ],
         "implementation_guidance": "Use Certificate Manager for public certificates. Use Private CA for internal PKI. Implement certificate lifecycle management. Monitor certificate expiration with CloudWatch. Automate certificate renewal. Document PKI procedures."
+      },
+      {
+        "control_id": "AWS-CG-0000733",
+        "title": "Check IAM server certificate expiration",
+        "description": "Monitor IAM server certificate expiration to maintain PKI certificate validity.",
+        "services": [
+          "AWS Identity and Access Management"
+        ],
+        "config_rules": [
+          "IAM_SERVER_CERTIFICATE_EXPIRATION_CHECK"
+        ],
+        "security_hub_controls": [],
+        "control_tower_ids": [],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000333",
+        "title": "Disable ACM PCA root CA",
+        "description": "Disable ACM PCA root CA when not in use to protect PKI infrastructure.",
+        "services": [
+          "AWS Certificate Manager"
+        ],
+        "config_rules": [
+          "ACM_PCA_ROOT_CA_DISABLED"
+        ],
+        "security_hub_controls": [
+          "PCA.1"
+        ],
+        "control_tower_ids": [],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
       }
     ],
     "sc-18": [
@@ -5202,6 +6316,38 @@
           "NIST-800-53"
         ],
         "implementation_guidance": "Define mobile code policies (JavaScript, Java applets). Use WAF to control mobile code. Implement Content Security Policy headers. Use Lambda@Edge for code inspection. Document approved mobile code. Review policies annually."
+      },
+      {
+        "control_id": "AWS-CG-0000338",
+        "title": "Ensure WAFv2 rule groups are not empty",
+        "description": "Ensure WAFv2 rule groups contain rules to control mobile code execution.",
+        "services": [
+          "AWS WAF"
+        ],
+        "config_rules": [
+          "WAFV2_RULEGROUP_NOT_EMPTY"
+        ],
+        "security_hub_controls": [],
+        "control_tower_ids": [],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000374",
+        "title": "Configure WAF web ACL rules",
+        "description": "Configure WAF web ACLs to filter and control mobile code.",
+        "services": [
+          "AWS WAF"
+        ],
+        "config_rules": [],
+        "security_hub_controls": [
+          "WAF.1"
+        ],
+        "control_tower_ids": [],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
       }
     ],
     "sc-22": [
@@ -5220,6 +6366,44 @@
           "NIST-800-53"
         ],
         "implementation_guidance": "Use Route 53 with multiple name servers. Implement Route 53 Resolver for VPC DNS. Use health checks for failover. Deploy across multiple regions. Enable DNSSEC. Document DNS architecture."
+      },
+      {
+        "control_id": "AWS-CG-0000325",
+        "title": "Enable Network Firewall multi-AZ deployment",
+        "description": "Enable multi-AZ Network Firewall to protect name resolution services.",
+        "services": [
+          "AWS Network Firewall"
+        ],
+        "config_rules": [
+          "NETFW_MULTI_AZ_ENABLED"
+        ],
+        "security_hub_controls": [
+          "NetworkFirewall.1"
+        ],
+        "control_tower_ids": [],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000062",
+        "title": "Enable VPC flow logs",
+        "description": "Enable VPC flow logs to monitor DNS and name resolution traffic.",
+        "services": [
+          "Amazon VPC"
+        ],
+        "config_rules": [
+          "VPC_FLOW_LOGS_ENABLED"
+        ],
+        "security_hub_controls": [
+          "EC2.6"
+        ],
+        "control_tower_ids": [
+          "AWS-GR_VPC_FLOW_LOGS_ENABLED"
+        ],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
       }
     ],
     "sc-39": [
@@ -5239,6 +6423,45 @@
           "NIST-800-53"
         ],
         "implementation_guidance": "Use Lambda for isolated function execution. Use Fargate for container isolation. Implement EC2 with separate security groups. Use separate VPCs for isolation. Document isolation architecture."
+      },
+      {
+        "control_id": "AWS-CG-0000063",
+        "title": "Close VPC default security groups",
+        "description": "Close default security groups to support process isolation between workloads.",
+        "services": [
+          "Amazon VPC"
+        ],
+        "config_rules": [
+          "VPC_DEFAULT_SECURITY_GROUP_CLOSED"
+        ],
+        "security_hub_controls": [
+          "EC2.2"
+        ],
+        "control_tower_ids": [
+          "AWS-GR_VPC_DEFAULT_SECURITY_GROUP_CLOSED",
+          "SH.EC2.2"
+        ],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000066",
+        "title": "Enable VPC endpoint services",
+        "description": "Use VPC endpoints to isolate processes and limit network exposure.",
+        "services": [
+          "Amazon VPC"
+        ],
+        "config_rules": [
+          "SERVICE_VPC_ENDPOINT_ENABLED"
+        ],
+        "security_hub_controls": [
+          "EC2.10"
+        ],
+        "control_tower_ids": [],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
       }
     ],
     "si-12": [
@@ -5258,6 +6481,41 @@
           "NIST-800-53"
         ],
         "implementation_guidance": "Define retention policies by data type. Use S3 lifecycle policies for automated retention. Use Glacier for long-term archival. Implement S3 Object Lock for compliance. Use AWS Backup for retention management. Document retention schedules."
+      },
+      {
+        "control_id": "AWS-CG-0000244",
+        "title": "Configure CloudWatch log group retention period",
+        "description": "Set retention periods on CloudWatch log groups for information management.",
+        "services": [
+          "Amazon CloudWatch"
+        ],
+        "config_rules": [
+          "CW_LOGGROUP_RETENTION_PERIOD_CHECK"
+        ],
+        "security_hub_controls": [
+          "CloudWatch.16"
+        ],
+        "control_tower_ids": [],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000267",
+        "title": "Protect S3 resources with backup plans",
+        "description": "Protect S3 resources with backup plans for information retention.",
+        "services": [
+          "Amazon S3",
+          "AWS Backup"
+        ],
+        "config_rules": [
+          "S3_RESOURCES_PROTECTED_BY_BACKUP_PLAN"
+        ],
+        "security_hub_controls": [],
+        "control_tower_ids": [],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
       }
     ],
     "sr-6": [
@@ -5410,6 +6668,61 @@
           "NIST-800-53"
         ],
         "implementation_guidance": "Create CloudWatch alarms for CloudTrail delivery failures, S3 bucket access errors, and log storage capacity. Use SNS to alert security team. Implement Lambda functions to take corrective action (e.g., increase storage, fix permissions). Monitor CloudWatch Logs delivery with EventBridge rules."
+      },
+      {
+        "control_id": "AWS-CG-0000017",
+        "title": "Ensure CloudWatch alarms cannot be disabled",
+        "description": "Verify CloudWatch alarm actions are enabled to support audit failure alerting.",
+        "services": [
+          "Amazon CloudWatch"
+        ],
+        "config_rules": [
+          "CLOUDWATCH_ALARM_ACTION_ENABLED_CHECK"
+        ],
+        "security_hub_controls": [
+          "CloudWatch.17"
+        ],
+        "control_tower_ids": [],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000018",
+        "title": "Verify CloudWatch alarm settings",
+        "description": "Verify CloudWatch alarm settings are properly configured for audit monitoring.",
+        "services": [
+          "Amazon CloudWatch"
+        ],
+        "config_rules": [
+          "CLOUDWATCH_ALARM_SETTINGS_CHECK"
+        ],
+        "security_hub_controls": [],
+        "control_tower_ids": [],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000010",
+        "title": "Enable CloudTrail integration with CloudWatch Logs",
+        "description": "Send CloudTrail logs to CloudWatch for real-time audit failure monitoring and alerting.",
+        "services": [
+          "AWS CloudTrail",
+          "Amazon CloudWatch"
+        ],
+        "config_rules": [
+          "CLOUD_TRAIL_CLOUD_WATCH_LOGS_ENABLED"
+        ],
+        "security_hub_controls": [
+          "CloudTrail.5"
+        ],
+        "control_tower_ids": [
+          "AWS-GR_CLOUD_TRAIL_CLOUD_WATCH_LOGS_ENABLED"
+        ],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
       }
     ],
     "au-7": [
@@ -5430,6 +6743,44 @@
           "NIST-800-53"
         ],
         "implementation_guidance": "Use Athena to query CloudTrail logs in S3. Create QuickSight dashboards for audit visualization. Use CloudWatch Logs Insights for real-time analysis. Deploy OpenSearch for advanced log analytics. Create saved queries for common audit reports (failed logins, privilege escalation, data access)."
+      },
+      {
+        "control_id": "AWS-CG-0000244",
+        "title": "Configure CloudWatch log group retention period",
+        "description": "Set retention periods on CloudWatch log groups to support audit record management.",
+        "services": [
+          "Amazon CloudWatch"
+        ],
+        "config_rules": [
+          "CW_LOGGROUP_RETENTION_PERIOD_CHECK"
+        ],
+        "security_hub_controls": [
+          "CloudWatch.16"
+        ],
+        "control_tower_ids": [],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000201",
+        "title": "Enable Amazon S3 bucket logging",
+        "description": "Enable S3 bucket logging to support audit record collection and analysis.",
+        "services": [
+          "Amazon S3"
+        ],
+        "config_rules": [
+          "S3_BUCKET_LOGGING_ENABLED"
+        ],
+        "security_hub_controls": [
+          "S3.9"
+        ],
+        "control_tower_ids": [
+          "CT.S3.PR.9"
+        ],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
       }
     ],
     "au-8": [
@@ -5449,6 +6800,47 @@
           "NIST-800-53"
         ],
         "implementation_guidance": "AWS services automatically use UTC timestamps. For EC2 instances, configure NTP using Amazon Time Sync Service (169.254.169.123). Verify time synchronization with Systems Manager. All CloudTrail events include precise timestamps. Use CloudWatch Logs timestamp for correlation across services."
+      },
+      {
+        "control_id": "AWS-CG-0000014",
+        "title": "Enable CloudTrail log file validation",
+        "description": "Enable log file validation to ensure integrity and timestamping of audit records.",
+        "services": [
+          "AWS CloudTrail"
+        ],
+        "config_rules": [
+          "CLOUD_TRAIL_LOG_FILE_VALIDATION_ENABLED"
+        ],
+        "security_hub_controls": [
+          "CloudTrail.4"
+        ],
+        "control_tower_ids": [
+          "AWS-GR_CLOUD_TRAIL_LOG_FILE_VALIDATION_ENABLED"
+        ],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000010",
+        "title": "Enable CloudTrail integration with CloudWatch Logs",
+        "description": "Integrate CloudTrail with CloudWatch for time-synchronized audit record processing.",
+        "services": [
+          "AWS CloudTrail",
+          "Amazon CloudWatch"
+        ],
+        "config_rules": [
+          "CLOUD_TRAIL_CLOUD_WATCH_LOGS_ENABLED"
+        ],
+        "security_hub_controls": [
+          "CloudTrail.5"
+        ],
+        "control_tower_ids": [
+          "AWS-GR_CLOUD_TRAIL_CLOUD_WATCH_LOGS_ENABLED"
+        ],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
       }
     ],
     "ca-1": [
@@ -5488,6 +6880,67 @@
           "NIST-800-53"
         ],
         "implementation_guidance": "Document all VPC peering connections, Transit Gateway attachments, and PrivateLink endpoints. Use VPC Flow Logs to monitor interconnection traffic. Implement security groups and NACLs at interconnection points. Review and approve new interconnections through change management. Monitor with CloudTrail and Config."
+      },
+      {
+        "control_id": "AWS-CG-0000229",
+        "title": "Configure custom TLS policies for ELB listeners",
+        "description": "Configure TLS policies for ELB to secure information exchange between systems.",
+        "services": [
+          "AWS Elastic Load Balancing"
+        ],
+        "config_rules": [
+          "ELB_CUSTOM_SECURITY_POLICY_SSL_CHECK",
+          "ELB_TLS_HTTPS_LISTENERS_ONLY"
+        ],
+        "security_hub_controls": [
+          "ELB.3",
+          "ELB.8"
+        ],
+        "control_tower_ids": [
+          "SH.ELB.3",
+          "SH.ELB.8"
+        ],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000066",
+        "title": "Enable VPC endpoint services",
+        "description": "Use VPC endpoints to secure information exchange within AWS without traversing the internet.",
+        "services": [
+          "Amazon VPC"
+        ],
+        "config_rules": [
+          "SERVICE_VPC_ENDPOINT_ENABLED"
+        ],
+        "security_hub_controls": [
+          "EC2.10"
+        ],
+        "control_tower_ids": [],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000169",
+        "title": "Enable AWS Security Hub",
+        "description": "Enable Security Hub to monitor and assess information exchange security posture.",
+        "services": [
+          "AWS Security Hub"
+        ],
+        "config_rules": [
+          "SECURITYHUB_ENABLED"
+        ],
+        "security_hub_controls": [
+          "SecurityHub.1"
+        ],
+        "control_tower_ids": [
+          "AWS-GR_SECURITYHUB_ENABLED"
+        ],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
       }
     ],
     "ca-5": [
@@ -5572,6 +7025,58 @@
           "NIST-800-53"
         ],
         "implementation_guidance": "Use IAM policies to restrict who can modify infrastructure. Implement SCPs in Organizations to prevent unauthorized changes. Require all changes through CloudFormation or Terraform. Use CodePipeline with approval stages. Enable MFA delete on S3 buckets. Monitor changes with CloudTrail and Config."
+      },
+      {
+        "control_id": "AWS-CG-0000772",
+        "title": "Audit bucket policy changes prohibited",
+        "description": "Prevent unauthorized changes to audit bucket policies to maintain configuration integrity.",
+        "services": [
+          "Amazon S3"
+        ],
+        "config_rules": [],
+        "security_hub_controls": [],
+        "control_tower_ids": [
+          "AWS-GR_AUDIT_BUCKET_POLICY_CHANGES_PROHIBITED"
+        ],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000774",
+        "title": "Audit bucket retention policy",
+        "description": "Enforce retention policies on audit buckets to protect configuration change records.",
+        "services": [
+          "Amazon S3"
+        ],
+        "config_rules": [],
+        "security_hub_controls": [],
+        "control_tower_ids": [
+          "AWS-GR_AUDIT_BUCKET_RETENTION_POLICY"
+        ],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000046",
+        "title": "Restrict IAM policies with blacklisted actions",
+        "description": "Restrict IAM policies to prevent unauthorized configuration changes.",
+        "services": [
+          "AWS Identity and Access Management"
+        ],
+        "config_rules": [
+          "IAM_POLICY_BLACKLISTED_CHECK"
+        ],
+        "security_hub_controls": [
+          "IAM.2"
+        ],
+        "control_tower_ids": [
+          "SH.IAM.2"
+        ],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
       }
     ],
     "cp-8": [
@@ -5591,6 +7096,58 @@
           "NIST-800-53"
         ],
         "implementation_guidance": "Implement redundant connectivity: primary Direct Connect with VPN backup. Use multiple Direct Connect locations for diversity. Configure Route 53 health checks for automatic failover. Document telecommunications providers and SLAs. Test failover procedures quarterly. Consider multiple ISPs for VPN connections."
+      },
+      {
+        "control_id": "AWS-CG-0000267",
+        "title": "Protect S3 resources with backup plans",
+        "description": "Protect S3 resources with backup plans for telecommunications service continuity.",
+        "services": [
+          "Amazon S3",
+          "AWS Backup"
+        ],
+        "config_rules": [
+          "S3_RESOURCES_PROTECTED_BY_BACKUP_PLAN"
+        ],
+        "security_hub_controls": [],
+        "control_tower_ids": [],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000152",
+        "title": "Include EBS volumes in backup plans",
+        "description": "Include EBS volumes in backup plans for service continuity.",
+        "services": [
+          "Amazon EBS",
+          "AWS Backup"
+        ],
+        "config_rules": [
+          "EBS_IN_BACKUP_PLAN"
+        ],
+        "security_hub_controls": [
+          "EC2.28"
+        ],
+        "control_tower_ids": [],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000109",
+        "title": "Enforce backup recovery point minimum retention",
+        "description": "Enforce minimum retention for recovery points to support service continuity.",
+        "services": [
+          "AWS Backup"
+        ],
+        "config_rules": [
+          "BACKUP_RECOVERY_POINT_MINIMUM_RETENTION_CHECK"
+        ],
+        "security_hub_controls": [],
+        "control_tower_ids": [],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
       }
     ],
     "ia-7": [
@@ -5610,6 +7167,62 @@
           "NIST-800-53"
         ],
         "implementation_guidance": "Use AWS KMS with IAM policies for key access control. For FIPS 140-2 Level 3, use CloudHSM with client authentication. Implement key policies requiring multiple approvers for sensitive operations. Use CloudTrail to audit all cryptographic operations. Rotate CloudHSM credentials regularly."
+      },
+      {
+        "control_id": "AWS-CG-0000033",
+        "title": "Enable EBS encryption by default",
+        "description": "Enable EBS encryption by default using validated cryptographic modules.",
+        "services": [
+          "Amazon EBS",
+          "AWS KMS"
+        ],
+        "config_rules": [
+          "EC2_EBS_ENCRYPTION_BY_DEFAULT"
+        ],
+        "security_hub_controls": [
+          "EC2.7"
+        ],
+        "control_tower_ids": [
+          "AWS-GR_EC2_EBS_ENCRYPTION_BY_DEFAULT",
+          "SH.EC2.7"
+        ],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000565",
+        "title": "Restrict KMS key policy public access",
+        "description": "Restrict KMS key policies to prevent public access to cryptographic modules.",
+        "services": [
+          "AWS KMS"
+        ],
+        "config_rules": [
+          "KMS_KEY_POLICY_NO_PUBLIC_ACCESS"
+        ],
+        "security_hub_controls": [],
+        "control_tower_ids": [],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000275",
+        "title": "Encrypt backup recovery points",
+        "description": "Encrypt backup recovery points using validated cryptographic modules.",
+        "services": [
+          "AWS Backup"
+        ],
+        "config_rules": [
+          "BACKUP_RECOVERY_POINT_ENCRYPTED"
+        ],
+        "security_hub_controls": [
+          "Backup.1"
+        ],
+        "control_tower_ids": [],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
       }
     ],
     "ir-3": [
@@ -5629,6 +7242,60 @@
           "NIST-800-53"
         ],
         "implementation_guidance": "Conduct tabletop exercises quarterly. Perform technical tests in isolated AWS accounts. Use CloudFormation to create test scenarios. Simulate incidents: compromised IAM credentials, data exfiltration, ransomware, DDoS. Use Lambda to inject test events. Document test results and lessons learned in S3."
+      },
+      {
+        "control_id": "AWS-CG-0000645",
+        "title": "Enable GuardDuty malware protection",
+        "description": "Enable GuardDuty malware protection to support incident response testing.",
+        "services": [
+          "Amazon GuardDuty"
+        ],
+        "config_rules": [
+          "GUARDDUTY_MALWARE_PROTECTION_ENABLED"
+        ],
+        "security_hub_controls": [],
+        "control_tower_ids": [],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000275",
+        "title": "Encrypt backup recovery points",
+        "description": "Encrypt backup recovery points to support incident response and recovery testing.",
+        "services": [
+          "AWS Backup"
+        ],
+        "config_rules": [
+          "BACKUP_RECOVERY_POINT_ENCRYPTED"
+        ],
+        "security_hub_controls": [
+          "Backup.1"
+        ],
+        "control_tower_ids": [],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000169",
+        "title": "Enable AWS Security Hub",
+        "description": "Enable Security Hub to support incident response testing and validation.",
+        "services": [
+          "AWS Security Hub"
+        ],
+        "config_rules": [
+          "SECURITYHUB_ENABLED"
+        ],
+        "security_hub_controls": [
+          "SecurityHub.1"
+        ],
+        "control_tower_ids": [
+          "AWS-GR_SECURITYHUB_ENABLED"
+        ],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
       }
     ],
     "ir-7": [
@@ -5648,6 +7315,42 @@
           "NIST-800-53"
         ],
         "implementation_guidance": "Maintain AWS Enterprise Support for 24/7 incident assistance. Document AWS Support contact procedures. Create Systems Manager runbooks for common incidents. Establish relationships with AWS Security team. Use AWS Professional Services for complex incidents. Document internal and external support contacts."
+      },
+      {
+        "control_id": "AWS-CG-0000169",
+        "title": "Enable AWS Security Hub",
+        "description": "Enable Security Hub to provide centralized incident response assistance.",
+        "services": [
+          "AWS Security Hub"
+        ],
+        "config_rules": [
+          "SECURITYHUB_ENABLED"
+        ],
+        "security_hub_controls": [
+          "SecurityHub.1"
+        ],
+        "control_tower_ids": [
+          "AWS-GR_SECURITYHUB_ENABLED"
+        ],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000645",
+        "title": "Enable GuardDuty malware protection",
+        "description": "Enable GuardDuty malware protection for automated incident detection assistance.",
+        "services": [
+          "Amazon GuardDuty"
+        ],
+        "config_rules": [
+          "GUARDDUTY_MALWARE_PROTECTION_ENABLED"
+        ],
+        "security_hub_controls": [],
+        "control_tower_ids": [],
+        "frameworks": [
+          "NIST-SP-800-53-r5"
+        ]
       }
     ],
     "ma-1": [

@@ -4,6 +4,8 @@ from typing import List, Dict, Any, Optional
 from compliance_discovery.models.control import Control
 from compliance_discovery.models.question import DiscoveryQuestion, QuestionType
 from compliance_discovery.control_questions import get_control_questions, has_custom_questions
+from compliance_discovery.csf_custom_questions import get_csf_custom_questions, has_csf_custom_questions, get_csf_evidence_question, has_csf_evidence_question
+from compliance_discovery.evidence_questions import get_family_evidence_question, has_family_evidence_question
 
 
 class DiscoveryQuestionGenerator:
@@ -60,12 +62,35 @@ class DiscoveryQuestionGenerator:
                     aws_service_guidance=aws_guidance if idx == 0 else None
                 ))
             
-            # Add custom evidence question if available
+            # Add evidence question - prefer family-level over generic custom evidence
             if evidence_questions:
+                ev_text = evidence_questions[0]['question']
+                # If the custom evidence is a generic template, prefer family-level
+                is_generic = ('Configuration screenshots from' in ev_text
+                              or 'CloudTrail logs of relevant API calls. Where are these artifacts stored?' in ev_text)
+                if is_generic and has_family_evidence_question(control.id):
+                    family_evidence = get_family_evidence_question(control.id, control.title)
+                    questions.append(DiscoveryQuestion(
+                        id=f"{control.id}-EVIDENCE",
+                        control_id=control.id,
+                        question_text=family_evidence,
+                        question_type=QuestionType.EVIDENCE,
+                        family=control.family
+                    ))
+                else:
+                    questions.append(DiscoveryQuestion(
+                        id=f"{control.id}-EVIDENCE",
+                        control_id=control.id,
+                        question_text=ev_text,
+                        question_type=QuestionType.EVIDENCE,
+                        family=control.family
+                    ))
+            elif has_family_evidence_question(control.id):
+                family_evidence = get_family_evidence_question(control.id, control.title)
                 questions.append(DiscoveryQuestion(
                     id=f"{control.id}-EVIDENCE",
                     control_id=control.id,
-                    question_text=evidence_questions[0]['question'],
+                    question_text=family_evidence,
                     question_type=QuestionType.EVIDENCE,
                     family=control.family
                 ))
@@ -101,7 +126,16 @@ class DiscoveryQuestionGenerator:
             ))
             
             # Generate AWS-specific evidence question
-            if is_policy_control:
+            if has_family_evidence_question(control.id):
+                family_evidence = get_family_evidence_question(control.id, control.title)
+                questions.append(DiscoveryQuestion(
+                    id=f"{control.id}-EVIDENCE",
+                    control_id=control.id,
+                    question_text=family_evidence,
+                    question_type=QuestionType.EVIDENCE,
+                    family=control.family
+                ))
+            elif is_policy_control:
                 questions.append(DiscoveryQuestion(
                     id=f"{control.id}-EVIDENCE",
                     control_id=control.id,
@@ -340,3 +374,116 @@ class DiscoveryQuestionGenerator:
                 all_questions.extend(questions)
         
         return all_questions
+
+    def generate_csf_questions(self, control: Control, aws_controls: Optional[List[Dict[str, Any]]] = None) -> List[DiscoveryQuestion]:
+        """Generate discovery questions for a NIST CSF 2.0 subcategory.
+
+        Uses custom implementation questions when available, falling back to
+        AWS-specific generated questions. Evidence, second-line, and audit-readiness
+        questions are always generated.
+
+        Args:
+            control: Control object representing a CSF subcategory
+            aws_controls: Optional AWS control data mapped to this subcategory
+
+        Returns:
+            List of DiscoveryQuestion objects
+        """
+        questions = []
+
+        if aws_controls is None:
+            aws_controls = []
+
+        aws_guidance = self._get_aws_service_guidance(control, aws_controls) if aws_controls else None
+
+        # 1. Implementation questions — use custom if available
+        if has_csf_custom_questions(control.id):
+            custom_qs = get_csf_custom_questions(control.id)
+            for idx, q in enumerate(custom_qs):
+                questions.append(DiscoveryQuestion(
+                    id=f"{control.id}-IMPL-{idx+1}",
+                    control_id=control.id,
+                    question_text=q['question'],
+                    question_type=QuestionType.IMPLEMENTATION,
+                    family=control.family,
+                    aws_service_guidance=aws_guidance if idx == 0 else None
+                ))
+        else:
+            # Fallback: generate AWS-specific implementation question
+            if aws_controls:
+                services = set()
+                config_rules = set()
+                security_hub = set()
+                for ac in aws_controls:
+                    services.update(ac.get('services', []))
+                    config_rules.update(ac.get('config_rules', []))
+                    security_hub.update(ac.get('security_hub_controls', []))
+
+                parts = [f"How is {control.id} ({control.title}) implemented in your AWS environment?"]
+                if services:
+                    svc_list = ', '.join(sorted(services)[:3])
+                    parts.append(f"Are you using {svc_list}?")
+                if config_rules:
+                    rule_list = ', '.join(sorted(config_rules)[:2])
+                    parts.append(f"Have you enabled AWS Config rules like {rule_list}?")
+                if security_hub:
+                    hub_list = ', '.join(sorted(security_hub)[:2])
+                    parts.append(f"Are you monitoring Security Hub controls {hub_list}?")
+                impl_text = ' '.join(parts)
+            else:
+                impl_text = f"What is the current implementation status of {control.id} ({control.title})? What processes, tools, or AWS services support this outcome?"
+
+            questions.append(DiscoveryQuestion(
+                id=f"{control.id}-IMPL-1",
+                control_id=control.id,
+                question_text=impl_text,
+                question_type=QuestionType.IMPLEMENTATION,
+                family=control.family,
+                aws_service_guidance=aws_guidance
+            ))
+
+        # 2. Evidence question — use custom if available, otherwise AWS-specific
+        if has_csf_evidence_question(control.id):
+            evidence_text = get_csf_evidence_question(control.id)
+        elif aws_controls:
+            services = set()
+            for ac in aws_controls:
+                services.update(ac.get('services', []))
+            if services:
+                service_list = ', '.join(sorted(services)[:4])
+                evidence_text = f"What evidence demonstrates achievement of {control.id}? Are you using AWS services such as {service_list} to support this outcome?"
+            else:
+                evidence_text = f"What evidence demonstrates achievement of {control.id}? What AWS services, configurations, or processes support this outcome?"
+        else:
+            evidence_text = f"What evidence demonstrates achievement of {control.id}? What processes, tools, or documentation support this outcome?"
+
+        questions.append(DiscoveryQuestion(
+            id=f"{control.id}-EVIDENCE",
+            control_id=control.id,
+            question_text=evidence_text,
+            question_type=QuestionType.EVIDENCE,
+            family=control.family
+        ))
+
+        # 3. Maturity assessment
+        questions.append(DiscoveryQuestion(
+            id=f"{control.id}-MATURITY",
+            control_id=control.id,
+            question_text=f"How mature is your organization's approach to {control.id}? Is it ad-hoc, documented, managed, or optimized? How do you measure effectiveness?",
+            question_type=QuestionType.SECOND_LINE_DEFENSE,
+            family=control.family
+        ))
+
+        # 4. Gap and improvement
+        questions.append(DiscoveryQuestion(
+            id=f"{control.id}-GAPS",
+            control_id=control.id,
+            question_text=f"What gaps or improvement opportunities exist for {control.id}? Are there planned initiatives to enhance this capability?",
+            question_type=QuestionType.AUDIT_READINESS,
+            family=control.family,
+            aws_service_guidance=aws_guidance
+        ))
+
+        return questions
+
+

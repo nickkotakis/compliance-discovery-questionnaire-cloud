@@ -49,6 +49,54 @@ ENV/
 env.bak/
 venv.bak/
 
+# Lambda package - third-party dependencies (installed at deploy time)
+backend/lambda_package/**/
+!backend/lambda_package/compliance_discovery/
+backend/lambda_package/*.dist-info/
+backend/lambda_package/PIL/
+backend/lambda_package/Pillow*/
+backend/lambda_package/PyYAML*/
+backend/lambda_package/SQLAlchemy*/
+backend/lambda_package/XlsxWriter*/
+backend/lambda_package/_yaml/
+backend/lambda_package/beautifulsoup4*/
+backend/lambda_package/bin/
+backend/lambda_package/blinker*/
+backend/lambda_package/boto3*/
+backend/lambda_package/botocore*/
+backend/lambda_package/bs4/
+backend/lambda_package/certifi*/
+backend/lambda_package/charset_normalizer*/
+backend/lambda_package/click*/
+backend/lambda_package/dateutil/
+backend/lambda_package/et_xmlfile*/
+backend/lambda_package/flask*/
+backend/lambda_package/fpdf*/
+backend/lambda_package/idna*/
+backend/lambda_package/itsdangerous*/
+backend/lambda_package/jinja2*/
+backend/lambda_package/jmespath*/
+backend/lambda_package/markupsafe*/
+backend/lambda_package/openpyxl*/
+backend/lambda_package/python_dateutil*/
+backend/lambda_package/reportlab*/
+backend/lambda_package/requests*/
+backend/lambda_package/s3transfer*/
+backend/lambda_package/six*/
+backend/lambda_package/soupsieve*/
+backend/lambda_package/sqlalchemy*/
+backend/lambda_package/urllib3*/
+backend/lambda_package/werkzeug*/
+backend/lambda_package/xlsxwriter*/
+backend/lambda_package/yaml/
+backend/lambda_package/Flask*/
+backend/lambda_package/MarkupSafe*/
+backend/lambda_package/Jinja2*/
+backend/lambda_package/Werkzeug*/
+backend/lambda_package/mangum*/
+backend/lambda_package/typing_extensions*/
+backend/lambda_package/sessions.db
+
 # Node
 node_modules/
 npm-debug.log*
@@ -59,6 +107,11 @@ lerna-debug.log*
 dist/
 dist-ssr/
 *.local
+
+# CDK
+cdk/cdk.out/
+cdk/.venv/
+cdk/node_modules/
 
 # Editor
 .vscode/*
@@ -74,3 +127,43 @@ dist-ssr/
 # OS
 .DS_Store
 Thumbs.db
+
+# Kiro
+.kiro/
+
+# Summary/status markdown files (generated during development)
+ADD_MORE_CONTROLS.md
+AWS_CONTROLS_POPULATED.md
+AWS_IMPLEMENTATION_GUIDE_FEATURE.md
+AWS_IMPLEMENTATION_GUIDE_STATUS.md
+AWS_MANAGED_CONTROLS_ADDED.md
+AWS_SPECIFIC_QUESTIONS_IMPLEMENTED.md
+BACKUP_AND_DEPLOYMENT_SUMMARY.md
+BROWSER_CACHE_ISSUE.md
+CLOUDSCAPE_DEPLOYMENT_COMPLETE.md
+CLOUDSCAPE_REFACTOR_COMPLETE.md
+COMPLIANCE_IMPLEMENTATION_SUMMARY.md
+COMPLIANCE_INTEGRATION_README.md
+DEPLOYMENT_READY.md
+DEPLOYMENT_STATUS_SUMMARY.md
+FIXES_APPLIED.md
+IMPLEMENTATION_SUMMARY.md
+INTEGRATION_COMPLETE.md
+MCP_CONNECTION_STATUS.md
+MCP_DATA_EXAMPLE.md
+PDF_EXPORT_FIXED.md
+PDF_EXPORT_FIX_GUIDE.md
+PDF_EXPORT_STATUS.md
+PDF_EXPORT_WORKING.md
+POPULATE_MCP_DATA.md
+QUICKSTART.md
+
+
+# Stray lambda package files
+backend/lambda_package/six.py
+backend/lambda_package/typing_extensions.py
+backend/lambda_package/compliance_discovery/sessions.db
+*.db
+
+# Old nested copy
+backend/lambda_package/compliance_discovery/compliance_discovery/

@@ -4,6 +4,12 @@
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://zr5mc40584.execute-api.us-east-1.amazonaws.com/prod/api';
 
+export interface Framework {
+  id: string;
+  label: string;
+  functions?: Record<string, string>;
+}
+
 export interface Control {
   id: string;
   title: string;
@@ -15,6 +21,9 @@ export interface Control {
   parameters?: Parameter[];
   enhancements?: Enhancement[];
   aws_responsibility?: 'aws' | 'shared' | 'customer';
+  function_name?: string;
+  category?: string;
+  category_name?: string;
 }
 
 export interface Parameter {
@@ -91,6 +100,8 @@ export interface ControlDetail {
     specific_mappings: Record<string, string[]>;
     has_specific_mappings: boolean;
   };
+  framework?: string;
+  framework_label?: string;
 }
 
 export interface TemplateMetadata {
@@ -134,27 +145,36 @@ class ComplianceApi {
     return this.fetch('/health');
   }
 
-  async getControls(family?: string): Promise<{ controls: Control[]; total: number }> {
-    const params = family ? `?family=${encodeURIComponent(family)}` : '';
-    return this.fetch(`/controls${params}`);
+  async getFrameworks(): Promise<{ frameworks: Framework[] }> {
+    return this.fetch('/frameworks');
   }
 
-  async getControl(controlId: string): Promise<ControlDetail> {
-    return this.fetch(`/controls/${encodeURIComponent(controlId)}`);
+  async getControls(family?: string, framework?: string): Promise<{ controls: Control[]; total: number; framework?: string; framework_label?: string }> {
+    const params = new URLSearchParams();
+    if (family) params.append('family', family);
+    if (framework) params.append('framework', framework);
+    const qs = params.toString();
+    return this.fetch(`/controls${qs ? `?${qs}` : ''}`);
+  }
+
+  async getControl(controlId: string, framework?: string): Promise<ControlDetail> {
+    const params = framework ? `?framework=${encodeURIComponent(framework)}` : '';
+    return this.fetch(`/controls/${encodeURIComponent(controlId)}${params}`);
   }
 
   async getQuestions(filters?: {
     control_id?: string;
     family?: string;
     question_type?: string;
+    framework?: string;
   }): Promise<{ questions: Question[]; total: number }> {
     const params = new URLSearchParams();
     if (filters?.control_id) params.append('control_id', filters.control_id);
     if (filters?.family) params.append('family', filters.family);
     if (filters?.question_type) params.append('question_type', filters.question_type);
-
-    const queryString = params.toString();
-    return this.fetch(`/questions${queryString ? `?${queryString}` : ''}`);
+    if (filters?.framework) params.append('framework', filters.framework);
+    const qs = params.toString();
+    return this.fetch(`/questions${qs ? `?${qs}` : ''}`);
   }
 
   async createSession(data: {
@@ -186,8 +206,11 @@ class ComplianceApi {
     });
   }
 
-  async exportTemplate(format: 'json' | 'csv' | 'excel' = 'json'): Promise<BlankTemplate> {
-    return this.fetch(`/export?format=${format}`);
+  async exportTemplate(format: 'json' | 'csv' | 'excel' = 'json', framework?: string): Promise<BlankTemplate> {
+    const params = new URLSearchParams();
+    params.append('format', format);
+    if (framework) params.append('framework', framework);
+    return this.fetch(`/export?${params.toString()}`);
   }
 
   async getSessions(): Promise<{ sessions: Session[]; total: number }> {
@@ -200,6 +223,7 @@ class ComplianceApi {
       include_unanswered?: boolean;
       include_aws_hints?: boolean;
       include_framework_mappings?: boolean;
+      framework?: string;
     }
   ): Promise<Blob> {
     const params = new URLSearchParams();
@@ -213,12 +237,14 @@ class ComplianceApi {
     if (options?.include_framework_mappings !== undefined) {
       params.append('include_framework_mappings', String(options.include_framework_mappings));
     }
+    if (options?.framework) {
+      params.append('framework', options.framework);
+    }
 
-    // Set proper Accept header for binary formats
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
     };
-    
+
     if (format === 'excel') {
       headers['Accept'] = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
     } else if (format === 'pdf') {

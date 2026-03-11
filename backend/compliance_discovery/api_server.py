@@ -8,6 +8,7 @@ import json
 import os
 
 from compliance_discovery.nist_parser import NIST80053Parser
+from compliance_discovery.csf_parser import NISTCSFParser
 from compliance_discovery.question_generator import DiscoveryQuestionGenerator
 from compliance_discovery.mcp_integration import MCPClient, create_aws_hints
 from compliance_discovery.models.control import Control
@@ -16,6 +17,8 @@ from compliance_discovery.database import db, SessionModel
 from compliance_discovery.control_descriptions import get_control_description
 from compliance_discovery.aws_control_mapping import get_aws_responsibility, get_aws_services
 from compliance_discovery.framework_mapper import get_framework_relevance
+from compliance_discovery.csf_control_mapping import get_csf_responsibility, get_csf_aws_services
+from compliance_discovery.csf_framework_mapper import get_csf_framework_relevance
 
 
 app = Flask(__name__)
@@ -27,27 +30,52 @@ CORS(app, resources={
     }
 })
 
-# Database configuration
+# Base directory for data files
 basedir = os.path.abspath(os.path.dirname(__file__))
-app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(basedir, "sessions.db")}'
+
+# Database configuration - use /tmp for Lambda (only writable directory)
+if os.environ.get('AWS_LAMBDA_FUNCTION_NAME'):
+    db_path = '/tmp/sessions.db'
+else:
+    db_path = os.path.join(basedir, 'sessions.db')
+
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize database
 db.init_app(app)
 
-# Create tables on startup (moved to main block to avoid double initialization)
-# with app.app_context():
-#     db.create_all()
+# Create tables on startup
+with app.app_context():
+    db.create_all()
 
-# Global state
-controls_cache: List[Control] = []
-questions_cache: Dict[str, List[DiscoveryQuestion]] = {}
+# Global state - keyed by framework
+controls_cache: Dict[str, List[Control]] = {}  # framework -> controls
+questions_cache: Dict[str, Dict[str, List[DiscoveryQuestion]]] = {}  # framework -> {control_id -> questions}
 mcp_data_cache: Dict[str, List[Dict[str, Any]]] = {}  # Cache for MCP data from JSON file
+csf_aws_data_cache: Dict[str, List[Dict[str, Any]]] = {}  # Cache for CSF AWS mappings
 
 # Initialize components
 parser = NIST80053Parser()
+csf_parser = NISTCSFParser()
 generator = DiscoveryQuestionGenerator()
 mcp_client = MCPClient()
+
+# Supported frameworks
+SUPPORTED_FRAMEWORKS = {
+    'nist-800-53': 'NIST 800-53 Rev 5 Moderate Baseline',
+    'nist-csf': 'NIST CSF 2.0'
+}
+
+# CSF Function display names
+CSF_FUNCTION_NAMES = {
+    'GV': 'Govern',
+    'ID': 'Identify',
+    'PR': 'Protect',
+    'DE': 'Detect',
+    'RS': 'Respond',
+    'RC': 'Recover'
+}
 
 
 def load_mcp_data():
@@ -69,29 +97,70 @@ def load_mcp_data():
         mcp_data_cache = {}
 
 
-def initialize_data():
-    """Initialize controls and questions data."""
+def load_csf_aws_data():
+    """Load AWS controls data mapped to CSF subcategories."""
+    global csf_aws_data_cache
+    
+    csf_aws_file = os.path.join(basedir, 'csf_aws_mappings.json')
+    if os.path.exists(csf_aws_file):
+        try:
+            with open(csf_aws_file, 'r') as f:
+                data = json.load(f)
+                csf_aws_data_cache = data.get('controls', {})
+                print(f"Loaded CSF AWS data for {len(csf_aws_data_cache)} subcategories from {csf_aws_file}")
+        except Exception as e:
+            print(f"Warning: Could not load CSF AWS data file: {str(e)}")
+            csf_aws_data_cache = {}
+    else:
+        print(f"Note: CSF AWS data file not found at {csf_aws_file}")
+        csf_aws_data_cache = {}
+
+
+def initialize_data(framework: str = 'nist-800-53'):
+    """Initialize controls and questions data for a given framework.
+    
+    Args:
+        framework: Framework identifier ('nist-800-53' or 'nist-csf')
+    """
     global controls_cache, questions_cache
     
-    if not controls_cache:
-        print("Loading NIST 800-53 Moderate Baseline controls...")
-        controls_cache = parser.get_moderate_baseline_controls()
-        print(f"Loaded {len(controls_cache)} controls")
-        print(f"Sample control IDs: {[c.id for c in controls_cache[:10]]}")
+    if framework not in controls_cache or not controls_cache[framework]:
+        # Load MCP data first (shared across frameworks)
+        if not mcp_data_cache:
+            load_mcp_data()
         
-        # Load MCP data first
-        load_mcp_data()
-        
-        # Pass AWS controls data to generator
-        generator.set_aws_controls_data(mcp_data_cache)
-        
-        print("Generating discovery questions...")
-        for control in controls_cache:
-            # Get AWS controls for this control
-            aws_controls = mcp_data_cache.get(control.id.lower(), [])
-            questions = generator.generate_questions(control, aws_controls)
-            questions_cache[control.id] = questions
-        print(f"Generated questions for {len(questions_cache)} controls")
+        if framework == 'nist-800-53':
+            print("Loading NIST 800-53 Moderate Baseline controls...")
+            controls_cache[framework] = parser.get_moderate_baseline_controls()
+            print(f"Loaded {len(controls_cache[framework])} controls")
+            
+            # Pass AWS controls data to generator
+            generator.set_aws_controls_data(mcp_data_cache)
+            
+            print("Generating discovery questions for NIST 800-53...")
+            questions_cache[framework] = {}
+            for control in controls_cache[framework]:
+                aws_controls = mcp_data_cache.get(control.id.lower(), [])
+                questions = generator.generate_questions(control, aws_controls)
+                questions_cache[framework][control.id] = questions
+            print(f"Generated questions for {len(questions_cache[framework])} controls")
+            
+        elif framework == 'nist-csf':
+            print("Loading NIST CSF 2.0 subcategories...")
+            controls_cache[framework] = csf_parser.get_all_subcategories()
+            print(f"Loaded {len(controls_cache[framework])} subcategories")
+            
+            # Load CSF-specific AWS mappings
+            if not csf_aws_data_cache:
+                load_csf_aws_data()
+            
+            print("Generating discovery questions for NIST CSF 2.0...")
+            questions_cache[framework] = {}
+            for control in controls_cache[framework]:
+                aws_controls = csf_aws_data_cache.get(control.id.lower(), [])
+                questions = generator.generate_csf_questions(control, aws_controls)
+                questions_cache[framework][control.id] = questions
+            print(f"Generated questions for {len(questions_cache[framework])} subcategories")
 
 
 @app.after_request
@@ -103,6 +172,7 @@ def after_request(response):
     return response
 
 
+@app.route('/api/frameworks', methods=['OPTIONS'])
 @app.route('/api/controls', methods=['OPTIONS'])
 @app.route('/api/controls/<control_id>', methods=['OPTIONS'])
 @app.route('/api/questions', methods=['OPTIONS'])
@@ -125,57 +195,109 @@ def health_check():
     })
 
 
+@app.route('/api/frameworks', methods=['GET'])
+def get_frameworks():
+    """Get available compliance frameworks."""
+    frameworks = []
+    for key, label in SUPPORTED_FRAMEWORKS.items():
+        info = {'id': key, 'label': label}
+        if key == 'nist-csf':
+            info['functions'] = {
+                code: name for code, name in CSF_FUNCTION_NAMES.items()
+            }
+        frameworks.append(info)
+    return jsonify({'frameworks': frameworks})
+
+
 @app.route('/api/controls', methods=['GET'])
 def get_controls():
-    """Get all Moderate Baseline controls.
+    """Get all controls for a framework.
     
     Query parameters:
-        family: Filter by control family (optional)
+        framework: Framework ID ('nist-800-53' or 'nist-csf', default: 'nist-800-53')
+        family: Filter by control family / CSF function (optional)
     """
-    initialize_data()
+    framework = request.args.get('framework', 'nist-800-53')
+    if framework not in SUPPORTED_FRAMEWORKS:
+        return jsonify({'error': f'Unsupported framework: {framework}'}), 400
+    
+    initialize_data(framework)
     
     family = request.args.get('family')
     
-    filtered_controls = controls_cache
+    cached = controls_cache.get(framework, [])
+    filtered_controls = cached
     if family:
-        filtered_controls = [c for c in controls_cache if c.family.upper() == family.upper()]
+        filtered_controls = [c for c in cached if c.family.upper() == family.upper()]
     
-    # Sort controls alphabetically by ID with natural number sorting
-    def sort_key(control):
-        # Split ID into parts (e.g., "AC-11" -> ["AC", 11])
-        parts = control.id.upper().split('-')
-        if len(parts) == 2:
-            family_code = parts[0]
-            try:
-                # Handle enhancements like AC-11(1)
-                if '(' in parts[1]:
-                    base_num = int(parts[1].split('(')[0])
-                    enh_num = int(parts[1].split('(')[1].rstrip(')'))
-                    return (family_code, base_num, enh_num)
-                else:
-                    return (family_code, int(parts[1]), 0)
-            except ValueError:
-                return (family_code, 0, 0)
-        return (control.id.upper(), 0, 0)
-    
-    sorted_controls = sorted(filtered_controls, key=sort_key)
-    
-    return jsonify({
-        'controls': [
-            {
-                'id': c.id,
-                'title': c.title,
-                'description': get_control_description(c.id) or c.description,
-                'family': c.family,
-                'in_moderate_baseline': c.in_moderate_baseline,
-                'parameter_count': len(c.parameters),
-                'enhancement_count': len(c.enhancements),
-                'aws_responsibility': get_aws_responsibility(c.id)  # Add responsibility
-            }
-            for c in sorted_controls
-        ],
-        'total': len(sorted_controls)
-    })
+    if framework == 'nist-csf':
+        # Sort CSF subcategories by function then category then number
+        def csf_sort_key(control):
+            parts = control.id.split('-')
+            prefix = parts[0] if parts else control.id  # e.g., "GV.OC"
+            num = int(parts[1]) if len(parts) > 1 else 0
+            func_order = {'GV': 0, 'ID': 1, 'PR': 2, 'DE': 3, 'RS': 4, 'RC': 5}
+            func_code = control.family.upper()
+            return (func_order.get(func_code, 99), prefix, num)
+        
+        sorted_controls = sorted(filtered_controls, key=csf_sort_key)
+        
+        return jsonify({
+            'controls': [
+                {
+                    'id': c.id,
+                    'title': c.title,
+                    'description': c.description,
+                    'family': c.family,
+                    'function_name': CSF_FUNCTION_NAMES.get(c.family.upper(), c.family),
+                    'category': c.id.split('-')[0] if '-' in c.id else c.id,
+                    'category_name': csf_parser.get_category_name(c.id.split('-')[0] if '-' in c.id else c.id),
+                    'in_moderate_baseline': True,
+                    'aws_responsibility': get_csf_responsibility(c.id)
+                }
+                for c in sorted_controls
+            ],
+            'total': len(sorted_controls),
+            'framework': framework,
+            'framework_label': SUPPORTED_FRAMEWORKS[framework]
+        })
+    else:
+        # Original NIST 800-53 sorting
+        def sort_key(control):
+            parts = control.id.upper().split('-')
+            if len(parts) == 2:
+                family_code = parts[0]
+                try:
+                    if '(' in parts[1]:
+                        base_num = int(parts[1].split('(')[0])
+                        enh_num = int(parts[1].split('(')[1].rstrip(')'))
+                        return (family_code, base_num, enh_num)
+                    else:
+                        return (family_code, int(parts[1]), 0)
+                except ValueError:
+                    return (family_code, 0, 0)
+            return (control.id.upper(), 0, 0)
+        
+        sorted_controls = sorted(filtered_controls, key=sort_key)
+        
+        return jsonify({
+            'controls': [
+                {
+                    'id': c.id,
+                    'title': c.title,
+                    'description': get_control_description(c.id) or c.description,
+                    'family': c.family,
+                    'in_moderate_baseline': c.in_moderate_baseline,
+                    'parameter_count': len(c.parameters),
+                    'enhancement_count': len(c.enhancements),
+                    'aws_responsibility': get_aws_responsibility(c.id)
+                }
+                for c in sorted_controls
+            ],
+            'total': len(sorted_controls),
+            'framework': framework,
+            'framework_label': SUPPORTED_FRAMEWORKS[framework]
+        })
 
 
 @app.route('/api/controls/<control_id>', methods=['GET'])
@@ -183,30 +305,48 @@ def get_control(control_id: str):
     """Get specific control with questions and AWS mappings.
     
     Args:
-        control_id: NIST control ID (e.g., "AC-1" or "ac-1")
-    """
-    initialize_data()
+        control_id: Control ID (e.g., "AC-1" or "GV.OC-01")
     
-    # Normalize control ID to uppercase for comparison
-    normalized_id = control_id.upper()
+    Query parameters:
+        framework: Framework ID ('nist-800-53' or 'nist-csf', default: 'nist-800-53')
+    """
+    framework = request.args.get('framework', 'nist-800-53')
+    if framework not in SUPPORTED_FRAMEWORKS:
+        return jsonify({'error': f'Unsupported framework: {framework}'}), 400
+    
+    initialize_data(framework)
+    
+    # Normalize control ID for comparison
+    if framework == 'nist-csf':
+        # CSF IDs are like GV.OC-01 — normalize to uppercase
+        normalized_id = control_id.upper()
+    else:
+        normalized_id = control_id.upper()
     
     # Find control (case-insensitive)
-    control = next((c for c in controls_cache if c.id.upper() == normalized_id), None)
+    cached = controls_cache.get(framework, [])
+    control = next((c for c in cached if c.id.upper() == normalized_id), None)
     if not control:
-        print(f"Control not found: {control_id} (normalized: {normalized_id})")
-        print(f"Available controls: {[c.id for c in controls_cache[:5]]}")
+        print(f"Control not found: {control_id} (normalized: {normalized_id}) in framework {framework}")
         return jsonify({'error': f'Control not found: {control_id}'}), 404
     
-    # Get questions (use actual control ID from cache)
-    questions = questions_cache.get(control.id, [])
+    # Get questions
+    fw_questions = questions_cache.get(framework, {})
+    questions = fw_questions.get(control.id, [])
     
     # Try to get AWS mappings using normalized ID
     aws_hints = []
     aws_controls_data = []  # Store full control data for detailed view
     
-    # First try loading from MCP data cache (JSON file)
-    if normalized_id.lower() in mcp_data_cache:
-        aws_controls_data = mcp_data_cache[normalized_id.lower()]
+    # Choose the right data cache based on framework
+    if framework == 'nist-csf':
+        data_cache = csf_aws_data_cache
+    else:
+        data_cache = mcp_data_cache
+    
+    # First try loading from data cache (JSON file)
+    if normalized_id.lower() in data_cache:
+        aws_controls_data = data_cache[normalized_id.lower()]
         print(f"Loaded {len(aws_controls_data)} AWS controls for {normalized_id} from MCP cache")
         # Generate hints from cached data
         if aws_controls_data:
@@ -250,12 +390,18 @@ def get_control(control_id: str):
     
     # Final fallback to manual mapping if nothing else worked
     if not aws_hints:
-        fallback_services = get_aws_services(control.id)
+        if framework == 'nist-csf':
+            fallback_services = get_csf_aws_services(control.id)
+        else:
+            fallback_services = get_aws_services(control.id)
         if fallback_services:
             aws_hints = [f"AWS Services: {', '.join(fallback_services)}"]
     
-    # Determine responsibility using fallback mapping
-    responsibility = get_aws_responsibility(control.id)
+    # Determine responsibility using framework-specific mapping
+    if framework == 'nist-csf':
+        responsibility = get_csf_responsibility(control.id)
+    else:
+        responsibility = get_aws_responsibility(control.id)
     
     # Build applicability message based on responsibility
     if responsibility == 'aws':
@@ -310,7 +456,10 @@ def get_control(control_id: str):
     cleaned_description = human_description if human_description else control.description
     
     # Get framework relevance
-    framework_relevance = get_framework_relevance(control.id)
+    if framework == 'nist-csf':
+        framework_relevance = get_csf_framework_relevance(control.id)
+    else:
+        framework_relevance = get_framework_relevance(control.id)
     
     return jsonify({
         'control': {
@@ -352,7 +501,9 @@ def get_control(control_id: str):
         'aws_hints': aws_hints,
         'aws_applicability': aws_applicability,
         'aws_controls': aws_controls_data,  # Add detailed AWS control data
-        'framework_relevance': framework_relevance  # Add framework relevance
+        'framework_relevance': framework_relevance,  # Add framework relevance
+        'framework': framework,
+        'framework_label': SUPPORTED_FRAMEWORKS.get(framework, framework)
     })
 
 
@@ -361,18 +512,21 @@ def get_questions():
     """Get all questions.
     
     Query parameters:
+        framework: Framework ID (default: 'nist-800-53')
         control_id: Filter by control ID (optional)
         family: Filter by family (optional)
         question_type: Filter by question type (optional)
     """
-    initialize_data()
+    framework = request.args.get('framework', 'nist-800-53')
+    initialize_data(framework)
     
     control_id = request.args.get('control_id')
     family = request.args.get('family')
     question_type = request.args.get('question_type')
     
+    fw_questions = questions_cache.get(framework, {})
     all_questions = []
-    for questions in questions_cache.values():
+    for questions in fw_questions.values():
         all_questions.extend(questions)
     
     # Apply filters
@@ -481,25 +635,30 @@ def export_template():
     
     Query parameters:
         format: Export format (json, excel, pdf, yaml) - default: json
+        framework: Framework ID (default: 'nist-800-53')
         include_unanswered: Include unanswered questions (default: true)
         include_aws_hints: Include AWS implementation hints (default: true)
         include_framework_mappings: Include framework mappings (default: true)
     """
-    initialize_data()
+    framework = request.args.get('framework', 'nist-800-53')
+    initialize_data(framework)
     
     export_format = request.args.get('format', 'json')
     include_unanswered = request.args.get('include_unanswered', 'true').lower() == 'true'
     include_aws_hints = request.args.get('include_aws_hints', 'true').lower() == 'true'
     include_framework_mappings = request.args.get('include_framework_mappings', 'true').lower() == 'true'
     
+    fw_controls = controls_cache.get(framework, [])
+    fw_questions = questions_cache.get(framework, {})
+    
     # Build template data
     template_data = {
         'metadata': {
             'template_version': '1.0.0',
-            'baseline_version': 'NIST 800-53 Rev 5 Moderate Baseline',
+            'baseline_version': SUPPORTED_FRAMEWORKS.get(framework, framework),
             'export_date': datetime.utcnow().isoformat(),
-            'total_control_count': len(controls_cache),
-            'frameworks_included': ['NIST 800-53', 'AWS']
+            'total_control_count': len(fw_controls),
+            'frameworks_included': [SUPPORTED_FRAMEWORKS.get(framework, framework), 'AWS']
         },
         'controls': [
             {
@@ -507,9 +666,9 @@ def export_template():
                 'title': c.title,
                 'description': get_control_description(c.id) or c.description,
                 'family': c.family,
-                'aws_responsibility': get_aws_responsibility(c.id)
+                'aws_responsibility': get_aws_responsibility(c.id) if framework == 'nist-800-53' else 'shared'
             }
-            for c in controls_cache
+            for c in fw_controls
         ],
         'questions': {
             control_id: [
@@ -522,24 +681,25 @@ def export_template():
                 }
                 for q in questions
             ]
-            for control_id, questions in questions_cache.items()
+            for control_id, questions in fw_questions.items()
         }
     }
     
     # Add framework mappings if requested
-    if include_framework_mappings:
+    if include_framework_mappings and framework == 'nist-800-53':
         template_data['framework_mappings'] = {
             control.id: get_framework_relevance(control.id)
-            for control in controls_cache
+            for control in fw_controls
         }
     
     # Add AWS hints if requested
     if include_aws_hints:
         template_data['aws_hints'] = {}
-        for control in controls_cache:
+        data_cache = csf_aws_data_cache if framework == 'nist-csf' else mcp_data_cache
+        for control in fw_controls:
             normalized_id = control.id.lower()
-            if normalized_id in mcp_data_cache:
-                aws_controls = mcp_data_cache[normalized_id]
+            if normalized_id in data_cache:
+                aws_controls = data_cache[normalized_id]
                 hints = []
                 for ac in aws_controls:
                     hint_parts = []
@@ -942,6 +1102,7 @@ if __name__ == '__main__':
     with app.app_context():
         db.create_all()
     print("Initializing data...")
-    initialize_data()
+    initialize_data('nist-800-53')
+    initialize_data('nist-csf')
     print("Server ready!")
     app.run(debug=True, port=5001)
