@@ -6,6 +6,10 @@ from compliance_discovery.models.question import DiscoveryQuestion, QuestionType
 from compliance_discovery.control_questions import get_control_questions, has_custom_questions
 from compliance_discovery.csf_custom_questions import get_csf_custom_questions, has_csf_custom_questions, get_csf_evidence_question, has_csf_evidence_question
 from compliance_discovery.evidence_questions import get_family_evidence_question, has_family_evidence_question
+from compliance_discovery.defense_line_questions import (
+    get_nist_second_line_question, get_nist_third_line_question,
+    get_csf_second_line_question, get_csf_third_line_question,
+)
 
 
 class DiscoveryQuestionGenerator:
@@ -153,43 +157,65 @@ class DiscoveryQuestionGenerator:
                     family=control.family
                 ))
         
-        # 3. Second line defense question - different for policy vs technical
-        if is_policy_control:
+        # 3. Second line defense question — family-specific risk management oversight
+        second_line_q = get_nist_second_line_question(control.id)
+        if second_line_q:
             questions.append(DiscoveryQuestion(
                 id=f"{control.id}-SECOND-LINE",
                 control_id=control.id,
-                question_text=f"How does your compliance/risk team ensure the {control.id} policy is followed? Are there periodic reviews or assessments?",
+                question_text=second_line_q,
                 question_type=QuestionType.SECOND_LINE_DEFENSE,
                 family=control.family
             ))
         else:
-            questions.append(DiscoveryQuestion(
-                id=f"{control.id}-SECOND-LINE",
-                control_id=control.id,
-                question_text=f"How does your compliance/risk team verify {control.id} in AWS? What oversight mechanisms or automated checks are in place?",
-                question_type=QuestionType.SECOND_LINE_DEFENSE,
-                family=control.family
-            ))
+            # Fallback for families not yet covered
+            if is_policy_control:
+                questions.append(DiscoveryQuestion(
+                    id=f"{control.id}-SECOND-LINE",
+                    control_id=control.id,
+                    question_text=f"How does your compliance/risk team ensure the {control.id} policy is followed? Are there periodic reviews or assessments?",
+                    question_type=QuestionType.SECOND_LINE_DEFENSE,
+                    family=control.family
+                ))
+            else:
+                questions.append(DiscoveryQuestion(
+                    id=f"{control.id}-SECOND-LINE",
+                    control_id=control.id,
+                    question_text=f"How does your compliance/risk team verify {control.id} in AWS? What oversight mechanisms or automated checks are in place?",
+                    question_type=QuestionType.SECOND_LINE_DEFENSE,
+                    family=control.family
+                ))
         
-        # 4. Third line defense question - different for policy vs technical
-        if is_policy_control:
+        # 4. Third line defense question — family-specific internal audit assurance
+        third_line_q = get_nist_third_line_question(control.id)
+        if third_line_q:
             questions.append(DiscoveryQuestion(
                 id=f"{control.id}-THIRD-LINE",
                 control_id=control.id,
-                question_text=f"Is the {control.id} policy document sufficient for internal audit? Does it clearly define roles, responsibilities, and procedures?",
+                question_text=third_line_q,
                 question_type=QuestionType.THIRD_LINE_DEFENSE,
                 family=control.family
             ))
         else:
-            questions.append(DiscoveryQuestion(
-                id=f"{control.id}-THIRD-LINE",
-                control_id=control.id,
-                question_text=f"Is your AWS implementation of {control.id} audit-ready? What documentation or evidence gaps exist for internal audit?",
-                question_type=QuestionType.THIRD_LINE_DEFENSE,
-                family=control.family
-            ))
+            # Fallback for families not yet covered
+            if is_policy_control:
+                questions.append(DiscoveryQuestion(
+                    id=f"{control.id}-THIRD-LINE",
+                    control_id=control.id,
+                    question_text=f"Is the {control.id} policy document sufficient for internal audit? Does it clearly define roles, responsibilities, and procedures?",
+                    question_type=QuestionType.THIRD_LINE_DEFENSE,
+                    family=control.family
+                ))
+            else:
+                questions.append(DiscoveryQuestion(
+                    id=f"{control.id}-THIRD-LINE",
+                    control_id=control.id,
+                    question_text=f"Is your AWS implementation of {control.id} audit-ready? What documentation or evidence gaps exist for internal audit?",
+                    question_type=QuestionType.THIRD_LINE_DEFENSE,
+                    family=control.family
+                ))
         
-        # 5. Audit readiness question - different for policy vs technical
+        # 5. Audit readiness question
         if is_policy_control:
             questions.append(DiscoveryQuestion(
                 id=f"{control.id}-AUDIT-READY",
@@ -465,16 +491,45 @@ class DiscoveryQuestionGenerator:
             family=control.family
         ))
 
-        # 3. Maturity assessment
-        questions.append(DiscoveryQuestion(
-            id=f"{control.id}-MATURITY",
-            control_id=control.id,
-            question_text=f"How mature is your organization's approach to {control.id}? Is it ad-hoc, documented, managed, or optimized? How do you measure effectiveness?",
-            question_type=QuestionType.SECOND_LINE_DEFENSE,
-            family=control.family
-        ))
+        # 3. Second line defense — function-specific risk management oversight
+        second_line_q = get_csf_second_line_question(control.id)
+        if second_line_q:
+            questions.append(DiscoveryQuestion(
+                id=f"{control.id}-SECOND-LINE",
+                control_id=control.id,
+                question_text=second_line_q,
+                question_type=QuestionType.SECOND_LINE_DEFENSE,
+                family=control.family
+            ))
+        else:
+            questions.append(DiscoveryQuestion(
+                id=f"{control.id}-SECOND-LINE",
+                control_id=control.id,
+                question_text=f"How does your risk management function review and challenge the controls supporting {control.id}? What independent oversight mechanisms validate that this outcome is being achieved?",
+                question_type=QuestionType.SECOND_LINE_DEFENSE,
+                family=control.family
+            ))
 
-        # 4. Gap and improvement
+        # 4. Third line defense — function-specific internal audit assurance
+        third_line_q = get_csf_third_line_question(control.id)
+        if third_line_q:
+            questions.append(DiscoveryQuestion(
+                id=f"{control.id}-THIRD-LINE",
+                control_id=control.id,
+                question_text=third_line_q,
+                question_type=QuestionType.THIRD_LINE_DEFENSE,
+                family=control.family
+            ))
+        else:
+            questions.append(DiscoveryQuestion(
+                id=f"{control.id}-THIRD-LINE",
+                control_id=control.id,
+                question_text=f"Has internal audit independently tested the controls supporting {control.id}? What evidence exists to demonstrate this outcome is achieved and audit-ready?",
+                question_type=QuestionType.THIRD_LINE_DEFENSE,
+                family=control.family
+            ))
+
+        # 5. Gap and improvement
         questions.append(DiscoveryQuestion(
             id=f"{control.id}-GAPS",
             control_id=control.id,
