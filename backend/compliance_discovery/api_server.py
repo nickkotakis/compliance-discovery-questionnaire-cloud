@@ -666,7 +666,7 @@ def export_template():
                 'title': c.title,
                 'description': get_control_description(c.id) or c.description,
                 'family': c.family,
-                'aws_responsibility': get_aws_responsibility(c.id) if framework == 'nist-800-53' else 'shared'
+                'aws_responsibility': get_aws_responsibility(c.id) if framework == 'nist-800-53' else get_csf_responsibility(c.id)
             }
             for c in fw_controls
         ],

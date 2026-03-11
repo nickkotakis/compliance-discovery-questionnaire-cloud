@@ -17,6 +17,7 @@ from compliance_discovery.database import db, SessionModel
 from compliance_discovery.control_descriptions import get_control_description
 from compliance_discovery.aws_control_mapping import get_aws_responsibility, get_aws_services
 from compliance_discovery.framework_mapper import get_framework_relevance
+from compliance_discovery.csf_control_mapping import get_csf_responsibility, get_csf_aws_services
 
 
 app = Flask(__name__)
@@ -251,7 +252,7 @@ def get_controls():
                     'category': c.id.split('-')[0] if '-' in c.id else c.id,
                     'category_name': csf_parser.get_category_name(c.id.split('-')[0] if '-' in c.id else c.id),
                     'in_moderate_baseline': True,
-                    'aws_responsibility': 'shared'
+                    'aws_responsibility': get_csf_responsibility(c.id)
                 }
                 for c in sorted_controls
             ],
@@ -392,8 +393,11 @@ def get_control(control_id: str):
         if fallback_services:
             aws_hints = [f"AWS Services: {', '.join(fallback_services)}"]
     
-    # Determine responsibility using fallback mapping
-    responsibility = get_aws_responsibility(control.id)
+    # Determine responsibility using framework-specific mapping
+    if framework == 'nist-csf':
+        responsibility = get_csf_responsibility(control.id)
+    else:
+        responsibility = get_aws_responsibility(control.id)
     
     # Build applicability message based on responsibility
     if responsibility == 'aws':
@@ -655,7 +659,7 @@ def export_template():
                 'title': c.title,
                 'description': get_control_description(c.id) or c.description,
                 'family': c.family,
-                'aws_responsibility': get_aws_responsibility(c.id) if framework == 'nist-800-53' else 'shared'
+                'aws_responsibility': get_aws_responsibility(c.id) if framework == 'nist-800-53' else get_csf_responsibility(c.id)
             }
             for c in fw_controls
         ],
