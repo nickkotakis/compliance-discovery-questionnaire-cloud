@@ -57,19 +57,55 @@ const CSF_FUNCTION_NAMES: Record<string, string> = {
   'rc': 'Recover'
 };
 
-// Color mapping for NIST 800-53 families
-const NIST_FAMILY_COLORS: Record<string, 'blue' | 'grey' | 'green' | 'red'> = {
+// Badge color mapping for NIST 800-53 families (Cloudscape badge colors)
+const NIST_FAMILY_BADGE_COLORS: Record<string, 'blue' | 'grey' | 'green' | 'red'> = {
   'ac': 'blue', 'at': 'grey', 'au': 'blue', 'ca': 'green',
-  'cm': 'blue', 'cp': 'red', 'ia': 'blue', 'ir': 'red',
+  'cm': 'green', 'cp': 'red', 'ia': 'blue', 'ir': 'red',
   'ma': 'grey', 'mp': 'grey', 'pe': 'grey', 'pl': 'green',
-  'pm': 'green', 'ps': 'grey', 'pt': 'blue', 'ra': 'green',
+  'pm': 'green', 'ps': 'blue', 'pt': 'grey', 'ra': 'green',
   'sa': 'green', 'sc': 'blue', 'si': 'blue', 'sr': 'green'
 };
 
-// Color mapping for CSF functions
-const CSF_FUNCTION_COLORS: Record<string, 'blue' | 'grey' | 'green' | 'red'> = {
+// Badge color mapping for CSF functions (Cloudscape badge colors)
+const CSF_FUNCTION_BADGE_COLORS: Record<string, 'blue' | 'grey' | 'green' | 'red'> = {
   'gv': 'grey', 'id': 'blue', 'pr': 'green',
-  'de': 'blue', 'rs': 'red', 'rc': 'green'
+  'de': 'red', 'rs': 'red', 'rc': 'blue'
+};
+
+// Accent hex colors for left-border strips — Cloudscape design token palette
+// CSF functions: each gets a unique, distinguishable color
+const CSF_FUNCTION_ACCENT_COLORS: Record<string, string> = {
+  'gv': '#6B40B8', // Purple — Governance
+  'id': '#0073BB', // Teal/Blue — Identify
+  'pr': '#037F0C', // Green — Protect
+  'de': '#D45B07', // Orange — Detect
+  'rs': '#D13212', // Red — Respond
+  'rc': '#00838F', // Dark Cyan — Recover
+};
+
+// NIST 800-53 families grouped by domain
+const NIST_FAMILY_ACCENT_COLORS: Record<string, string> = {
+  // Access & Identity — Blue
+  'ac': '#0073BB', 'ia': '#0073BB', 'ps': '#0073BB',
+  // Monitoring & Audit — Teal
+  'au': '#00838F', 'ca': '#00838F', 'si': '#00838F',
+  // Protection & Config — Green
+  'cm': '#037F0C', 'cp': '#037F0C', 'sc': '#037F0C', 'sr': '#037F0C',
+  // Risk & Planning — Purple
+  'ra': '#6B40B8', 'sa': '#6B40B8', 'pl': '#6B40B8', 'pm': '#6B40B8',
+  // Operations — Orange
+  'ma': '#D45B07', 'mp': '#D45B07', 'pe': '#D45B07', 'ir': '#D45B07',
+  // People & Privacy — Grey
+  'at': '#687078', 'pt': '#687078',
+};
+
+// Question type badge colors
+const QUESTION_TYPE_COLORS: Record<string, 'blue' | 'grey' | 'green' | 'red'> = {
+  'implementation': 'blue',
+  'evidence': 'green',
+  'second_line_defense': 'grey',
+  'third_line_defense': 'grey',
+  'audit_readiness': 'red',
 };
 
 const getFamilyFullName = (familyCode: string, framework: string): string => {
@@ -83,20 +119,36 @@ const getFamilyFullName = (familyCode: string, framework: string): string => {
 const getFamilyColor = (familyCode: string, framework: string): 'blue' | 'grey' | 'green' | 'red' => {
   const code = familyCode.toLowerCase();
   if (framework === 'nist-csf') {
-    return CSF_FUNCTION_COLORS[code] || 'grey';
+    return CSF_FUNCTION_BADGE_COLORS[code] || 'grey';
   }
-  return NIST_FAMILY_COLORS[code] || 'grey';
+  return NIST_FAMILY_BADGE_COLORS[code] || 'grey';
+};
+
+const getAccentColor = (familyCode: string, framework: string): string => {
+  const code = familyCode.toLowerCase();
+  if (framework === 'nist-csf') {
+    return CSF_FUNCTION_ACCENT_COLORS[code] || '#687078';
+  }
+  return NIST_FAMILY_ACCENT_COLORS[code] || '#687078';
 };
 
 const getColorEmoji = (familyCode: string, framework: string): string => {
-  const color = getFamilyColor(familyCode, framework);
-  switch (color) {
-    case 'blue': return '🔵';
-    case 'green': return '🟢';
-    case 'red': return '🔴';
-    case 'grey': return '⚪';
-    default: return '⚪';
-  }
+  const accent = getAccentColor(familyCode, framework);
+  // Map accent hex to colored circle for dropdown labels
+  const emojiMap: Record<string, string> = {
+    '#6B40B8': '🟣',
+    '#0073BB': '🔵',
+    '#037F0C': '🟢',
+    '#D45B07': '🟠',
+    '#D13212': '🔴',
+    '#00838F': '🔵',
+    '#687078': '⚪',
+  };
+  return emojiMap[accent] || '⚪';
+};
+
+const getQuestionTypeBadgeColor = (questionType: string): 'blue' | 'grey' | 'green' | 'red' => {
+  return QUESTION_TYPE_COLORS[questionType.toLowerCase()] || 'blue';
 };
 
 interface ComplianceQuestionnaireProps {
@@ -309,6 +361,7 @@ const ComplianceQuestionnaire: React.FC<ComplianceQuestionnaireProps> = ({ sessi
             </Container>
 
             {/* Filters */}
+            <div style={{ background: '#FAFAFA', borderRadius: '8px', padding: '2px' }}>
             <Container>
               <SpaceBetween size="m" direction="horizontal">
                 <div style={{ flex: 1 }}>
@@ -360,6 +413,7 @@ const ComplianceQuestionnaire: React.FC<ComplianceQuestionnaireProps> = ({ sessi
                 )}
               </SpaceBetween>
             </Container>
+            </div>
 
             {/* Content views */}
             {activeView === 'dashboard' && (
@@ -383,10 +437,17 @@ const ComplianceQuestionnaire: React.FC<ComplianceQuestionnaireProps> = ({ sessi
                   const controlQuestions = allQuestions[control.id] || [];
                   const answeredCount = controlQuestions.filter(q => responses[q.id]).length;
                   const isComplete = answeredCount === controlQuestions.length && controlQuestions.length > 0;
+                  const accentColor = getAccentColor(control.family, selectedFramework);
 
                   return (
-                    <ExpandableSection
+                    <div
                       key={control.id}
+                      style={{
+                        borderLeft: `4px solid ${accentColor}`,
+                        borderRadius: '4px',
+                      }}
+                    >
+                    <ExpandableSection
                       variant="container"
                       headerText={
                         <SpaceBetween size="xs" direction="horizontal">
@@ -508,7 +569,7 @@ const ComplianceQuestionnaire: React.FC<ComplianceQuestionnaireProps> = ({ sessi
                                       <SpaceBetween size="m">
                                         <SpaceBetween size="xs" direction="horizontal">
                                           <Badge>{idx + 1}</Badge>
-                                          <Badge color="blue">
+                                          <Badge color={getQuestionTypeBadgeColor(question.question_type)}>
                                             {question.question_type.replace(/_/g, ' ').toUpperCase()}
                                           </Badge>
                                           {isAnswered && (
@@ -541,6 +602,7 @@ const ComplianceQuestionnaire: React.FC<ComplianceQuestionnaireProps> = ({ sessi
                         </SpaceBetween>
                       )}
                     </ExpandableSection>
+                    </div>
                   );
                 })}
               </SpaceBetween>

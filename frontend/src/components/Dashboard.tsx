@@ -28,7 +28,7 @@ const Dashboard: React.FC<DashboardProps> = ({
       </Header>
 
       <ColumnLayout columns={4} variant="text-grid">
-        <div>
+        <div style={{ borderTop: '4px solid #0073BB', paddingTop: '12px' }}>
           <Box variant="awsui-key-label">Total controls</Box>
           <Box variant="h1" fontSize="display-l" fontWeight="bold">
             {totalControls}
@@ -38,7 +38,7 @@ const Dashboard: React.FC<DashboardProps> = ({
           </Box>
         </div>
 
-        <div>
+        <div style={{ borderTop: '4px solid #037F0C', paddingTop: '12px' }}>
           <Box variant="awsui-key-label">Questions answered</Box>
           <Box variant="h1" fontSize="display-l" fontWeight="bold">
             {answeredQuestions}/{totalQuestions}
@@ -48,7 +48,7 @@ const Dashboard: React.FC<DashboardProps> = ({
           </Box>
         </div>
 
-        <div>
+        <div style={{ borderTop: '4px solid #D45B07', paddingTop: '12px' }}>
           <Box variant="awsui-key-label">Completion rate</Box>
           <Box variant="h1" fontSize="display-l" fontWeight="bold">
             {completionRate}%
@@ -58,7 +58,7 @@ const Dashboard: React.FC<DashboardProps> = ({
           </Box>
         </div>
 
-        <div>
+        <div style={{ borderTop: '4px solid #D13212', paddingTop: '12px' }}>
           <Box variant="awsui-key-label">Pending review</Box>
           <Box variant="h1" fontSize="display-l" fontWeight="bold">
             {totalQuestions - answeredQuestions}
