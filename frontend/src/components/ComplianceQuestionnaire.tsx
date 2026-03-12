@@ -75,7 +75,7 @@ const CSF_FUNCTION_BADGE_COLORS: Record<string, 'blue' | 'grey' | 'green' | 'red
 // Accent hex colors for left-border strips — Cloudscape design token palette
 // CSF functions: each gets a unique, distinguishable color
 const CSF_FUNCTION_ACCENT_COLORS: Record<string, string> = {
-  'gv': '#6B40B8', // Purple — Governance
+  'gv': '#687078', // Grey — Governance
   'id': '#0073BB', // Teal/Blue — Identify
   'pr': '#037F0C', // Green — Protect
   'de': '#D45B07', // Orange — Detect
