@@ -514,6 +514,45 @@ const ComplianceQuestionnaire: React.FC<ComplianceQuestionnaireProps> = ({ sessi
                             </Button>
                           )}
 
+                          {/* Organizational Requirements (non-AWS controls) */}
+                          {selectedControl.organizational_requirements && selectedControl.organizational_requirements.length > 0 && (
+                            <Container
+                              header={
+                                <Header
+                                  variant="h3"
+                                  description="Policies, processes, and governance controls needed alongside AWS technical controls"
+                                  counter={`(${selectedControl.organizational_requirements.length})`}
+                                >
+                                  Organizational requirements
+                                </Header>
+                              }
+                            >
+                              <SpaceBetween size="m">
+                                {selectedControl.organizational_requirements.map((req, idx) => {
+                                  const meta = selectedControl.organizational_category_metadata?.[req.category];
+                                  const badgeColor: 'blue' | 'grey' | 'green' | 'red' =
+                                    req.category === 'POLICY' ? 'blue' :
+                                    req.category === 'PROCESS' ? 'green' :
+                                    req.category === 'GOVERNANCE' ? 'blue' :
+                                    req.category === 'TRAINING' ? 'red' :
+                                    req.category === 'DOCUMENTATION' ? 'grey' :
+                                    'grey';
+                                  return (
+                                    <div key={idx} style={{ borderLeft: `3px solid ${meta?.color || '#687078'}`, paddingLeft: '12px' }}>
+                                      <SpaceBetween size="xxs">
+                                        <SpaceBetween size="xs" direction="horizontal">
+                                          <Badge color={badgeColor}>{meta?.label || req.category}</Badge>
+                                          <Box variant="strong">{req.title}</Box>
+                                        </SpaceBetween>
+                                        <Box variant="p" color="text-body-secondary">{req.description}</Box>
+                                      </SpaceBetween>
+                                    </div>
+                                  );
+                                })}
+                              </SpaceBetween>
+                            </Container>
+                          )}
+
                           {/* AWS Implementation Guide */}
                           {selectedControl.aws_controls && selectedControl.aws_controls.length > 0 && (
                             <AWSImplementationGuide

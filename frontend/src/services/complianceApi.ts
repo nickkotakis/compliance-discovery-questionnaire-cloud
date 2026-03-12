@@ -100,6 +100,16 @@ export interface ControlDetail {
     specific_mappings: Record<string, string[]>;
     has_specific_mappings: boolean;
   };
+  organizational_requirements?: Array<{
+    category: string;
+    title: string;
+    description: string;
+  }>;
+  organizational_category_metadata?: Record<string, {
+    label: string;
+    icon: string;
+    color: string;
+  }>;
   framework?: string;
   framework_label?: string;
 }
