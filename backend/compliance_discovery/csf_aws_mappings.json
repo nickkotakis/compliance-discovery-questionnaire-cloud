@@ -3,7 +3,7 @@
     "source": "AWS Control Guides from ControlCompass (verified)",
     "description": "AWS implementation guides for NIST CSF 2.0 subcategories",
     "total_subcategories": 105,
-    "total_controls": 718,
+    "total_controls": 433,
     "total_controls_with_guides": 72,
     "total_aws_control_guides": 440
   },
@@ -1578,68 +1578,304 @@
     "gv.oc-05": [],
     "gv.po-01": [
       {
-        "control_id": "AWS-CG-0000785",
-        "title": "Document IAM policies and procedures",
-        "description": "Maintain documented access control policies that define IAM user management, role-based access, and least privilege principles.",
+        "control_id": "AWS-CG-0000057",
+        "title": "Enable encryption on Amazon S3 buckets",
+        "description": "Enable server-side encryption in S3 buckets to reduce the risk of unintentional data exposure. Enforces data-at-rest encryption policy.",
+        "services": [
+          "Amazon S3"
+        ],
+        "config_rules": [
+          "S3_BUCKET_SERVER_SIDE_ENCRYPTION_ENABLED"
+        ],
+        "security_hub_controls": [
+          "S3.4"
+        ],
+        "control_tower_ids": [
+          "CONFIG.S3.DT.8"
+        ],
+        "frameworks": [
+          "AWS-WAF-v10",
+          "CIS-AWS-Benchmark-v1.3",
+          "CIS-AWS-Benchmark-v1.4",
+          "CIS-v7.1",
+          "CIS-v8.0",
+          "FedRAMP-r4",
+          "ISO-IEC-27001:2013-Annex-A",
+          "NIST-CSF-v1.1",
+          "NIST-SP-800-53-r5",
+          "PCI-DSS-v3.2.1",
+          "PCI-DSS-v4.0",
+          "SSAE-18-SOC-2-Oct-2023"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000193",
+        "title": "Enable encryption at rest for Amazon RDS database instances",
+        "description": "Enable encryption at rest for Amazon RDS DB instances to secure data from unauthorized access to the underlying storage. Enforces data-at-rest encryption policy.",
+        "services": [
+          "Amazon RDS"
+        ],
+        "config_rules": [
+          "RDS_STORAGE_ENCRYPTED"
+        ],
+        "security_hub_controls": [
+          "RDS.3"
+        ],
+        "control_tower_ids": [
+          "AWS-GR_RDS_STORAGE_ENCRYPTED",
+          "SH.RDS.3"
+        ],
+        "frameworks": [
+          "ACSC-ISM-02-Mar-2023",
+          "AWS-WAF-v10",
+          "CIS-v7.1",
+          "CIS-v8.0",
+          "FedRAMP-r4",
+          "ISO-IEC-27001:2013-Annex-A",
+          "NIST-CSF-v1.1",
+          "NIST-SP-800-53-r5",
+          "PCI-DSS-v3.2.1",
+          "PCI-DSS-v4.0"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000034",
+        "title": "Enable encryption at rest on Amazon EBS volumes attached to EC2 instances",
+        "description": "Enable encryption at rest on EBS volumes attached to EC2 instances to protect data from unauthorized access. Enforces data-at-rest encryption policy.",
+        "services": [
+          "Amazon Elastic Block Store"
+        ],
+        "config_rules": [
+          "ENCRYPTED_VOLUMES"
+        ],
+        "security_hub_controls": [
+          "EC2.3"
+        ],
+        "control_tower_ids": [
+          "AWS-GR_ENCRYPTED_VOLUMES",
+          "SH.EC2.3"
+        ],
+        "frameworks": [
+          "AWS-WAF-v10",
+          "CIS-AWS-Benchmark-v1.3",
+          "CIS-AWS-Benchmark-v1.4",
+          "CIS-v7.1",
+          "CIS-v8.0",
+          "FedRAMP-r4",
+          "ISO-IEC-27001:2013-Annex-A",
+          "NIST-CSF-v1.1",
+          "NIST-SP-800-171-r2",
+          "NIST-SP-800-53-r5",
+          "PCI-DSS-v3.2.1",
+          "PCI-DSS-v4.0",
+          "SSAE-18-SOC-2-Oct-2023"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000055",
+        "title": "Encrypt Amazon CloudWatch log groups",
+        "description": "Encrypt all log data stored in CloudWatch Logs to protect the confidentiality and integrity of audit logs. Enforces data-at-rest encryption policy.",
+        "services": [
+          "Amazon CloudWatch Logs"
+        ],
+        "config_rules": [
+          "CLOUDWATCH_LOG_GROUP_ENCRYPTED"
+        ],
+        "security_hub_controls": [],
+        "control_tower_ids": [
+          "CONFIG.LOGS.DT.1"
+        ],
+        "frameworks": [
+          "FedRAMP-r4",
+          "ISO-IEC-27001:2013-Annex-A",
+          "NIST-SP-800-171-r2",
+          "NIST-SP-800-53-r5",
+          "PCI-DSS-v3.2.1",
+          "PCI-DSS-v4.0"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000187",
+        "title": "Configure Multi-Factor Authentication (MFA) for IAM users",
+        "description": "Configure MFA for IAM users to protect resources from unauthorized access. Enforces IAM authentication policy.",
         "services": [
           "AWS Identity and Access Management"
         ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-SP-800-53-r5"
-        ]
-      },
-      {
-        "control_id": "AWS-CG-0000786",
-        "title": "Use AWS Organizations for policy enforcement",
-        "description": "Implement Service Control Policies (SCPs) in AWS Organizations to enforce access control policies across all accounts.",
-        "services": [
-          "AWS Organizations"
+        "config_rules": [
+          "IAM_USER_MFA_ENABLED"
         ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
+        "security_hub_controls": [
+          "IAM.19"
+        ],
+        "control_tower_ids": [
+          "AWS-GR_IAM_USER_MFA_ENABLED"
+        ],
         "frameworks": [
-          "NIST-SP-800-53-r5"
+          "ACSC-ISM-02-Mar-2023",
+          "AWS-WAF-v10",
+          "CIS-v7.1",
+          "CIS-v8.0",
+          "FedRAMP-r4",
+          "NIST-CSF-v1.1",
+          "NIST-SP-800-171-r2",
+          "PCI-DSS-v3.2.1",
+          "PCI-DSS-v4.0",
+          "SSAE-18-SOC-2-Oct-2023"
         ]
       },
       {
-        "control_id": "AWS-CG-0000787",
-        "title": "Review IAM Access Analyzer findings",
-        "description": "Regularly review IAM Access Analyzer findings to identify unintended access to resources and ensure policy compliance.",
+        "control_id": "AWS-CG-0000138",
+        "title": "Enable MFA for IAM users that have a console password",
+        "description": "Enable MFA for IAM users with console passwords to strengthen user authentication. Enforces IAM authentication policy.",
         "services": [
           "AWS Identity and Access Management"
         ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
+        "config_rules": [
+          "MFA_ENABLED_FOR_IAM_CONSOLE_ACCESS"
+        ],
+        "security_hub_controls": [
+          "IAM.5"
+        ],
+        "control_tower_ids": [
+          "AWS-GR_MFA_ENABLED_FOR_IAM_CONSOLE_ACCESS",
+          "SH.IAM.5"
+        ],
         "frameworks": [
-          "NIST-SP-800-53-r5"
+          "ACSC-Essential-Eight-Nov-2022",
+          "AWS-WAF-v10",
+          "CIS-AWS-Benchmark-v1.2",
+          "CIS-AWS-Benchmark-v1.3",
+          "CIS-AWS-Benchmark-v1.4",
+          "CIS-v7.1",
+          "CIS-v8.0",
+          "FedRAMP-r4",
+          "NIST-CSF-v1.1",
+          "NIST-SP-800-53-r5",
+          "PCI-DSS-v3.2.1",
+          "PCI-DSS-v4.0",
+          "SSAE-18-SOC-2-Oct-2023"
         ]
       },
       {
-        "control_id": "AWS-CG-0000788",
-        "title": "Document audit logging policy",
-        "description": "Maintain documented audit policy that defines CloudTrail requirements, log retention, and review procedures.",
+        "control_id": "AWS-CG-0000048",
+        "title": "Implement multi-factor authentication (MFA) for the AWS root account",
+        "description": "Enable MFA for the AWS root account to reduce the potential for brute-force attacks and unauthorized access. Enforces IAM authentication policy.",
+        "services": [
+          "AWS Identity and Access Management"
+        ],
+        "config_rules": [
+          "ROOT_ACCOUNT_MFA_ENABLED"
+        ],
+        "security_hub_controls": [
+          "IAM.9"
+        ],
+        "control_tower_ids": [
+          "AWS-GR_ROOT_ACCOUNT_MFA_ENABLED"
+        ],
+        "frameworks": [
+          "ACSC-Essential-Eight-Nov-2022",
+          "ACSC-ISM-02-Mar-2023",
+          "AWS-WAF-v10",
+          "CIS-AWS-Benchmark-v1.2",
+          "CIS-AWS-Benchmark-v1.3",
+          "CIS-AWS-Benchmark-v1.4",
+          "CIS-v7.1",
+          "CIS-v8.0",
+          "FedRAMP-r4",
+          "NIST-CSF-v1.1",
+          "NIST-SP-800-53-r5",
+          "PCI-DSS-v3.2.1",
+          "PCI-DSS-v4.0",
+          "SSAE-18-SOC-2-Oct-2023"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000182",
+        "title": "Disable the access keys for the AWS root user",
+        "description": "Disable AWS root user access keys to prevent unauthorized access to the AWS environment. Enforces IAM access control policy.",
+        "services": [
+          "AWS Identity and Access Management"
+        ],
+        "config_rules": [
+          "IAM_ROOT_ACCESS_KEY_CHECK"
+        ],
+        "security_hub_controls": [
+          "IAM.4"
+        ],
+        "control_tower_ids": [
+          "AWS-GR_RESTRICT_ROOT_USER_ACCESS_KEYS",
+          "SH.IAM.4"
+        ],
+        "frameworks": [
+          "AWS-WAF-v10",
+          "CIS-AWS-Benchmark-v1.2",
+          "CIS-AWS-Benchmark-v1.3",
+          "CIS-AWS-Benchmark-v1.4",
+          "CIS-v8.0",
+          "ISO-IEC-27001:2013-Annex-A"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000184",
+        "title": "Enforce account password policy for IAM users",
+        "description": "Define strong password parameters within the AWS account password policy to enforce minimum password requirements. Enforces IAM authentication policy.",
+        "services": [
+          "AWS Identity and Access Management"
+        ],
+        "config_rules": [
+          "IAM_PASSWORD_POLICY"
+        ],
+        "security_hub_controls": [
+          "IAM.10"
+        ],
+        "control_tower_ids": [
+          "SH.IAM.7"
+        ],
+        "frameworks": [
+          "CIS-AWS-Benchmark-v1.2",
+          "CIS-AWS-Benchmark-v1.3",
+          "CIS-AWS-Benchmark-v1.4",
+          "FedRAMP-r4",
+          "ISO-IEC-27001:2013-Annex-A",
+          "NIST-CSF-v1.1",
+          "NIST-SP-800-171-r2",
+          "NIST-SP-800-53-r5",
+          "PCI-DSS-v3.2.1",
+          "PCI-DSS-v4.0"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000012",
+        "title": "Enable AWS CloudTrail for all regions",
+        "description": "Enable CloudTrail to capture all API call activity logs across all Regions, providing visibility for monitoring all AWS resources and services. Enforces auditing and logging policy.",
         "services": [
           "AWS CloudTrail"
         ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
+        "config_rules": [
+          "MULTI_REGION_CLOUD_TRAIL_ENABLED"
+        ],
+        "security_hub_controls": [
+          "CloudTrail.1"
+        ],
+        "control_tower_ids": [
+          "SH.CloudTrail.1"
+        ],
         "frameworks": [
-          "NIST-SP-800-53-r5"
+          "ACSC-Essential-Eight-Nov-2022",
+          "ACSC-ISM-02-Mar-2023",
+          "CIS-v7.1",
+          "ISO-IEC-27001:2013-Annex-A",
+          "NIST-SP-800-53-r5",
+          "PCI-DSS-v3.2.1",
+          "SSAE-18-SOC-2-Oct-2023"
         ]
       },
       {
-        "control_id": "AWS-CG-0000789",
-        "title": "Centralize logs with AWS Organizations",
-        "description": "Use AWS Organizations to centralize CloudTrail logs from all accounts into a dedicated logging account.",
+        "control_id": "AWS-CG-0000009",
+        "title": "Enable security trails in AWS CloudTrail",
+        "description": "Enable and create security trails in AWS CloudTrail to retain and protect audit logs of AWS API call activity. Enforces auditing and logging policy.",
         "services": [
-          "AWS CloudTrail",
-          "AWS Organizations"
+          "AWS CloudTrail"
         ],
         "config_rules": [
           "CLOUDTRAIL_SECURITY_TRAIL_ENABLED"
@@ -1651,202 +1887,170 @@
           "CONFIG.CLOUDTRAIL.DT.6"
         ],
         "frameworks": [
-          "NIST-SP-800-53-r5"
+          "ACSC-Essential-Eight-Nov-2022",
+          "ACSC-ISM-02-Mar-2023",
+          "FedRAMP-r4",
+          "ISO-IEC-27001:2013-Annex-A",
+          "NIST-SP-800-171-r2",
+          "NIST-SP-800-53-r5",
+          "PCI-DSS-v3.2.1",
+          "PCI-DSS-v4.0",
+          "SSAE-18-SOC-2-Oct-2023"
         ]
       },
       {
-        "control_id": "AWS-CG-0000790",
-        "title": "Implement log retention policies",
-        "description": "Configure CloudWatch Logs retention periods and S3 lifecycle policies to meet audit log retention requirements.",
+        "control_id": "AWS-CG-0000062",
+        "title": "Enable Amazon VPC flow logs in all VPCs",
+        "description": "Enable all Amazon VPC flow logs and recording to aid in anomalous traffic detection. Enforces auditing and logging policy.",
         "services": [
-          "Amazon CloudWatch Logs",
+          "Amazon Virtual Private Cloud"
+        ],
+        "config_rules": [
+          "VPC_FLOW_LOGS_ENABLED"
+        ],
+        "security_hub_controls": [
+          "EC2.6"
+        ],
+        "control_tower_ids": [
+          "SH.EC2.6"
+        ],
+        "frameworks": [
+          "ACSC-ISM-02-Mar-2023",
+          "CIS-AWS-Benchmark-v1.2",
+          "CIS-AWS-Benchmark-v1.3",
+          "CIS-AWS-Benchmark-v1.4",
+          "CIS-v7.1",
+          "CIS-v8.0",
+          "ISO-IEC-27001:2013-Annex-A",
+          "NIST-SP-800-171-r2",
+          "NIST-SP-800-53-r5",
+          "PCI-DSS-v3.2.1",
+          "PCI-DSS-v4.0"
+        ]
+      },
+      {
+        "control_id": "AWS-CG-0000198",
+        "title": "Block public access to Amazon S3 buckets",
+        "description": "Configure Amazon S3 to block public access to S3 buckets to protect data from unauthorized access. Enforces network security and public exposure policy.",
+        "services": [
           "Amazon S3"
         ],
         "config_rules": [
-          "CW_LOGGROUP_RETENTION_PERIOD_CHECK"
+          "S3_BUCKET_PUBLIC_READ_PROHIBITED",
+          "S3_BUCKET_PUBLIC_WRITE_PROHIBITED",
+          "S3_ACCOUNT_LEVEL_PUBLIC_ACCESS_BLOCKS",
+          "S3_BUCKET_LEVEL_PUBLIC_ACCESS_PROHIBITED"
         ],
         "security_hub_controls": [
-          "CloudWatch.16"
+          "S3.1",
+          "S3.2",
+          "S3.3",
+          "S3.8"
         ],
         "control_tower_ids": [
-          "CONFIG.LOGS.DT.2"
+          "AWS-GR_S3_BUCKET_PUBLIC_READ_PROHIBITED",
+          "AWS-GR_S3_BUCKET_PUBLIC_WRITE_PROHIBITED",
+          "CT.S3.PR.1",
+          "SH.S3.1",
+          "SH.S3.2",
+          "SH.S3.3",
+          "SH.S3.8"
         ],
         "frameworks": [
-          "NIST-SP-800-53-r5"
+          "AWS-WAF-v10",
+          "CIS-AWS-Benchmark-v1.2",
+          "CIS-AWS-Benchmark-v1.3",
+          "CIS-AWS-Benchmark-v1.4",
+          "ISO-IEC-27001:2013-Annex-A",
+          "NIST-SP-800-53-r5",
+          "PCI-DSS-v3.2.1",
+          "PCI-DSS-v4.0"
         ]
       },
       {
-        "control_id": "AWS-CG-0000791",
-        "title": "Document configuration management policy",
-        "description": "Maintain documented configuration management policy requiring Infrastructure as Code and AWS Config for compliance monitoring.",
+        "control_id": "AWS-CG-0000063",
+        "title": "Do not use default security group rules in Amazon VPC",
+        "description": "Change VPC default security group rules from their default configuration to prevent unrestricted inbound/outbound traffic. Enforces network security policy.",
         "services": [
-          "AWS Config"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-SP-800-53-r5"
-        ]
-      },
-      {
-        "control_id": "AWS-CG-0000792",
-        "title": "Enable AWS Config in all regions",
-        "description": "Enable AWS Config in all regions to track configuration changes and maintain configuration history.",
-        "services": [
-          "AWS Config"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [
-          "AWS-GR_CONFIG_ENABLED"
-        ],
-        "frameworks": [
-          "NIST-SP-800-53-r5"
-        ]
-      },
-      {
-        "control_id": "AWS-CG-0000793",
-        "title": "Use CloudFormation or Terraform for IaC",
-        "description": "Implement Infrastructure as Code using CloudFormation or Terraform to ensure consistent and auditable infrastructure deployments.",
-        "services": [
-          "AWS CloudFormation"
+          "Amazon Virtual Private Cloud"
         ],
         "config_rules": [
-          "CLOUDFORMATION_STACK_NOTIFICATION_CHECK"
+          "VPC_DEFAULT_SECURITY_GROUP_CLOSED"
         ],
         "security_hub_controls": [
-          "CloudFormation.1"
+          "EC2.2"
         ],
         "control_tower_ids": [
-          "CONFIG.CLOUDFORMATION.DT.1"
+          "SH.EC2.2"
         ],
         "frameworks": [
-          "NIST-SP-800-53-r5"
+          "CIS-AWS-Benchmark-v1.2",
+          "CIS-AWS-Benchmark-v1.3",
+          "CIS-AWS-Benchmark-v1.4",
+          "FedRAMP-r4",
+          "NIST-SP-800-53-r5",
+          "PCI-DSS-v3.2.1",
+          "PCI-DSS-v4.0"
         ]
       },
       {
-        "control_id": "AWS-CG-0000794",
-        "title": "Document disaster recovery policy",
-        "description": "Maintain documented contingency planning policy that defines RTO/RPO requirements and AWS Backup strategies.",
+        "control_id": "AWS-CG-0000093",
+        "title": "Restrict inbound traffic on sensitive ports in EC2 security groups",
+        "description": "Change the AWS default security groups for Amazon EC2 instances and allow only authorized connections, blocking all other traffic. Enforces network security policy.",
         "services": [
-          "AWS Backup"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-SP-800-53-r5"
-        ]
-      },
-      {
-        "control_id": "AWS-CG-0000795",
-        "title": "Implement AWS Backup centralized management",
-        "description": "Use AWS Backup to centrally manage and automate backups across AWS services.",
-        "services": [
-          "AWS Backup"
+          "Amazon EC2"
         ],
         "config_rules": [
-          "BACKUP_RECOVERY_POINT_ENCRYPTED",
-          "BACKUP_RECOVERY_POINT_MINIMUM_RETENTION_CHECK"
+          "RESTRICTED_INCOMING_TRAFFIC"
         ],
         "security_hub_controls": [
-          "Backup.1"
+          "EC2.14"
         ],
         "control_tower_ids": [
-          "BACKUP_RECOVERY_POINT_MINIMUM_RETENTION_CHECK"
+          "AWS-GR_RESTRICTED_COMMON_PORTS"
         ],
         "frameworks": [
-          "NIST-SP-800-53-r5"
+          "CIS-v7.1",
+          "FedRAMP-r4",
+          "NIST-SP-800-53-r5",
+          "PCI-DSS-v3.2.1",
+          "PCI-DSS-v4.0"
         ]
       },
       {
-        "control_id": "AWS-CG-0000796",
-        "title": "Configure multi-region replication",
-        "description": "Implement cross-region replication for critical data using S3 replication, RDS read replicas, or DynamoDB global tables.",
+        "control_id": "AWS-CG-0000180",
+        "title": "Enable Amazon GuardDuty in AWS account and region",
+        "description": "Implement intrusion detection capabilities by enabling GuardDuty to monitor for and detect suspicious activity. Enforces security monitoring policy.",
         "services": [
-          "Amazon S3",
-          "Amazon RDS",
-          "Amazon DynamoDB"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-SP-800-53-r5"
-        ]
-      },
-      {
-        "control_id": "AWS-CG-0000797",
-        "title": "Document authentication policy",
-        "description": "Maintain documented authentication policy requiring MFA, password complexity, and federated access via SSO.",
-        "services": [
-          "AWS Identity and Access Management"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-SP-800-53-r5"
-        ]
-      },
-      {
-        "control_id": "AWS-CG-0000798",
-        "title": "Implement IAM Identity Center for SSO",
-        "description": "Use AWS IAM Identity Center (formerly AWS SSO) to provide centralized authentication and federated access.",
-        "services": [
-          "AWS IAM Identity Center"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-SP-800-53-r5"
-        ]
-      },
-      {
-        "control_id": "AWS-CG-0000799",
-        "title": "Enforce IAM password policy",
-        "description": "Configure IAM password policy with minimum length, complexity requirements, and rotation periods.",
-        "services": [
-          "AWS Identity and Access Management"
+          "Amazon GuardDuty"
         ],
         "config_rules": [
-          "IAM_PASSWORD_POLICY"
+          "GUARDDUTY_ENABLED_CENTRALIZED"
         ],
         "security_hub_controls": [
-          "IAM.7",
-          "IAM.8",
-          "IAM.9",
-          "IAM.10",
-          "IAM.11"
+          "GuardDuty.1"
         ],
         "control_tower_ids": [
-          "SH.IAM.7",
-          "SH.IAM.8"
+          "SH.GuardDuty.1"
         ],
         "frameworks": [
-          "NIST-SP-800-53-r5"
+          "ACSC-ISM-02-Mar-2023",
+          "AWS-WAF-v10",
+          "CIS-v7.1",
+          "CIS-v8.0",
+          "FedRAMP-r4",
+          "NIST-CSF-v1.1",
+          "NIST-SP-800-171-r2",
+          "NIST-SP-800-53-r5",
+          "PCI-DSS-v3.2.1",
+          "PCI-DSS-v4.0",
+          "SSAE-18-SOC-2-Oct-2023"
         ]
       },
       {
-        "control_id": "AWS-CG-0000800",
-        "title": "Document incident response policy",
-        "description": "Maintain documented incident response policy that defines AWS-specific incident handling procedures and escalation paths.",
-        "services": [
-          "AWS Security Hub"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-SP-800-53-r5"
-        ]
-      },
-      {
-        "control_id": "AWS-CG-0000801",
-        "title": "Enable Security Hub for incident aggregation",
-        "description": "Use Security Hub to aggregate security findings from multiple AWS services for centralized incident detection.",
+        "control_id": "AWS-CG-0000169",
+        "title": "Enable AWS Security Hub service",
+        "description": "Activate Security Hub to receive findings from supported AWS security services for centralized security posture management. Enforces security monitoring policy.",
         "services": [
           "AWS Security Hub"
         ],
@@ -1858,126 +2062,14 @@
           "CONFIG.SECURITYHUB.DT.1"
         ],
         "frameworks": [
-          "NIST-SP-800-53-r5"
-        ]
-      },
-      {
-        "control_id": "AWS-CG-0000802",
-        "title": "Configure EventBridge for incident automation",
-        "description": "Use Amazon EventBridge to automate incident response actions based on Security Hub findings and GuardDuty alerts.",
-        "services": [
-          "Amazon EventBridge"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-SP-800-53-r5"
-        ]
-      },
-      {
-        "control_id": "AWS-CG-0000806",
-        "title": "Document encryption policy",
-        "description": "Maintain documented encryption policy requiring TLS 1.2+ for data in transit and KMS encryption for data at rest.",
-        "services": [
-          "AWS Key Management Service"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-SP-800-53-r5"
-        ]
-      },
-      {
-        "control_id": "AWS-CG-0000807",
-        "title": "Enforce encryption with SCPs",
-        "description": "Use Service Control Policies to enforce encryption requirements across all AWS accounts in the organization.",
-        "services": [
-          "AWS Organizations"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-SP-800-53-r5"
-        ]
-      },
-      {
-        "control_id": "AWS-CG-0000808",
-        "title": "Monitor encryption compliance with Config",
-        "description": "Use AWS Config rules to continuously monitor encryption compliance for S3, EBS, RDS, and other services.",
-        "services": [
-          "AWS Config"
-        ],
-        "config_rules": [
-          "DYNAMODB_TABLE_ENCRYPTED_KMS",
-          "S3_DEFAULT_ENCRYPTION_KMS",
-          "RDS_STORAGE_ENCRYPTED"
-        ],
-        "security_hub_controls": [
-          "DynamoDB.1",
-          "S3.4",
-          "RDS.3"
-        ],
-        "control_tower_ids": [
-          "CONFIG.DYNAMODB.DT.4",
-          "SH.RDS.3"
-        ],
-        "frameworks": [
-          "NIST-SP-800-53-r5"
-        ]
-      },
-      {
-        "control_id": "AWS-CG-0000809",
-        "title": "Document security monitoring policy",
-        "description": "Maintain documented security monitoring policy that defines GuardDuty, Security Hub, and vulnerability scanning requirements.",
-        "services": [
-          "Amazon GuardDuty",
-          "AWS Security Hub"
-        ],
-        "config_rules": [],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-SP-800-53-r5"
-        ]
-      },
-      {
-        "control_id": "AWS-CG-0000810",
-        "title": "Enable GuardDuty in all regions",
-        "description": "Enable GuardDuty in all regions to continuously monitor for malicious activity and unauthorized behavior.",
-        "services": [
-          "Amazon GuardDuty"
-        ],
-        "config_rules": [
-          "GUARDDUTY_ENABLED_CENTRALIZED"
-        ],
-        "security_hub_controls": [
-          "GuardDuty.1"
-        ],
-        "control_tower_ids": [
-          "CONFIG.GUARDDUTY.DT.1",
-          "SH.GuardDuty.1"
-        ],
-        "frameworks": [
-          "NIST-SP-800-53-r5"
-        ]
-      },
-      {
-        "control_id": "AWS-CG-0000811",
-        "title": "Enable Inspector for vulnerability scanning",
-        "description": "Enable Amazon Inspector to automatically scan EC2 instances, Lambda functions, and container images for vulnerabilities.",
-        "services": [
-          "Amazon Inspector"
-        ],
-        "config_rules": [
-          "INSPECTOR_ENABLED"
-        ],
-        "security_hub_controls": [],
-        "control_tower_ids": [],
-        "frameworks": [
-          "NIST-SP-800-53-r5"
+          "AWS-WAF-v10",
+          "CIS-v7.1",
+          "CIS-v8.0",
+          "FedRAMP-r4",
+          "NIST-CSF-v1.1",
+          "NIST-SP-800-53-r5",
+          "PCI-DSS-v4.0",
+          "SSAE-18-SOC-2-Oct-2023"
         ]
       }
     ],
