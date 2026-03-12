@@ -498,7 +498,9 @@ const ComplianceQuestionnaire: React.FC<ComplianceQuestionnaireProps> = ({ sessi
                     >
                       {selectedControl && expandedControl === control.id && (
                         <SpaceBetween size="l">
-                          <Box variant="p">{control.description}</Box>
+                          {control.title !== control.description && (
+                            <Box variant="p">{control.description}</Box>
+                          )}
 
                           {controlQuestions.length > 0 && (
                             <Button
