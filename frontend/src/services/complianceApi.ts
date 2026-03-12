@@ -91,6 +91,7 @@ export interface ControlDetail {
     security_hub_controls: string[];
     control_tower_ids: string[];
     frameworks: string[];
+    priority?: 'core' | 'recommended' | 'enhanced';
   }>;
   framework_relevance?: {
     control_id: string;

@@ -10,6 +10,7 @@ import ColumnLayout from '@cloudscape-design/components/column-layout';
 import Link from '@cloudscape-design/components/link';
 import Alert from '@cloudscape-design/components/alert';
 import Flashbar from '@cloudscape-design/components/flashbar';
+import Icon from '@cloudscape-design/components/icon';
 
 interface AWSControl {
   control_id: string;
@@ -20,12 +21,37 @@ interface AWSControl {
   security_hub_controls: string[];
   control_tower_ids: string[];
   frameworks: string[];
+  priority?: 'core' | 'recommended' | 'enhanced';
 }
 
 interface AWSImplementationGuideProps {
   controlId: string;
   awsControls?: AWSControl[];
 }
+
+const PRIORITY_META: Record<string, { label: string; color: string; badgeColor: 'blue' | 'green' | 'grey'; icon: string; desc: string }> = {
+  core: {
+    label: 'Core',
+    color: '#037f0c',
+    badgeColor: 'green',
+    icon: 'status-positive',
+    desc: 'Fundamental controls for audit readiness'
+  },
+  recommended: {
+    label: 'Recommended',
+    color: '#0972d3',
+    badgeColor: 'blue',
+    icon: 'status-info',
+    desc: 'Important controls most organizations should implement'
+  },
+  enhanced: {
+    label: 'Enhanced',
+    color: '#687078',
+    badgeColor: 'grey',
+    icon: 'status-pending',
+    desc: 'Advanced controls for mature security programs'
+  }
+};
 
 const AWSImplementationGuide: React.FC<AWSImplementationGuideProps> = ({
   controlId,
@@ -58,46 +84,36 @@ const AWSImplementationGuide: React.FC<AWSImplementationGuideProps> = ({
     let report = `AWS Implementation Guide for ${controlId.toUpperCase()}\n`;
     report += `${'='.repeat(60)}\n\n`;
 
-    awsControls.forEach((control, idx) => {
-      report += `${idx + 1}. ${control.title}\n`;
-      report += `   Control ID: ${control.control_id}\n`;
-      report += `   Description: ${control.description}\n\n`;
+    const tiers = ['core', 'recommended', 'enhanced'] as const;
+    for (const tier of tiers) {
+      const tierControls = awsControls.filter(c => (c.priority || 'recommended') === tier);
+      if (tierControls.length === 0) continue;
+      const meta = PRIORITY_META[tier];
+      report += `--- ${meta.label.toUpperCase()} CONTROLS (${tierControls.length}) ---\n`;
+      report += `${meta.desc}\n\n`;
 
-      if (control.services.length > 0) {
-        report += `   AWS Services:\n`;
-        control.services.forEach(service => {
-          report += `   • ${service}\n`;
-        });
-        report += `\n`;
-      }
-
-      if (control.config_rules.length > 0) {
-        report += `   Config Rules:\n`;
-        control.config_rules.forEach(rule => {
-          report += `   • ${rule}\n`;
-        });
-        report += `\n`;
-      }
-
-      if (control.security_hub_controls.length > 0) {
-        report += `   Security Hub Controls:\n`;
-        control.security_hub_controls.forEach(hub => {
-          report += `   • ${hub}\n`;
-        });
-        report += `\n`;
-      }
-
-      if (control.control_tower_ids.length > 0) {
-        report += `   Control Tower Controls:\n`;
-        control.control_tower_ids.forEach(ct => {
-          report += `   • ${ct}\n`;
-        });
-        report += `\n`;
-      }
-
+      tierControls.forEach((control, idx) => {
+        report += `${idx + 1}. ${control.title}\n`;
+        report += `   Control ID: ${control.control_id}\n`;
+        report += `   Description: ${control.description}\n\n`;
+        if (control.config_rules.length > 0) {
+          report += `   Config Rules:\n`;
+          control.config_rules.forEach(rule => { report += `   - ${rule}\n`; });
+          report += `\n`;
+        }
+        if (control.security_hub_controls.length > 0) {
+          report += `   Security Hub Controls:\n`;
+          control.security_hub_controls.forEach(hub => { report += `   - ${hub}\n`; });
+          report += `\n`;
+        }
+        if (control.control_tower_ids.length > 0) {
+          report += `   Control Tower Controls:\n`;
+          control.control_tower_ids.forEach(ct => { report += `   - ${ct}\n`; });
+          report += `\n`;
+        }
+      });
       report += `\n`;
-    });
-
+    }
     return report;
   };
 
@@ -106,15 +122,60 @@ const AWSImplementationGuide: React.FC<AWSImplementationGuideProps> = ({
   const allControlTowerIds = [...new Set(awsControls.flatMap(c => c.control_tower_ids))];
   const allServices = [...new Set(awsControls.flatMap(c => c.services))];
 
-  const controlsByService = awsControls.reduce((acc, control) => {
-    control.services.forEach(service => {
-      if (!acc[service]) {
-        acc[service] = [];
-      }
-      acc[service].push(control);
-    });
-    return acc;
-  }, {} as Record<string, AWSControl[]>);
+  const coreControls = awsControls.filter(c => c.priority === 'core');
+  const recommendedControls = awsControls.filter(c => (c.priority || 'recommended') === 'recommended');
+  const enhancedControls = awsControls.filter(c => c.priority === 'enhanced');
+
+  const renderControlCard = (control: AWSControl) => {
+    const tier = control.priority || 'recommended';
+    const meta = PRIORITY_META[tier];
+    return (
+      <div key={control.control_id} style={{ borderLeft: `4px solid ${meta.color}`, paddingLeft: '12px', marginBottom: '8px' }}>
+        <SpaceBetween size="xs">
+          <Box>
+            <SpaceBetween size="xs" direction="horizontal">
+              <Badge color={meta.badgeColor}>{meta.label}</Badge>
+              <Badge>{control.control_id}</Badge>
+            </SpaceBetween>
+            <Box variant="strong" margin={{ top: 'xxs' }}>{control.title}</Box>
+          </Box>
+          <Box variant="small" color="text-body-secondary">{control.description}</Box>
+          <ColumnLayout columns={3}>
+            {control.config_rules.length > 0 && (
+              <div>
+                <Box variant="awsui-key-label">Config rules</Box>
+                <SpaceBetween size="xxs">
+                  {control.config_rules.map((rule, ridx) => (
+                    <Box key={ridx} variant="code" fontSize="body-s">{rule}</Box>
+                  ))}
+                </SpaceBetween>
+              </div>
+            )}
+            {control.security_hub_controls.length > 0 && (
+              <div>
+                <Box variant="awsui-key-label">Security Hub</Box>
+                <SpaceBetween size="xxs" direction="horizontal">
+                  {control.security_hub_controls.map((hub, hidx) => (
+                    <Badge key={hidx} color="green">{hub}</Badge>
+                  ))}
+                </SpaceBetween>
+              </div>
+            )}
+            {control.control_tower_ids.length > 0 && (
+              <div>
+                <Box variant="awsui-key-label">Control Tower</Box>
+                <SpaceBetween size="xxs">
+                  {control.control_tower_ids.map((ct, ctidx) => (
+                    <Box key={ctidx} variant="code" fontSize="body-s">{ct}</Box>
+                  ))}
+                </SpaceBetween>
+              </div>
+            )}
+          </ColumnLayout>
+        </SpaceBetween>
+      </div>
+    );
+  };
 
   return (
     <>
@@ -165,171 +226,163 @@ const AWSImplementationGuide: React.FC<AWSImplementationGuideProps> = ({
             </div>
           </ColumnLayout>
 
-          {allServices.length > 0 && (
+          {/* Priority tier summary */}
+          <ColumnLayout columns={3} variant="text-grid">
+            {(['core', 'recommended', 'enhanced'] as const).map(tier => {
+              const count = tier === 'core' ? coreControls.length
+                : tier === 'recommended' ? recommendedControls.length
+                : enhancedControls.length;
+              const meta = PRIORITY_META[tier];
+              return (
+                <div key={tier} style={{ borderLeft: `4px solid ${meta.color}`, paddingLeft: '8px' }}>
+                  <Box variant="awsui-key-label">
+                    <Icon name={meta.icon as any} /> {meta.label}
+                  </Box>
+                  <Box variant="h2" fontSize="display-l" fontWeight="bold">{count}</Box>
+                  <Box variant="small" color="text-body-secondary">{meta.desc}</Box>
+                </div>
+              );
+            })}
+          </ColumnLayout>
+
+          {/* Core controls - always expanded */}
+          {coreControls.length > 0 && (
             <Container
               header={
                 <Header
                   variant="h3"
-                  actions={
-                    <Button
-                      variant="inline-icon"
-                      iconName={copiedSection === 'services' ? 'check' : 'copy'}
-                      onClick={() => copyToClipboard(allServices.join('\n'), 'services')}
-                    />
-                  }
+                  counter={`(${coreControls.length})`}
+                  description="Enable these first for audit readiness"
                 >
-                  AWS services to implement
+                  <span style={{ color: '#037f0c' }}>
+                    <Icon name="status-positive" /> Core controls
+                  </span>
                 </Header>
               }
             >
-              <SpaceBetween size="xs" direction="horizontal">
-                {allServices.map((service, idx) => (
-                  <Badge key={idx} color="blue">{service}</Badge>
-                ))}
+              <SpaceBetween size="m">
+                {coreControls.map(renderControlCard)}
               </SpaceBetween>
             </Container>
           )}
 
-          {allConfigRules.length > 0 && (
-            <Container
-              header={
-                <Header
-                  variant="h3"
-                  actions={
-                    <Button
-                      variant="inline-icon"
-                      iconName={copiedSection === 'config' ? 'check' : 'copy'}
-                      onClick={() => copyToClipboard(allConfigRules.join('\n'), 'config')}
-                    />
-                  }
-                >
-                  AWS Config rules to enable
-                </Header>
-              }
+          {/* Recommended controls - expandable */}
+          {recommendedControls.length > 0 && (
+            <ExpandableSection
+              variant="container"
+              headerText={`Recommended controls (${recommendedControls.length})`}
+              headerDescription="Important controls most organizations should implement"
+              defaultExpanded={coreControls.length === 0}
             >
-              <SpaceBetween size="xs">
-                {allConfigRules.map((rule, idx) => (
-                  <Box key={idx} variant="code">{rule}</Box>
-                ))}
+              <SpaceBetween size="m">
+                {recommendedControls.map(renderControlCard)}
               </SpaceBetween>
-            </Container>
+            </ExpandableSection>
+          )}
+
+          {/* Enhanced controls - collapsed by default */}
+          {enhancedControls.length > 0 && (
+            <ExpandableSection
+              variant="container"
+              headerText={`Enhanced controls (${enhancedControls.length})`}
+              headerDescription="Advanced controls for mature security programs"
+            >
+              <SpaceBetween size="m">
+                {enhancedControls.map(renderControlCard)}
+              </SpaceBetween>
+            </ExpandableSection>
+          )}
+
+          {/* Quick reference sections */}
+          {allConfigRules.length > 0 && (
+            <ExpandableSection
+              variant="container"
+              headerText={`All Config rules (${allConfigRules.length})`}
+            >
+              <Container
+                header={
+                  <Header
+                    variant="h3"
+                    actions={
+                      <Button
+                        variant="inline-icon"
+                        iconName={copiedSection === 'config' ? 'check' : 'copy'}
+                        onClick={() => copyToClipboard(allConfigRules.join('\n'), 'config')}
+                      />
+                    }
+                  >
+                    Config rules to enable
+                  </Header>
+                }
+              >
+                <SpaceBetween size="xs">
+                  {allConfigRules.map((rule, idx) => (
+                    <Box key={idx} variant="code">{rule}</Box>
+                  ))}
+                </SpaceBetween>
+              </Container>
+            </ExpandableSection>
           )}
 
           {allSecurityHubControls.length > 0 && (
-            <Container
-              header={
-                <Header
-                  variant="h3"
-                  actions={
-                    <Button
-                      variant="inline-icon"
-                      iconName={copiedSection === 'securityhub' ? 'check' : 'copy'}
-                      onClick={() => copyToClipboard(allSecurityHubControls.join('\n'), 'securityhub')}
-                    />
-                  }
-                >
-                  Security Hub controls to monitor
-                </Header>
-              }
+            <ExpandableSection
+              variant="container"
+              headerText={`All Security Hub controls (${allSecurityHubControls.length})`}
             >
-              <SpaceBetween size="xs" direction="horizontal">
-                {allSecurityHubControls.map((control, idx) => (
-                  <Badge key={idx} color="green">{control}</Badge>
-                ))}
-              </SpaceBetween>
-            </Container>
+              <Container
+                header={
+                  <Header
+                    variant="h3"
+                    actions={
+                      <Button
+                        variant="inline-icon"
+                        iconName={copiedSection === 'securityhub' ? 'check' : 'copy'}
+                        onClick={() => copyToClipboard(allSecurityHubControls.join('\n'), 'securityhub')}
+                      />
+                    }
+                  >
+                    Security Hub controls to monitor
+                  </Header>
+                }
+              >
+                <SpaceBetween size="xs" direction="horizontal">
+                  {allSecurityHubControls.map((control, idx) => (
+                    <Badge key={idx} color="green">{control}</Badge>
+                  ))}
+                </SpaceBetween>
+              </Container>
+            </ExpandableSection>
           )}
 
           {allControlTowerIds.length > 0 && (
-            <Container
-              header={
-                <Header
-                  variant="h3"
-                  actions={
-                    <Button
-                      variant="inline-icon"
-                      iconName={copiedSection === 'controltower' ? 'check' : 'copy'}
-                      onClick={() => copyToClipboard(allControlTowerIds.join('\n'), 'controltower')}
-                    />
-                  }
-                >
-                  Control Tower controls
-                </Header>
-              }
+            <ExpandableSection
+              variant="container"
+              headerText={`All Control Tower controls (${allControlTowerIds.length})`}
             >
-              <SpaceBetween size="xs">
-                {allControlTowerIds.map((ct, idx) => (
-                  <Box key={idx} variant="code">{ct}</Box>
-                ))}
-              </SpaceBetween>
-            </Container>
+              <Container
+                header={
+                  <Header
+                    variant="h3"
+                    actions={
+                      <Button
+                        variant="inline-icon"
+                        iconName={copiedSection === 'controltower' ? 'check' : 'copy'}
+                        onClick={() => copyToClipboard(allControlTowerIds.join('\n'), 'controltower')}
+                      />
+                    }
+                  >
+                    Control Tower controls
+                  </Header>
+                }
+              >
+                <SpaceBetween size="xs">
+                  {allControlTowerIds.map((ct, idx) => (
+                    <Box key={idx} variant="code">{ct}</Box>
+                  ))}
+                </SpaceBetween>
+              </Container>
+            </ExpandableSection>
           )}
-
-          <ExpandableSection headerText="AWS control guides by service" variant="container">
-            <SpaceBetween size="m">
-              {Object.entries(controlsByService).map(([service, controls]) => (
-                <Container
-                  key={service}
-                  header={
-                    <Header
-                      variant="h3"
-                      counter={`(${controls.length})`}
-                    >
-                      {service}
-                    </Header>
-                  }
-                >
-                  <SpaceBetween size="m">
-                    {controls.map((control, idx) => (
-                      <Box key={idx}>
-                        <SpaceBetween size="xs">
-                          <Box>
-                            <Badge>{control.control_id}</Badge>
-                            <Box variant="strong" display="inline" margin={{ left: 'xs' }}>
-                              {control.title}
-                            </Box>
-                          </Box>
-                          <Box variant="p">{control.description}</Box>
-                          <ColumnLayout columns={3}>
-                            {control.config_rules.length > 0 && (
-                              <div>
-                                <Box variant="awsui-key-label">Config rules</Box>
-                                <SpaceBetween size="xxs">
-                                  {control.config_rules.map((rule, ridx) => (
-                                    <Box key={ridx} variant="code" fontSize="body-s">{rule}</Box>
-                                  ))}
-                                </SpaceBetween>
-                              </div>
-                            )}
-                            {control.security_hub_controls.length > 0 && (
-                              <div>
-                                <Box variant="awsui-key-label">Security Hub</Box>
-                                <SpaceBetween size="xxs" direction="horizontal">
-                                  {control.security_hub_controls.map((hub, hidx) => (
-                                    <Badge key={hidx} color="green">{hub}</Badge>
-                                  ))}
-                                </SpaceBetween>
-                              </div>
-                            )}
-                            {control.control_tower_ids.length > 0 && (
-                              <div>
-                                <Box variant="awsui-key-label">Control Tower</Box>
-                                <SpaceBetween size="xxs">
-                                  {control.control_tower_ids.map((ct, ctidx) => (
-                                    <Box key={ctidx} variant="code" fontSize="body-s">{ct}</Box>
-                                  ))}
-                                </SpaceBetween>
-                              </div>
-                            )}
-                          </ColumnLayout>
-                        </SpaceBetween>
-                      </Box>
-                    ))}
-                  </SpaceBetween>
-                </Container>
-              ))}
-            </SpaceBetween>
-          </ExpandableSection>
 
           <Alert type="info" header="Helpful AWS resources">
             <ColumnLayout columns={2}>
