@@ -117,10 +117,6 @@ const AWSImplementationGuide: React.FC<AWSImplementationGuideProps> = ({
     return report;
   };
 
-  const allConfigRules = [...new Set(awsControls.flatMap(c => c.config_rules))];
-  const allSecurityHubControls = [...new Set(awsControls.flatMap(c => c.security_hub_controls))];
-  const allControlTowerIds = [...new Set(awsControls.flatMap(c => c.control_tower_ids))];
-
   const coreControls = awsControls.filter(c => c.priority === 'core');
   const recommendedControls = awsControls.filter(c => (c.priority || 'recommended') === 'recommended');
   const enhancedControls = awsControls.filter(c => c.priority === 'enhanced');
@@ -255,97 +251,6 @@ const AWSImplementationGuide: React.FC<AWSImplementationGuideProps> = ({
               <SpaceBetween size="m">
                 {enhancedControls.map(renderControlCard)}
               </SpaceBetween>
-            </ExpandableSection>
-          )}
-
-          {/* Quick reference sections */}
-          {allConfigRules.length > 0 && (
-            <ExpandableSection
-              variant="container"
-              headerText={`All Config rules (${allConfigRules.length})`}
-            >
-              <Container
-                header={
-                  <Header
-                    variant="h3"
-                    actions={
-                      <Button
-                        variant="inline-icon"
-                        iconName={copiedSection === 'config' ? 'check' : 'copy'}
-                        onClick={() => copyToClipboard(allConfigRules.join('\n'), 'config')}
-                      />
-                    }
-                  >
-                    Config rules to enable
-                  </Header>
-                }
-              >
-                <SpaceBetween size="xs">
-                  {allConfigRules.map((rule, idx) => (
-                    <Box key={idx} variant="code">{rule}</Box>
-                  ))}
-                </SpaceBetween>
-              </Container>
-            </ExpandableSection>
-          )}
-
-          {allSecurityHubControls.length > 0 && (
-            <ExpandableSection
-              variant="container"
-              headerText={`All Security Hub controls (${allSecurityHubControls.length})`}
-            >
-              <Container
-                header={
-                  <Header
-                    variant="h3"
-                    actions={
-                      <Button
-                        variant="inline-icon"
-                        iconName={copiedSection === 'securityhub' ? 'check' : 'copy'}
-                        onClick={() => copyToClipboard(allSecurityHubControls.join('\n'), 'securityhub')}
-                      />
-                    }
-                  >
-                    Security Hub controls to monitor
-                  </Header>
-                }
-              >
-                <SpaceBetween size="xs" direction="horizontal">
-                  {allSecurityHubControls.map((control, idx) => (
-                    <Badge key={idx} color="green">{control}</Badge>
-                  ))}
-                </SpaceBetween>
-              </Container>
-            </ExpandableSection>
-          )}
-
-          {allControlTowerIds.length > 0 && (
-            <ExpandableSection
-              variant="container"
-              headerText={`All Control Tower controls (${allControlTowerIds.length})`}
-            >
-              <Container
-                header={
-                  <Header
-                    variant="h3"
-                    actions={
-                      <Button
-                        variant="inline-icon"
-                        iconName={copiedSection === 'controltower' ? 'check' : 'copy'}
-                        onClick={() => copyToClipboard(allControlTowerIds.join('\n'), 'controltower')}
-                      />
-                    }
-                  >
-                    Control Tower controls
-                  </Header>
-                }
-              >
-                <SpaceBetween size="xs">
-                  {allControlTowerIds.map((ct, idx) => (
-                    <Box key={idx} variant="code">{ct}</Box>
-                  ))}
-                </SpaceBetween>
-              </Container>
             </ExpandableSection>
           )}
 
