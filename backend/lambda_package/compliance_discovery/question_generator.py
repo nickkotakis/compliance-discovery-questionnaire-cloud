@@ -541,4 +541,105 @@ class DiscoveryQuestionGenerator:
 
         return questions
 
+    def generate_cmmc_questions(self, control: Control, aws_controls: Optional[List[Dict[str, Any]]] = None) -> List[DiscoveryQuestion]:
+        """Generate discovery questions for a CMMC Level 2 practice.
+
+        Args:
+            control: Control object representing a CMMC practice
+            aws_controls: Optional AWS control data mapped to this practice
+
+        Returns:
+            List of DiscoveryQuestion objects
+        """
+        questions = []
+
+        if aws_controls is None:
+            aws_controls = []
+
+        aws_guidance = self._get_aws_service_guidance(control, aws_controls) if aws_controls else None
+
+        # 1. Implementation question
+        if aws_controls:
+            services = set()
+            config_rules = set()
+            security_hub = set()
+            for ac in aws_controls:
+                services.update(ac.get('services', []))
+                config_rules.update(ac.get('config_rules', []))
+                security_hub.update(ac.get('security_hub_controls', []))
+
+            parts = [f"How is {control.id} ({control.title}) implemented in your AWS environment?"]
+            if services:
+                svc_list = ', '.join(sorted(services)[:3])
+                parts.append(f"Are you using {svc_list}?")
+            if config_rules:
+                rule_list = ', '.join(sorted(config_rules)[:2])
+                parts.append(f"Have you enabled AWS Config rules like {rule_list}?")
+            if security_hub:
+                hub_list = ', '.join(sorted(security_hub)[:2])
+                parts.append(f"Are you monitoring Security Hub controls {hub_list}?")
+            impl_text = ' '.join(parts)
+        else:
+            impl_text = f"What is the current implementation status of {control.id} ({control.title})? What processes, tools, or controls support this CMMC practice?"
+
+        questions.append(DiscoveryQuestion(
+            id=f"{control.id}-IMPL-1",
+            control_id=control.id,
+            question_text=impl_text,
+            question_type=QuestionType.IMPLEMENTATION,
+            family=control.family,
+            aws_service_guidance=aws_guidance
+        ))
+
+        # 2. Evidence question
+        if aws_controls:
+            services = set()
+            for ac in aws_controls:
+                services.update(ac.get('services', []))
+            if services:
+                service_list = ', '.join(sorted(services)[:4])
+                evidence_text = f"What evidence demonstrates implementation of {control.id}? Are you using AWS services such as {service_list} to support this practice?"
+            else:
+                evidence_text = f"What evidence demonstrates implementation of {control.id}? What AWS services, configurations, or processes support this practice?"
+        else:
+            evidence_text = f"What evidence demonstrates implementation of {control.id}? What documentation, logs, or artifacts can be provided to an assessor?"
+
+        questions.append(DiscoveryQuestion(
+            id=f"{control.id}-EVIDENCE",
+            control_id=control.id,
+            question_text=evidence_text,
+            question_type=QuestionType.EVIDENCE,
+            family=control.family
+        ))
+
+        # 3. Second line defense — risk management oversight
+        questions.append(DiscoveryQuestion(
+            id=f"{control.id}-SECOND-LINE",
+            control_id=control.id,
+            question_text=f"How does your risk management function review and validate the controls supporting {control.id}? What independent oversight mechanisms exist to confirm this practice is operating effectively?",
+            question_type=QuestionType.SECOND_LINE_DEFENSE,
+            family=control.family
+        ))
+
+        # 4. Third line defense — internal audit assurance
+        questions.append(DiscoveryQuestion(
+            id=f"{control.id}-THIRD-LINE",
+            control_id=control.id,
+            question_text=f"Has internal audit independently tested the controls supporting {control.id}? What evidence exists to demonstrate this practice meets CMMC Level 2 assessment objectives?",
+            question_type=QuestionType.THIRD_LINE_DEFENSE,
+            family=control.family
+        ))
+
+        # 5. Gap and improvement
+        questions.append(DiscoveryQuestion(
+            id=f"{control.id}-GAPS",
+            control_id=control.id,
+            question_text=f"What gaps or improvement opportunities exist for {control.id}? Are there planned initiatives to achieve or maintain CMMC Level 2 compliance for this practice?",
+            question_type=QuestionType.AUDIT_READINESS,
+            family=control.family,
+            aws_service_guidance=aws_guidance
+        ))
+
+        return questions
+
 

@@ -57,6 +57,24 @@ const CSF_FUNCTION_NAMES: Record<string, string> = {
   'rc': 'Recover'
 };
 
+// CMMC Domain Name Mappings
+const CMMC_DOMAIN_NAMES: Record<string, string> = {
+  'ac': 'Access Control',
+  'at': 'Awareness and Training',
+  'au': 'Audit and Accountability',
+  'cm': 'Configuration Management',
+  'ia': 'Identification and Authentication',
+  'ir': 'Incident Response',
+  'ma': 'Maintenance',
+  'mp': 'Media Protection',
+  'pe': 'Physical Protection',
+  'ps': 'Personnel Security',
+  'ra': 'Risk Assessment',
+  'ca': 'Security Assessment',
+  'sc': 'System and Communications Protection',
+  'si': 'System and Information Integrity'
+};
+
 // Badge color mapping for NIST 800-53 families (Cloudscape badge colors)
 const NIST_FAMILY_BADGE_COLORS: Record<string, 'blue' | 'grey' | 'green' | 'red'> = {
   'ac': 'blue', 'at': 'grey', 'au': 'blue', 'ca': 'green',
@@ -72,6 +90,14 @@ const CSF_FUNCTION_BADGE_COLORS: Record<string, 'blue' | 'grey' | 'green' | 'red
   'de': 'red', 'rs': 'red', 'rc': 'blue'
 };
 
+// Badge color mapping for CMMC domains (Cloudscape badge colors)
+const CMMC_DOMAIN_BADGE_COLORS: Record<string, 'blue' | 'grey' | 'green' | 'red'> = {
+  'ac': 'blue', 'at': 'grey', 'au': 'blue', 'cm': 'green',
+  'ia': 'blue', 'ir': 'red', 'ma': 'grey', 'mp': 'grey',
+  'pe': 'grey', 'ps': 'blue', 'ra': 'green', 'ca': 'green',
+  'sc': 'blue', 'si': 'blue'
+};
+
 // Accent hex colors for left-border strips — Cloudscape design token palette
 // CSF functions: each gets a unique, distinguishable color
 const CSF_FUNCTION_ACCENT_COLORS: Record<string, string> = {
@@ -81,6 +107,22 @@ const CSF_FUNCTION_ACCENT_COLORS: Record<string, string> = {
   'de': '#D45B07', // Orange — Detect
   'rs': '#D13212', // Red — Respond
   'rc': '#00838F', // Dark Cyan — Recover
+};
+
+// CMMC domain accent colors for left-border strips
+const CMMC_DOMAIN_ACCENT_COLORS: Record<string, string> = {
+  // Access & Identity — Blue
+  'ac': '#0073BB', 'ia': '#0073BB', 'ps': '#0073BB',
+  // Monitoring & Audit — Teal
+  'au': '#00838F', 'ca': '#00838F', 'si': '#00838F',
+  // Protection & Config — Green
+  'cm': '#037F0C', 'sc': '#037F0C',
+  // Risk — Purple
+  'ra': '#6B40B8',
+  // Operations — Orange
+  'ma': '#D45B07', 'mp': '#D45B07', 'ir': '#D45B07',
+  // People & Physical — Grey
+  'at': '#687078', 'pe': '#687078',
 };
 
 // NIST 800-53 families grouped by domain
@@ -113,6 +155,9 @@ const getFamilyFullName = (familyCode: string, framework: string): string => {
   if (framework === 'nist-csf') {
     return CSF_FUNCTION_NAMES[code] || familyCode.toUpperCase();
   }
+  if (framework === 'cmmc') {
+    return CMMC_DOMAIN_NAMES[code] || familyCode.toUpperCase();
+  }
   return NIST_FAMILY_NAMES[code] || familyCode.toUpperCase();
 };
 
@@ -121,6 +166,9 @@ const getFamilyColor = (familyCode: string, framework: string): 'blue' | 'grey' 
   if (framework === 'nist-csf') {
     return CSF_FUNCTION_BADGE_COLORS[code] || 'grey';
   }
+  if (framework === 'cmmc') {
+    return CMMC_DOMAIN_BADGE_COLORS[code] || 'grey';
+  }
   return NIST_FAMILY_BADGE_COLORS[code] || 'grey';
 };
 
@@ -128,6 +176,9 @@ const getAccentColor = (familyCode: string, framework: string): string => {
   const code = familyCode.toLowerCase();
   if (framework === 'nist-csf') {
     return CSF_FUNCTION_ACCENT_COLORS[code] || '#687078';
+  }
+  if (framework === 'cmmc') {
+    return CMMC_DOMAIN_ACCENT_COLORS[code] || '#687078';
   }
   return NIST_FAMILY_ACCENT_COLORS[code] || '#687078';
 };

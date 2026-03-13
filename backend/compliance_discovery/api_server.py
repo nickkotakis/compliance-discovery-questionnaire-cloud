@@ -9,6 +9,7 @@ import os
 
 from compliance_discovery.nist_parser import NIST80053Parser
 from compliance_discovery.csf_parser import NISTCSFParser
+from compliance_discovery.cmmc_parser import CMMCParser
 from compliance_discovery.question_generator import DiscoveryQuestionGenerator
 from compliance_discovery.mcp_integration import MCPClient, create_aws_hints
 from compliance_discovery.models.control import Control
@@ -55,17 +56,20 @@ controls_cache: Dict[str, List[Control]] = {}  # framework -> controls
 questions_cache: Dict[str, Dict[str, List[DiscoveryQuestion]]] = {}  # framework -> {control_id -> questions}
 mcp_data_cache: Dict[str, List[Dict[str, Any]]] = {}  # Cache for MCP data from JSON file
 csf_aws_data_cache: Dict[str, List[Dict[str, Any]]] = {}  # Cache for CSF AWS mappings
+cmmc_aws_data_cache: Dict[str, List[Dict[str, Any]]] = {}  # Cache for CMMC AWS mappings
 
 # Initialize components
 parser = NIST80053Parser()
 csf_parser = NISTCSFParser()
+cmmc_parser = CMMCParser()
 generator = DiscoveryQuestionGenerator()
 mcp_client = MCPClient()
 
 # Supported frameworks
 SUPPORTED_FRAMEWORKS = {
     'nist-800-53': 'NIST 800-53 Rev 5 Moderate Baseline',
-    'nist-csf': 'NIST CSF 2.0'
+    'nist-csf': 'NIST CSF 2.0',
+    'cmmc': 'CMMC Level 2 (v2.0)'
 }
 
 # CSF Function display names
@@ -76,6 +80,24 @@ CSF_FUNCTION_NAMES = {
     'DE': 'Detect',
     'RS': 'Respond',
     'RC': 'Recover'
+}
+
+# CMMC Domain display names
+CMMC_DOMAIN_NAMES = {
+    'AC': 'Access Control',
+    'AT': 'Awareness and Training',
+    'AU': 'Audit and Accountability',
+    'CM': 'Configuration Management',
+    'IA': 'Identification and Authentication',
+    'IR': 'Incident Response',
+    'MA': 'Maintenance',
+    'MP': 'Media Protection',
+    'PE': 'Physical Protection',
+    'PS': 'Personnel Security',
+    'RA': 'Risk Assessment',
+    'CA': 'Security Assessment',
+    'SC': 'System and Communications Protection',
+    'SI': 'System and Information Integrity'
 }
 
 
@@ -115,6 +137,25 @@ def load_csf_aws_data():
     else:
         print(f"Note: CSF AWS data file not found at {csf_aws_file}")
         csf_aws_data_cache = {}
+
+
+def load_cmmc_aws_data():
+    """Load AWS controls data mapped to CMMC practices."""
+    global cmmc_aws_data_cache
+    
+    cmmc_aws_file = os.path.join(basedir, 'cmmc_aws_mappings.json')
+    if os.path.exists(cmmc_aws_file):
+        try:
+            with open(cmmc_aws_file, 'r') as f:
+                data = json.load(f)
+                cmmc_aws_data_cache = data.get('controls', {})
+                print(f"Loaded CMMC AWS data for {len(cmmc_aws_data_cache)} practices from {cmmc_aws_file}")
+        except Exception as e:
+            print(f"Warning: Could not load CMMC AWS data file: {str(e)}")
+            cmmc_aws_data_cache = {}
+    else:
+        print(f"Note: CMMC AWS data file not found at {cmmc_aws_file}")
+        cmmc_aws_data_cache = {}
 
 
 def initialize_data(framework: str = 'nist-800-53'):
@@ -163,6 +204,23 @@ def initialize_data(framework: str = 'nist-800-53'):
                 questions_cache[framework][control.id] = questions
             print(f"Generated questions for {len(questions_cache[framework])} subcategories")
 
+        elif framework == 'cmmc':
+            print("Loading CMMC Level 2 practices...")
+            controls_cache[framework] = cmmc_parser.get_all_practices()
+            print(f"Loaded {len(controls_cache[framework])} practices")
+            
+            # Load CMMC-specific AWS mappings
+            if not cmmc_aws_data_cache:
+                load_cmmc_aws_data()
+            
+            print("Generating discovery questions for CMMC Level 2...")
+            questions_cache[framework] = {}
+            for control in controls_cache[framework]:
+                aws_controls = cmmc_aws_data_cache.get(control.id.lower(), [])
+                questions = generator.generate_cmmc_questions(control, aws_controls)
+                questions_cache[framework][control.id] = questions
+            print(f"Generated questions for {len(questions_cache[framework])} practices")
+
 
 @app.after_request
 def after_request(response):
@@ -205,6 +263,10 @@ def get_frameworks():
         if key == 'nist-csf':
             info['functions'] = {
                 code: name for code, name in CSF_FUNCTION_NAMES.items()
+            }
+        elif key == 'cmmc':
+            info['domains'] = {
+                code: name for code, name in CMMC_DOMAIN_NAMES.items()
             }
         frameworks.append(info)
     return jsonify({'frameworks': frameworks})
@@ -255,6 +317,44 @@ def get_controls():
                     'category_name': csf_parser.get_category_name(c.id.split('-')[0] if '-' in c.id else c.id),
                     'in_moderate_baseline': True,
                     'aws_responsibility': get_csf_responsibility(c.id)
+                }
+                for c in sorted_controls
+            ],
+            'total': len(sorted_controls),
+            'framework': framework,
+            'framework_label': SUPPORTED_FRAMEWORKS[framework]
+        })
+    elif framework == 'cmmc':
+        # Sort CMMC practices by domain then practice number
+        CMMC_DOMAIN_ORDER = {
+            'AC': 0, 'AT': 1, 'AU': 2, 'CM': 3, 'IA': 4, 'IR': 5, 'MA': 6,
+            'MP': 7, 'PE': 8, 'PS': 9, 'RA': 10, 'CA': 11, 'SC': 12, 'SI': 13
+        }
+
+        def cmmc_sort_key(control):
+            domain = control.family.upper()
+            # Practice IDs like "AC.L2-3.1.1" — extract the trailing number for sorting
+            parts = control.id.split('-')
+            num_part = parts[-1] if len(parts) > 1 else '0'
+            # Convert dotted number to tuple for proper sorting (e.g., "3.1.1" -> (3,1,1))
+            try:
+                num_tuple = tuple(int(x) for x in num_part.split('.'))
+            except ValueError:
+                num_tuple = (0,)
+            return (CMMC_DOMAIN_ORDER.get(domain, 99), num_tuple)
+
+        sorted_controls = sorted(filtered_controls, key=cmmc_sort_key)
+
+        return jsonify({
+            'controls': [
+                {
+                    'id': c.id,
+                    'title': c.title,
+                    'description': c.description,
+                    'family': c.family,
+                    'domain_name': CMMC_DOMAIN_NAMES.get(c.family.upper(), c.family),
+                    'in_moderate_baseline': True,
+                    'aws_responsibility': 'shared'
                 }
                 for c in sorted_controls
             ],
@@ -342,6 +442,8 @@ def get_control(control_id: str):
     # Choose the right data cache based on framework
     if framework == 'nist-csf':
         data_cache = csf_aws_data_cache
+    elif framework == 'cmmc':
+        data_cache = cmmc_aws_data_cache
     else:
         data_cache = mcp_data_cache
     
@@ -393,6 +495,8 @@ def get_control(control_id: str):
     if not aws_hints:
         if framework == 'nist-csf':
             fallback_services = get_csf_aws_services(control.id)
+        elif framework == 'cmmc':
+            fallback_services = []  # No manual fallback for CMMC yet
         else:
             fallback_services = get_aws_services(control.id)
         if fallback_services:
@@ -401,6 +505,9 @@ def get_control(control_id: str):
     # Determine responsibility using framework-specific mapping
     if framework == 'nist-csf':
         responsibility = get_csf_responsibility(control.id)
+    elif framework == 'cmmc':
+        # CMMC practices are generally shared or customer responsibility
+        responsibility = 'shared' if aws_controls_data else 'customer'
     else:
         responsibility = get_aws_responsibility(control.id)
     
@@ -459,6 +566,16 @@ def get_control(control_id: str):
     # Get framework relevance
     if framework == 'nist-csf':
         framework_relevance = get_csf_framework_relevance(control.id)
+    elif framework == 'cmmc':
+        # CMMC maps to NIST 800-171 / 800-53 — provide basic relevance info
+        framework_relevance = {
+            'control_id': control.id,
+            'family': control.family,
+            'relevant_frameworks': ['NIST SP 800-171 Rev 2', 'NIST SP 800-53 Rev 5'],
+            'notes': f'CMMC Level 2 practice {control.id} maps to NIST SP 800-171 Rev 2 requirements.',
+            'specific_mappings': {},
+            'has_specific_mappings': False
+        }
     else:
         framework_relevance = get_framework_relevance(control.id)
     
@@ -505,6 +622,7 @@ def get_control(control_id: str):
         'framework_relevance': framework_relevance,  # Add framework relevance
         'organizational_requirements': get_organizational_requirements(control.id) if framework == 'nist-csf' else [],
         'organizational_category_metadata': get_category_metadata() if framework == 'nist-csf' else {},
+        'domain_name': CMMC_DOMAIN_NAMES.get(control.family.upper(), control.family) if framework == 'cmmc' else None,
         'framework': framework,
         'framework_label': SUPPORTED_FRAMEWORKS.get(framework, framework)
     })

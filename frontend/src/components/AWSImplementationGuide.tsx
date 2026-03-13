@@ -39,6 +39,10 @@ const FRAMEWORK_CLASSIFICATION_INFO: Record<string, { name: string; explanation:
   'nist-800-53': {
     name: 'NIST 800-53 Rev 5',
     explanation: 'For NIST 800-53, controls are classified based on alignment with the control family objectives and baseline impact levels. Core controls have AWS Config rules for automated validation and are referenced across major frameworks (CIS Benchmarks, PCI DSS, FedRAMP). Recommended controls have Security Hub or Control Tower managed controls, or appear in multiple compliance frameworks. Enhanced controls provide defense-in-depth for organizations with advanced security requirements.'
+  },
+  'cmmc': {
+    name: 'CMMC Level 2',
+    explanation: 'For CMMC Level 2, controls are classified based on their alignment with NIST SP 800-171 practice requirements and AWS automation capabilities. Core controls have AWS Config rules for automated compliance validation and map to practices commonly assessed during CMMC certification. Recommended controls have Security Hub or Control Tower support, providing monitoring and alerting capabilities. Enhanced controls are advanced implementations for organizations seeking defense-in-depth beyond baseline CMMC requirements.'
   }
 };
 
