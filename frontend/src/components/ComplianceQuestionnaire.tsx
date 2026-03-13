@@ -360,6 +360,45 @@ const ComplianceQuestionnaire: React.FC<ComplianceQuestionnaireProps> = ({ sessi
         maxContentWidth={Number.MAX_VALUE}
         content={
           <SpaceBetween size="l">
+            {/* Framework selector — prominent cards */}
+            <div style={{ display: 'flex', gap: '12px', marginBottom: '4px' }}>
+              {frameworks.map(f => {
+                const isSelected = f.id === selectedFramework;
+                const meta: Record<string, { icon: string; color: string; desc: string }> = {
+                  'nist-800-53': { icon: '🏛️', color: '#0972d3', desc: 'Federal information systems' },
+                  'nist-csf': { icon: '🛡️', color: '#037f0c', desc: 'Cybersecurity risk management' },
+                  'cmmc': { icon: '🎖️', color: '#d45b07', desc: 'DoD contractor requirements' },
+                };
+                const m = meta[f.id] || { icon: '📋', color: '#687078', desc: '' };
+                return (
+                  <div
+                    key={f.id}
+                    onClick={() => setSelectedFramework(f.id)}
+                    style={{
+                      flex: 1,
+                      padding: '16px 20px',
+                      borderRadius: '12px',
+                      cursor: 'pointer',
+                      border: isSelected ? `2px solid ${m.color}` : '2px solid #e9ebed',
+                      background: isSelected ? `${m.color}0a` : '#ffffff',
+                      boxShadow: isSelected ? `0 0 0 1px ${m.color}40` : 'none',
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <span style={{ fontSize: '24px' }}>{m.icon}</span>
+                      <div>
+                        <div style={{ fontWeight: isSelected ? 700 : 600, fontSize: '14px', color: isSelected ? m.color : '#16191f' }}>
+                          {f.label}
+                        </div>
+                        <div style={{ fontSize: '12px', color: '#5f6b7a', marginTop: '2px' }}>{m.desc}</div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
             {/* Header section */}
             <Container>
               <SpaceBetween size="m">
@@ -372,16 +411,6 @@ const ComplianceQuestionnaire: React.FC<ComplianceQuestionnaireProps> = ({ sessi
                   </Header>
 
                   <SpaceBetween size="xs" direction="horizontal">
-                    <Select
-                      selectedOption={
-                        frameworks.find(f => f.id === selectedFramework)
-                          ? { label: frameworks.find(f => f.id === selectedFramework)!.label, value: selectedFramework }
-                          : { label: 'NIST 800-53 Rev 5 Moderate Baseline', value: 'nist-800-53' }
-                      }
-                      onChange={({ detail }) => setSelectedFramework(detail.selectedOption.value || 'nist-800-53')}
-                      options={frameworks.map(f => ({ label: f.label, value: f.id }))}
-                      placeholder="Choose framework"
-                    />
                     <Button
                       variant="primary"
                       iconName="download"
