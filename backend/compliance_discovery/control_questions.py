@@ -2470,7 +2470,525 @@ CONTROL_QUESTIONS = {
             'question': 'What evidence demonstrates SR-12 compliance? Provide: Component disposal procedures, disposal verification records, data sanitization logs, vendor termination confirmations. Where are these artifacts stored?',
         },
     ],
+
+    # =========================================================================
+    # Additional controls — filling gaps for controls without custom questions
+    # =========================================================================
+
+    # AC-4: Information Flow Enforcement
+    'ac-4': [
+        {
+            'type': 'flow_controls',
+            'question': 'How do you control the flow of information between different security domains or network segments? For example, do you use VPC security groups, NACLs, or AWS Network Firewall to restrict traffic between subnets?',
+        },
+        {
+            'type': 'data_flow_diagrams',
+            'question': 'Do you have data flow diagrams showing how sensitive data moves between systems, accounts, and external partners? Are these flows enforced through technical controls like VPC endpoints, PrivateLink, or S3 bucket policies?',
+        },
+    ],
+    # AC-5: Separation of Duties
+    'ac-5': [
+        {
+            'type': 'duty_separation',
+            'question': 'How do you separate duties so no single person can perform all critical steps of a sensitive process? For example, can the same person who writes code also approve and deploy it to production?',
+        },
+        {
+            'type': 'aws_role_separation',
+            'question': 'In AWS, do you use separate IAM roles for different functions — like one role for infrastructure provisioning and another for security configuration? Are there SCPs or permission boundaries preventing role overlap?',
+        },
+    ],
+    # AC-7: Unsuccessful Logon Attempts
+    'ac-7': [
+        {
+            'type': 'lockout_policy',
+            'question': 'What happens after multiple failed login attempts — do you lock accounts, introduce delays, or trigger alerts? What are your thresholds (e.g., 3-5 failed attempts)?',
+        },
+        {
+            'type': 'aws_brute_force',
+            'question': 'For AWS console access, how are failed login attempts tracked? Do you have CloudWatch alarms or GuardDuty findings that alert on brute-force attempts against IAM or federated accounts?',
+        },
+    ],
+    # AC-8: System Use Notification
+    'ac-8': [
+        {
+            'type': 'login_banners',
+            'question': 'When users log into systems, do they see a notice explaining authorized use, monitoring, and consent? Is there a login banner on your AWS WorkSpaces, bastion hosts, VPN portal, or custom applications?',
+        },
+    ],
+    # AC-11: Device Lock
+    'ac-11': [
+        {
+            'type': 'session_lock',
+            'question': 'Do workstations and remote sessions automatically lock after a period of inactivity? What is the timeout — 5 minutes, 15 minutes? Does the lock screen hide all sensitive content?',
+        },
+        {
+            'type': 'aws_session_lock',
+            'question': 'For AWS WorkSpaces or remote desktop sessions, are session timeout and screen lock policies enforced through Group Policy, WorkSpaces settings, or endpoint management tools?',
+        },
+    ],
+    # AC-12: Session Termination
+    'ac-12': [
+        {
+            'type': 'session_timeout',
+            'question': 'Do user sessions automatically terminate after a defined period of inactivity or at end of business day? What are your timeout values for web apps, SSH sessions, and AWS console access?',
+        },
+    ],
+    # AC-14: Permitted Actions Without Identification
+    'ac-14': [
+        {
+            'type': 'unauthenticated_access',
+            'question': 'Are there any actions users can perform on your systems without logging in first? For example, public-facing websites, health check endpoints, or anonymous API access? How do you ensure these don\'t expose sensitive data?',
+        },
+    ],
+    # AC-18: Wireless Access
+    'ac-18': [
+        {
+            'type': 'wireless_controls',
+            'question': 'How do you control wireless access to networks that connect to your AWS environment? Are wireless networks protected with WPA3 or WPA2-Enterprise, and is guest wireless separated from corporate networks?',
+        },
+    ],
+    # AC-19: Access Control for Mobile Devices
+    'ac-19': [
+        {
+            'type': 'mobile_device_controls',
+            'question': 'How do you control which mobile devices can access your AWS environment or sensitive data? Do you use an MDM solution that enforces encryption, screen lock, and remote wipe capabilities?',
+        },
+    ],
+    # AC-20: Use of External Systems
+    'ac-20': [
+        {
+            'type': 'external_system_controls',
+            'question': 'How do you verify and control connections to external systems — partner networks, SaaS applications, or third-party cloud services? Do you have interconnection security agreements that define security requirements?',
+        },
+        {
+            'type': 'aws_external_connections',
+            'question': 'In AWS, do you use VPC peering, Transit Gateway, or PrivateLink to control connections to external systems? Are security group rules restricting traffic to only approved external endpoints?',
+        },
+    ],
+    # AC-21: Information Sharing
+    'ac-21': [
+        {
+            'type': 'sharing_controls',
+            'question': 'How do you control information sharing with external parties? For example, when sharing data via S3, do you use pre-signed URLs with expiration, cross-account IAM roles with scoped permissions, or AWS Transfer Family for managed file transfers?',
+        },
+    ],
+    # AC-22: Publicly Accessible Content
+    'ac-22': [
+        {
+            'type': 'public_content_review',
+            'question': 'How do you ensure sensitive information is not posted on publicly accessible systems? Do you have a review process before publishing content, and are you using S3 Block Public Access, Amazon Macie, or Config rules to prevent accidental public exposure?',
+        },
+    ],
+
+    # AU-4: Audit Log Storage Capacity
+    'au-4': [
+        {
+            'type': 'storage_capacity',
+            'question': 'How do you ensure you have enough storage for audit logs? In AWS, are CloudTrail logs stored in S3 with lifecycle policies that transition older logs to cheaper storage (Glacier) while keeping recent logs readily accessible?',
+        },
+        {
+            'type': 'capacity_monitoring',
+            'question': 'Do you monitor log storage capacity and get alerts before running out of space? For CloudWatch Logs, have you set retention periods to balance cost with investigation needs?',
+        },
+    ],
+    # AU-5: Response to Audit Logging Process Failures
+    'au-5': [
+        {
+            'type': 'failure_alerting',
+            'question': 'What happens if audit logging fails — for example, if CloudTrail is disabled, a log pipeline breaks, or disk space runs out? Do you have CloudWatch alarms or EventBridge rules that alert your team immediately?',
+        },
+        {
+            'type': 'protection_scps',
+            'question': 'Do you have SCPs preventing anyone from disabling CloudTrail or deleting log groups? What is the escalation process when a logging failure is detected?',
+        },
+    ],
+    # AU-7: Audit Record Reduction and Report Generation
+    'au-7': [
+        {
+            'type': 'log_analysis',
+            'question': 'Can you generate on-demand reports from your audit logs — for example, "show me all privileged actions in the last 30 days" or "list all IAM policy changes this quarter"? What tools do you use — Athena queries on CloudTrail, CloudWatch Logs Insights, or a SIEM?',
+        },
+    ],
+    # AU-8: Time Stamps
+    'au-8': [
+        {
+            'type': 'time_sync',
+            'question': 'Are all your systems synchronized to a common, authoritative time source so that timestamps in audit logs are consistent and can be correlated across systems? In AWS, EC2 instances use the Amazon Time Sync Service by default — but what about on-premises systems and applications?',
+        },
+        {
+            'type': 'time_accuracy',
+            'question': 'How do you verify that time synchronization is working correctly? Do you monitor NTP drift on your servers, and are there alerts if a system falls out of sync?',
+        },
+    ],
+    # AU-11: Audit Record Retention
+    'au-11': [
+        {
+            'type': 'retention_policy',
+            'question': 'How long do you retain audit logs, and does this meet your regulatory requirements? For example, are CloudTrail logs kept for at least one year in S3, with 90 days readily accessible? Are CloudWatch log groups configured with appropriate retention periods?',
+        },
+    ],
+    # AU-12: Audit Record Generation
+    'au-12': [
+        {
+            'type': 'event_coverage',
+            'question': 'What events are you logging across your environment — user logins, API calls, file access, configuration changes, failed authentication? In AWS, is CloudTrail capturing both management events and data events (S3 object access, Lambda invocations)?',
+        },
+        {
+            'type': 'application_logging',
+            'question': 'Beyond AWS service logs, are your applications generating audit records for security-relevant events? Are application logs sent to CloudWatch Logs or a centralized logging platform?',
+        },
+    ],
+
+    # CM-4: Impact Analyses
+    'cm-4': [
+        {
+            'type': 'change_impact',
+            'question': 'Before making changes to your systems, do you analyze the potential security impact? For example, if someone wants to open a new port in a security group or modify an IAM policy, is there a security review step before approval?',
+        },
+    ],
+    # CM-5: Access Restrictions for Change
+    'cm-5': [
+        {
+            'type': 'change_access',
+            'question': 'Who can make changes to production systems, and how is that access controlled? Are change permissions restricted to specific IAM roles, and do you use separate accounts for production vs. development?',
+        },
+        {
+            'type': 'change_approval',
+            'question': 'Do infrastructure changes go through a code review and approval process — for example, pull requests for CloudFormation/CDK templates — or can someone make changes directly through the AWS console?',
+        },
+    ],
+    # CM-6: Configuration Settings
+    'cm-6': [
+        {
+            'type': 'config_baselines',
+            'question': 'How do you establish and enforce security configuration settings — for example, CIS Benchmarks for operating systems, AWS Foundational Security Best Practices, or custom hardening guides? Are these checked automatically or manually?',
+        },
+        {
+            'type': 'config_monitoring',
+            'question': 'In AWS, are you using Security Hub with CIS AWS Foundations Benchmark or FSBP enabled? Do you have Config rules that automatically flag resources that drift from your approved configuration baselines?',
+        },
+    ],
+    # CM-9: Configuration Management Plan
+    'cm-9': [
+        {
+            'type': 'cm_plan',
+            'question': 'Do you have a documented configuration management plan that defines roles, responsibilities, and processes for managing system configurations? Does it cover how AWS resources are provisioned, configured, and tracked?',
+        },
+    ],
+    # CM-10: Software Usage Restrictions
+    'cm-10': [
+        {
+            'type': 'software_licensing',
+            'question': 'How do you track and enforce software licensing compliance across your environment? In AWS, are you using License Manager to track licenses for Windows, SQL Server, or other commercial software on EC2 instances?',
+        },
+    ],
+    # CM-11: User-Installed Software
+    'cm-11': [
+        {
+            'type': 'user_software',
+            'question': 'How do you control what software users can install on their workstations and servers? Is user-installed software monitored and restricted on systems that access sensitive data — for example, through endpoint management or application whitelisting?',
+        },
+    ],
+    # CM-12: Information Location
+    'cm-12': [
+        {
+            'type': 'data_location',
+            'question': 'Do you know where your sensitive data resides across your AWS environment — which S3 buckets, RDS instances, DynamoDB tables, and EBS volumes contain it? Are you using Amazon Macie for automated sensitive data discovery or maintaining a manual data inventory?',
+        },
+    ],
+
+    # CP-3: Contingency Training
+    'cp-3': [
+        {
+            'type': 'contingency_training',
+            'question': 'Do personnel with contingency plan responsibilities receive training on their roles during a disaster or outage? Does this include AWS-specific recovery procedures like restoring from AWS Backup, failing over to a DR region, or redeploying from CloudFormation?',
+        },
+    ],
+    # CP-6: Alternate Storage Site
+    'cp-6': [
+        {
+            'type': 'alternate_storage',
+            'question': 'Where are your backup copies stored — a separate AWS Region, a separate AWS account, or an off-site location? Is the alternate storage site geographically separated enough to survive a regional disaster?',
+        },
+        {
+            'type': 'cross_region_backup',
+            'question': 'In AWS, are you using S3 Cross-Region Replication, AWS Backup with cross-Region copy, or RDS cross-Region read replicas to maintain copies of critical data in a separate Region?',
+        },
+    ],
+    # CP-7: Alternate Processing Site
+    'cp-7': [
+        {
+            'type': 'dr_site',
+            'question': 'Do you have an alternate processing site that can take over if your primary environment becomes unavailable? In AWS, is this a warm standby in another Region, a pilot light deployment, or a multi-Region active-active architecture?',
+        },
+        {
+            'type': 'failover_testing',
+            'question': 'How often do you test failover to your alternate site? Have you validated that your Recovery Time Objective (RTO) and Recovery Point Objective (RPO) can actually be met?',
+        },
+    ],
+    # CP-8: Telecommunications Services
+    'cp-8': [
+        {
+            'type': 'network_redundancy',
+            'question': 'Do you have redundant network connectivity to your AWS environment? For example, dual Direct Connect connections, VPN as a backup to Direct Connect, or multiple internet service providers for VPN connectivity?',
+        },
+    ],
+    # CP-10: System Recovery and Reconstitution
+    'cp-10': [
+        {
+            'type': 'recovery_procedures',
+            'question': 'After a disruption, how do you restore your systems to a known good state? Do you redeploy from Infrastructure as Code (CloudFormation/CDK), restore from AWS Backup, or rebuild from golden AMIs? How do you verify the restored system is secure before returning to production?',
+        },
+    ],
+
+    # IA-3: Device Identification and Authentication
+    'ia-3': [
+        {
+            'type': 'device_auth',
+            'question': 'How do you identify and authenticate devices before allowing them to connect to your network or AWS environment? For example, do you use certificate-based authentication, MAC address filtering, or 802.1X for network access control?',
+        },
+    ],
+    # IA-4: Identifier Management
+    'ia-4': [
+        {
+            'type': 'identifier_lifecycle',
+            'question': 'How do you manage the lifecycle of user identifiers — creation, assignment, reuse prevention, and deactivation? When someone leaves, how long before their username can be reassigned? Are you using IAM Identity Center or your corporate IdP to manage this centrally?',
+        },
+    ],
+    # IA-6: Authentication Feedback
+    'ia-6': [
+        {
+            'type': 'auth_feedback',
+            'question': 'When users authenticate, is sensitive information obscured — for example, are passwords masked as dots or asterisks on all login screens? Do error messages avoid revealing whether the username or password was incorrect?',
+        },
+    ],
+    # IA-7: Cryptographic Module Authentication
+    'ia-7': [
+        {
+            'type': 'crypto_modules',
+            'question': 'Are the cryptographic modules used for authentication FIPS 140-2 validated? In AWS, are you using FIPS endpoints for API calls and KMS keys backed by FIPS-validated HSMs? For on-premises systems, are your TLS libraries and encryption modules FIPS validated?',
+        },
+    ],
+    # IA-8: Identification and Authentication (Non-Organizational Users)
+    'ia-8': [
+        {
+            'type': 'external_user_auth',
+            'question': 'How do you identify and authenticate non-organizational users — contractors, partners, or customers — who access your systems? Do they use federated authentication, temporary credentials, or separate identity stores?',
+        },
+        {
+            'type': 'aws_external_access',
+            'question': 'In AWS, do external users access your environment through cross-account IAM roles with external ID conditions, AWS IAM Identity Center with SAML federation, or Amazon Cognito for customer-facing applications?',
+        },
+    ],
+    # IA-11: Re-authentication
+    'ia-11': [
+        {
+            'type': 'reauth',
+            'question': 'Under what circumstances do you require users to re-authenticate — for example, before performing sensitive actions, after a period of inactivity, or when accessing a different security domain? How is this enforced in your AWS environment?',
+        },
+    ],
+    # IA-12: Identity Proofing
+    'ia-12': [
+        {
+            'type': 'identity_proofing',
+            'question': 'How do you verify a person\'s identity before issuing them credentials — through government ID verification, in-person validation, or video verification? For privileged AWS access, is there an enhanced verification process beyond standard onboarding?',
+        },
+    ],
+
+    # IR-2: Incident Response Training
+    'ir-2': [
+        {
+            'type': 'ir_training',
+            'question': 'Do personnel with incident response roles receive training on their responsibilities? Does this include AWS-specific scenarios like compromised IAM credentials, unauthorized EC2 instances, or S3 data exposure? How often is training refreshed?',
+        },
+    ],
+    # IR-3: Incident Response Testing
+    'ir-3': [
+        {
+            'type': 'ir_testing',
+            'question': 'How often do you test your incident response capability — through tabletop exercises, simulations, or live drills? When was the last test, and did it include AWS-specific scenarios like a GuardDuty high-severity finding or a compromised access key?',
+        },
+    ],
+    # IR-5: Incident Monitoring
+    'ir-5': [
+        {
+            'type': 'incident_tracking',
+            'question': 'How do you track and monitor security incidents from detection through resolution? Do you use a ticketing system, incident management platform (PagerDuty, ServiceNow), or Security Hub workflow status to manage incident lifecycle?',
+        },
+    ],
+    # IR-6: Incident Reporting
+    'ir-6': [
+        {
+            'type': 'incident_reporting',
+            'question': 'What is your process for reporting security incidents to internal management and external authorities (regulators, law enforcement, affected customers)? Do you have defined timelines — for example, reporting to management within 1 hour and to regulators within 72 hours?',
+        },
+    ],
+    # IR-7: Incident Response Assistance
+    'ir-7': [
+        {
+            'type': 'ir_assistance',
+            'question': 'What resources are available to help your team during an incident — internal security experts, AWS Support (Enterprise or Business tier), third-party incident response retainers, or AWS Incident Detection and Response service? Are these contacts documented and accessible during an emergency?',
+        },
+    ],
+
+    # PL-2: System Security and Privacy Plans
+    'pl-2': [
+        {
+            'type': 'ssp',
+            'question': 'Do you have a System Security Plan (SSP) that describes your system boundaries, security controls, and how they are implemented? Does it cover your AWS environment specifically — VPC architecture, account structure, data flows, and how AWS services implement each security requirement?',
+        },
+        {
+            'type': 'ssp_maintenance',
+            'question': 'How often is the SSP reviewed and updated? Is it kept current as your AWS environment changes — new accounts, services, or architectural changes?',
+        },
+    ],
+    # PL-4: Rules of Behavior
+    'pl-4': [
+        {
+            'type': 'rules_of_behavior',
+            'question': 'Do you have documented rules of behavior that users must acknowledge before accessing your systems? Do they cover acceptable use of AWS resources, data handling requirements, and consequences for violations?',
+        },
+    ],
+    # PL-8: Security and Privacy Architectures
+    'pl-8': [
+        {
+            'type': 'security_architecture',
+            'question': 'Do you have a documented security architecture that describes your defense-in-depth approach? In AWS, does this include your multi-account strategy, VPC design, network segmentation, encryption approach, and identity architecture?',
+        },
+    ],
+    # PL-10: Baseline Selection
+    'pl-10': [
+        {
+            'type': 'baseline_selection',
+            'question': 'How did you select your security control baseline — NIST 800-53 Moderate, FedRAMP, or a custom baseline? Have you documented the rationale for any controls you tailored or added beyond the baseline?',
+        },
+    ],
+    # PL-11: Baseline Tailoring
+    'pl-11': [
+        {
+            'type': 'baseline_tailoring',
+            'question': 'Have you tailored your security control baseline to fit your specific environment? For example, have you scoped out controls that don\'t apply (like physical security for fully cloud-hosted systems) or added controls for specific risks?',
+        },
+    ],
+
+    # RA-2: Security Categorization
+    'ra-2': [
+        {
+            'type': 'data_categorization',
+            'question': 'How do you categorize your systems and data based on sensitivity and impact — using FIPS 199 (Low/Moderate/High), a custom classification scheme, or regulatory requirements? How does this categorization drive your security control selection?',
+        },
+        {
+            'type': 'aws_tagging',
+            'question': 'In AWS, do you tag resources with their security categorization (e.g., data-classification: confidential)? Are tagging policies enforced through SCPs or Config rules like REQUIRED_TAGS?',
+        },
+    ],
+    # RA-3: Risk Assessment
+    'ra-3': [
+        {
+            'type': 'risk_assessment',
+            'question': 'How often do you perform risk assessments, and what methodology do you use (NIST SP 800-30, FAIR, custom)? Does the assessment cover your AWS environment — including risks from misconfigured resources, overly permissive IAM policies, and unencrypted data?',
+        },
+        {
+            'type': 'risk_inputs',
+            'question': 'Do you use AWS security findings as inputs to your risk assessment — Security Hub scores, Inspector vulnerability counts, GuardDuty threat findings? How are identified risks tracked and remediated?',
+        },
+    ],
+    # RA-7: Risk Response
+    'ra-7': [
+        {
+            'type': 'risk_response',
+            'question': 'When you identify a risk, how do you decide whether to accept, mitigate, transfer, or avoid it? Is there a documented risk response process with defined criteria and approval authority?',
+        },
+    ],
+    # RA-9: Criticality Analysis
+    'ra-9': [
+        {
+            'type': 'criticality_analysis',
+            'question': 'Have you identified which systems and components are most critical to your mission? In AWS, do you know which workloads, databases, and services would cause the most business impact if compromised or unavailable?',
+        },
+    ],
+
+    # SA-16: Developer-Provided Training
+    'sa-16': [
+        {
+            'type': 'developer_training',
+            'question': 'Do your software developers and system integrators provide training on how to securely use, configure, and maintain the systems they build? For custom applications deployed on AWS, is there documentation and training on secure configuration?',
+        },
+    ],
+    # SA-17: Developer Security and Privacy Architecture and Design
+    'sa-17': [
+        {
+            'type': 'secure_design',
+            'question': 'Do your developers follow a secure-by-design approach — threat modeling, security architecture reviews, and secure coding standards? For AWS workloads, do they follow the Well-Architected Framework security pillar during design?',
+        },
+    ],
+
+    # SI-5: Security Alerts, Advisories, and Directives
+    'si-5': [
+        {
+            'type': 'alert_monitoring',
+            'question': 'How do you stay informed about security alerts and advisories — from vendors, CISA, US-CERT, AWS Security Bulletins? When a critical advisory comes out (like a Log4j-level event), what is your process for evaluating impact and taking action?',
+        },
+        {
+            'type': 'aws_notifications',
+            'question': 'Are you subscribed to AWS Security Bulletins, AWS Health notifications, and GuardDuty finding alerts? How are these routed to the right people — SNS topics, Slack channels, PagerDuty?',
+        },
+    ],
+    # SI-6: Security and Privacy Function Verification
+    'si-6': [
+        {
+            'type': 'function_verification',
+            'question': 'How do you verify that security functions are working correctly — for example, that encryption is actually encrypting, that logging is actually capturing events, and that access controls are actually blocking unauthorized access? Do you run periodic verification tests?',
+        },
+    ],
+    # SI-7: Software, Firmware, and Information Integrity
+    'si-7': [
+        {
+            'type': 'integrity_verification',
+            'question': 'How do you verify the integrity of software and firmware — for example, checking code signatures, validating checksums, or using AWS Signer for Lambda deployment packages? Do you detect unauthorized changes to critical files or configurations?',
+        },
+        {
+            'type': 'drift_detection',
+            'question': 'In AWS, are you using CloudFormation drift detection, Config rules, or file integrity monitoring (FIM) on EC2 instances to detect unauthorized modifications to your infrastructure and applications?',
+        },
+    ],
+    # SI-8: Spam Protection
+    'si-8': [
+        {
+            'type': 'spam_protection',
+            'question': 'How do you protect against spam and malicious email? If you use Amazon SES or WorkMail, are you using built-in spam filtering? For third-party email, do you have SPF, DKIM, and DMARC configured to prevent email spoofing?',
+        },
+    ],
+    # SI-10: Information Input Validation
+    'si-10': [
+        {
+            'type': 'input_validation',
+            'question': 'How do your applications validate user input to prevent injection attacks (SQL injection, XSS, command injection)? Are you using AWS WAF with managed rule groups (like the OWASP Top 10 rule set) to provide an additional layer of input validation?',
+        },
+    ],
+    # SI-11: Error Handling
+    'si-11': [
+        {
+            'type': 'error_handling',
+            'question': 'How do your applications handle errors — do they show generic error messages to users while logging detailed error information internally? Are you careful not to expose stack traces, database queries, or internal system details in error responses?',
+        },
+    ],
+    # SI-12: Information Management and Retention
+    'si-12': [
+        {
+            'type': 'data_retention',
+            'question': 'How do you manage information retention and disposal? In AWS, do you have S3 lifecycle policies, DynamoDB TTL settings, and RDS snapshot retention configured to automatically manage data lifecycle? How do you ensure data is securely deleted when retention periods expire?',
+        },
+    ],
+    # SI-16: Memory Protection
+    'si-16': [
+        {
+            'type': 'memory_protection',
+            'question': 'How do you protect against memory-based attacks — buffer overflows, code injection, or unauthorized memory access? Are your EC2 instances running operating systems with ASLR, DEP/NX, and stack canaries enabled? For sensitive workloads, are you using AWS Nitro Enclaves for isolated memory processing?',
+        },
+    ],
 }
+
 
 
 def get_control_questions(control_id: str) -> List[Dict[str, str]]:
