@@ -595,6 +595,18 @@ const ComplianceQuestionnaire: React.FC<ComplianceQuestionnaireProps> = ({ sessi
 
                           {/* Questions */}
                           {selectedControl.questions.length > 0 && (
+                            <>
+                              {/* AWS Guidance - control level, shown once above all questions */}
+                              {(() => {
+                                const guidance = selectedControl.questions
+                                  .map(q => q.aws_service_guidance)
+                                  .find(g => g);
+                                return guidance ? (
+                                  <Alert type="info" header="AWS guidance">
+                                    {guidance}
+                                  </Alert>
+                                ) : null;
+                              })()}
                             <Container header={
                               <Header
                                 variant="h3"
@@ -621,12 +633,6 @@ const ComplianceQuestionnaire: React.FC<ComplianceQuestionnaireProps> = ({ sessi
 
                                         <Box variant="p">{question.question_text}</Box>
 
-                                        {question.aws_service_guidance && (
-                                          <Alert type="info" header="AWS guidance">
-                                            {question.aws_service_guidance}
-                                          </Alert>
-                                        )}
-
                                         <Textarea
                                           value={responses[question.id] || ''}
                                           onChange={({ detail }) => handleResponseChange(question.id, detail.value)}
@@ -640,6 +646,7 @@ const ComplianceQuestionnaire: React.FC<ComplianceQuestionnaireProps> = ({ sessi
                                 })}
                               </SpaceBetween>
                             </Container>
+                            </>
                           )}
                         </SpaceBetween>
                       )}
