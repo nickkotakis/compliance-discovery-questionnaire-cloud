@@ -605,10 +605,13 @@ const ComplianceQuestionnaire: React.FC<ComplianceQuestionnaireProps> = ({ sessi
                           )}
 
                           {/* AWS Implementation Guide */}
-                          {selectedControl.aws_controls && selectedControl.aws_controls.length > 0 && (
+                          {((selectedControl.aws_controls && selectedControl.aws_controls.length > 0) ||
+                            (selectedControl.preventive_controls &&
+                              ((selectedControl.preventive_controls.scps && selectedControl.preventive_controls.scps.length > 0) ||
+                               (selectedControl.preventive_controls.opa_rules && selectedControl.preventive_controls.opa_rules.length > 0)))) && (
                             <AWSImplementationGuide
                               controlId={selectedControl.control.id}
-                              awsControls={selectedControl.aws_controls}
+                              awsControls={selectedControl.aws_controls || []}
                               framework={selectedFramework}
                               preventiveControls={selectedControl.preventive_controls}
                             />

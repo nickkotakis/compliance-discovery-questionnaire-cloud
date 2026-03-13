@@ -221,10 +221,13 @@ const InterviewMode: React.FC<InterviewModeProps> = ({
         )}
 
         {/* AWS Implementation Guide */}
-        {control.aws_controls && control.aws_controls.length > 0 && (
+        {((control.aws_controls && control.aws_controls.length > 0) ||
+          (control.preventive_controls &&
+            ((control.preventive_controls.scps && control.preventive_controls.scps.length > 0) ||
+             (control.preventive_controls.opa_rules && control.preventive_controls.opa_rules.length > 0)))) && (
           <AWSImplementationGuide
             controlId={control.control.id}
-            awsControls={control.aws_controls}
+            awsControls={control.aws_controls || []}
             framework={framework}
             preventiveControls={control.preventive_controls}
           />

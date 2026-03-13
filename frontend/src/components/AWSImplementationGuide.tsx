@@ -100,7 +100,11 @@ const AWSImplementationGuide: React.FC<AWSImplementationGuideProps> = ({
   const [copiedSection, setCopiedSection] = useState<string | null>(null);
   const [flashbarItems, setFlashbarItems] = useState<any[]>([]);
 
-  if (!awsControls || awsControls.length === 0) {
+  const hasPrevControls = preventiveControls &&
+    ((preventiveControls.scps && preventiveControls.scps.length > 0) ||
+     (preventiveControls.opa_rules && preventiveControls.opa_rules.length > 0));
+
+  if ((!awsControls || awsControls.length === 0) && !hasPrevControls) {
     return null;
   }
 
@@ -308,7 +312,7 @@ const AWSImplementationGuide: React.FC<AWSImplementationGuideProps> = ({
         header={
           <Header
             variant="h3"
-            description={`${awsControls.length} AWS control${awsControls.length !== 1 ? 's' : ''} mapped to this subcategory`}
+            description={`${totalCore + totalRecommended + totalEnhanced} AWS control${(totalCore + totalRecommended + totalEnhanced) !== 1 ? 's' : ''} mapped to this control`}
             actions={
               <Button
                 onClick={() => copyToClipboard(generateImplementationReport(), 'full')}
