@@ -226,6 +226,7 @@ const InterviewMode: React.FC<InterviewModeProps> = ({
             controlId={control.control.id}
             awsControls={control.aws_controls}
             framework={framework}
+            preventiveControls={control.preventive_controls}
           />
         )}
 

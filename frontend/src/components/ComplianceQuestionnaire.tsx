@@ -610,6 +610,7 @@ const ComplianceQuestionnaire: React.FC<ComplianceQuestionnaireProps> = ({ sessi
                               controlId={selectedControl.control.id}
                               awsControls={selectedControl.aws_controls}
                               framework={selectedFramework}
+                              preventiveControls={selectedControl.preventive_controls}
                             />
                           )}
 

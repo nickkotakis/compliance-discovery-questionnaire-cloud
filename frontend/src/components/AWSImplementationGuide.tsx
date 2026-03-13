@@ -29,6 +29,20 @@ interface AWSImplementationGuideProps {
   controlId: string;
   awsControls?: AWSControl[];
   framework?: string;
+  preventiveControls?: {
+    scps: Array<{
+      scp_name: string;
+      scp_id: string;
+      description: string;
+      example_actions: string;
+    }>;
+    opa_rules: Array<{
+      opa_rule: string;
+      description: string;
+      resource_types: string;
+      severity: string;
+    }>;
+  };
 }
 
 const FRAMEWORK_CLASSIFICATION_INFO: Record<string, { name: string; explanation: string }> = {
@@ -78,7 +92,8 @@ const PRIORITY_META: Record<string, { label: string; color: string; badgeColor: 
 const AWSImplementationGuide: React.FC<AWSImplementationGuideProps> = ({
   controlId,
   awsControls = [],
-  framework = 'nist-800-53'
+  framework = 'nist-800-53',
+  preventiveControls
 }) => {
   const [copiedSection, setCopiedSection] = useState<string | null>(null);
   const [flashbarItems, setFlashbarItems] = useState<any[]>([]);
@@ -137,6 +152,28 @@ const AWSImplementationGuide: React.FC<AWSImplementationGuideProps> = ({
       });
       report += `\n`;
     }
+    
+    // Add preventive controls
+    if (preventiveControls) {
+      if (preventiveControls.scps.length > 0) {
+        report += `--- SERVICE CONTROL POLICIES (${preventiveControls.scps.length}) ---\n`;
+        report += `Preventive guardrails via AWS Organizations\n\n`;
+        preventiveControls.scps.forEach((scp, idx) => {
+          report += `${idx + 1}. ${scp.scp_name}\n`;
+          report += `   ${scp.description}\n`;
+          report += `   Actions: ${scp.example_actions}\n\n`;
+        });
+      }
+      if (preventiveControls.opa_rules.length > 0) {
+        report += `--- IaC POLICY RULES (${preventiveControls.opa_rules.length}) ---\n`;
+        report += `Pre-deployment validation via OPA/Rego\n\n`;
+        preventiveControls.opa_rules.forEach((rule, idx) => {
+          report += `${idx + 1}. ${rule.opa_rule} [${rule.severity}]\n`;
+          report += `   ${rule.description}\n`;
+          report += `   Resources: ${rule.resource_types}\n\n`;
+        });
+      }
+    }
     return report;
   };
 
@@ -147,12 +184,16 @@ const AWSImplementationGuide: React.FC<AWSImplementationGuideProps> = ({
   const renderControlCard = (control: AWSControl) => {
     const tier = control.priority || 'recommended';
     const meta = PRIORITY_META[tier];
+    const hasDetective = control.config_rules.length > 0 || control.security_hub_controls.length > 0;
+    const hasPreventive = control.control_tower_ids.length > 0;
     return (
       <div key={control.control_id} style={{ borderLeft: `4px solid ${meta.color}`, paddingLeft: '12px', marginBottom: '8px' }}>
         <SpaceBetween size="xs">
           <Box>
             <SpaceBetween size="xs" direction="horizontal">
               <Badge color={meta.badgeColor}>{meta.label}</Badge>
+              {hasDetective && <Badge color="blue">Detective</Badge>}
+              {hasPreventive && <Badge color="green">Preventive</Badge>}
             </SpaceBetween>
             <Box variant="strong" margin={{ top: 'xxs' }}>{control.title}</Box>
           </Box>
@@ -160,7 +201,12 @@ const AWSImplementationGuide: React.FC<AWSImplementationGuideProps> = ({
           <ColumnLayout columns={3}>
             {control.config_rules.length > 0 && (
               <div>
-                <Box variant="awsui-key-label">Config rules</Box>
+                <Box variant="awsui-key-label">
+                  <SpaceBetween size="xxs" direction="horizontal">
+                    <span>Config rules</span>
+                    <Box variant="small" color="text-body-secondary">(AWS Config — Detective)</Box>
+                  </SpaceBetween>
+                </Box>
                 <SpaceBetween size="xxs">
                   {control.config_rules.map((rule, ridx) => (
                     <Box key={ridx} variant="code" fontSize="body-s">{rule}</Box>
@@ -170,7 +216,12 @@ const AWSImplementationGuide: React.FC<AWSImplementationGuideProps> = ({
             )}
             {control.security_hub_controls.length > 0 && (
               <div>
-                <Box variant="awsui-key-label">Security Hub</Box>
+                <Box variant="awsui-key-label">
+                  <SpaceBetween size="xxs" direction="horizontal">
+                    <span>Security Hub</span>
+                    <Box variant="small" color="text-body-secondary">(Detective)</Box>
+                  </SpaceBetween>
+                </Box>
                 <SpaceBetween size="xxs" direction="horizontal">
                   {control.security_hub_controls.map((hub, hidx) => (
                     <Badge key={hidx} color="green">{hub}</Badge>
@@ -180,7 +231,12 @@ const AWSImplementationGuide: React.FC<AWSImplementationGuideProps> = ({
             )}
             {control.control_tower_ids.length > 0 && (
               <div>
-                <Box variant="awsui-key-label">Control Tower</Box>
+                <Box variant="awsui-key-label">
+                  <SpaceBetween size="xxs" direction="horizontal">
+                    <span>Control Tower</span>
+                    <Box variant="small" color="text-body-secondary">(Preventive)</Box>
+                  </SpaceBetween>
+                </Box>
                 <SpaceBetween size="xxs">
                   {control.control_tower_ids.map((ct, ctidx) => (
                     <Box key={ctidx} variant="code" fontSize="body-s">{ct}</Box>
@@ -225,6 +281,7 @@ const AWSImplementationGuide: React.FC<AWSImplementationGuideProps> = ({
                       <Box><Box variant="strong" color="text-status-info">Recommended</Box> — Has Security Hub or Control Tower managed controls, or appears in 3+ compliance frameworks</Box>
                       <Box><Box variant="strong" color="text-body-secondary">Enhanced</Box> — Advanced or service-specific controls for mature security programs</Box>
                     </SpaceBetween>
+                    <Box variant="p" margin={{ top: 's' }}>Each control is also labeled as <Box variant="strong" display="inline" color="text-status-info">Detective</Box> (monitors after deployment via Config/Security Hub) or <Box variant="strong" display="inline" color="text-status-success">Preventive</Box> (blocks non-compliant actions via SCPs/Control Tower/OPA).</Box>
                   </SpaceBetween>
                 }
                 triggerType="custom"
@@ -299,6 +356,63 @@ const AWSImplementationGuide: React.FC<AWSImplementationGuideProps> = ({
             </ExpandableSection>
           )}
 
+          {/* Preventive Controls — SCPs (AWS Organizations) */}
+          {preventiveControls && preventiveControls.scps && preventiveControls.scps.length > 0 && (
+            <ExpandableSection
+              variant="container"
+              headerText={`Service Control Policies (${preventiveControls.scps.length})`}
+              headerDescription="Preventive guardrails via AWS Organizations — block non-compliant actions at the API level"
+            >
+              <SpaceBetween size="m">
+                {preventiveControls.scps.map((scp, idx) => (
+                  <div key={idx} style={{ borderLeft: '4px solid #ff9900', paddingLeft: '12px', marginBottom: '8px' }}>
+                    <SpaceBetween size="xxs">
+                      <Box>
+                        <SpaceBetween size="xxs" direction="horizontal">
+                          <Badge color="grey">Preventive</Badge>
+                          <Box variant="small" color="text-body-secondary">AWS Organizations</Box>
+                        </SpaceBetween>
+                        <Box variant="strong" margin={{ top: 'xxs' }}>{scp.scp_name}</Box>
+                      </Box>
+                      <Box variant="small" color="text-body-secondary">{scp.description}</Box>
+                      <Box variant="code" fontSize="body-s">{scp.example_actions}</Box>
+                    </SpaceBetween>
+                  </div>
+                ))}
+              </SpaceBetween>
+            </ExpandableSection>
+          )}
+
+          {/* Preventive Controls — OPA/Rego (CI/CD Pipeline) */}
+          {preventiveControls && preventiveControls.opa_rules && preventiveControls.opa_rules.length > 0 && (
+            <ExpandableSection
+              variant="container"
+              headerText={`IaC Policy Rules (${preventiveControls.opa_rules.length})`}
+              headerDescription="Pre-deployment validation via OPA/Rego — catch misconfigurations before they reach AWS"
+            >
+              <SpaceBetween size="m">
+                {preventiveControls.opa_rules.map((rule, idx) => (
+                  <div key={idx} style={{ borderLeft: '4px solid #9469d6', paddingLeft: '12px', marginBottom: '8px' }}>
+                    <SpaceBetween size="xxs">
+                      <Box>
+                        <SpaceBetween size="xxs" direction="horizontal">
+                          <Badge color="grey">Preventive</Badge>
+                          <Badge color={rule.severity === 'CRITICAL' ? 'red' : rule.severity === 'HIGH' ? 'blue' : 'grey'}>
+                            {rule.severity}
+                          </Badge>
+                          <Box variant="small" color="text-body-secondary">CI/CD Pipeline</Box>
+                        </SpaceBetween>
+                        <Box variant="strong" margin={{ top: 'xxs' }}>{rule.opa_rule}</Box>
+                      </Box>
+                      <Box variant="small" color="text-body-secondary">{rule.description}</Box>
+                      <Box variant="code" fontSize="body-s">Resources: {rule.resource_types}</Box>
+                    </SpaceBetween>
+                  </div>
+                ))}
+              </SpaceBetween>
+            </ExpandableSection>
+          )}
+
           <Alert type="info" header="Helpful AWS resources">
             <ColumnLayout columns={2}>
               <Link external href="https://console.aws.amazon.com/config/">
@@ -312,6 +426,12 @@ const AWSImplementationGuide: React.FC<AWSImplementationGuideProps> = ({
               </Link>
               <Link external href="https://console.aws.amazon.com/artifact/">
                 AWS Artifact (compliance reports)
+              </Link>
+              <Link external href="https://console.aws.amazon.com/organizations/">
+                AWS Organizations (SCPs)
+              </Link>
+              <Link external href="https://www.openpolicyagent.org/docs/latest/">
+                Open Policy Agent (OPA)
               </Link>
             </ColumnLayout>
           </Alert>

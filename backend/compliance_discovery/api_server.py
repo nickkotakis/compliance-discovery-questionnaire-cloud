@@ -21,6 +21,7 @@ from compliance_discovery.framework_mapper import get_framework_relevance
 from compliance_discovery.csf_control_mapping import get_csf_responsibility, get_csf_aws_services
 from compliance_discovery.csf_framework_mapper import get_csf_framework_relevance
 from compliance_discovery.csf_organizational_controls import get_organizational_requirements, get_category_metadata
+from compliance_discovery.preventive_controls import get_preventive_controls_for_control, get_control_type_label
 
 
 app = Flask(__name__)
@@ -619,6 +620,7 @@ def get_control(control_id: str):
         'aws_hints': aws_hints,
         'aws_applicability': aws_applicability,
         'aws_controls': aws_controls_data,  # Add detailed AWS control data
+        'preventive_controls': get_preventive_controls_for_control(control.id, framework),  # SCPs + OPA
         'framework_relevance': framework_relevance,  # Add framework relevance
         'organizational_requirements': get_organizational_requirements(control.id) if framework == 'nist-csf' else [],
         'organizational_category_metadata': get_category_metadata() if framework == 'nist-csf' else {},

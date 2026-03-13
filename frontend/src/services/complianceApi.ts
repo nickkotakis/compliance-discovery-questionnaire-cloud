@@ -113,6 +113,20 @@ export interface ControlDetail {
   }>;
   framework?: string;
   framework_label?: string;
+  preventive_controls?: {
+    scps: Array<{
+      scp_name: string;
+      scp_id: string;
+      description: string;
+      example_actions: string;
+    }>;
+    opa_rules: Array<{
+      opa_rule: string;
+      description: string;
+      resource_types: string;
+      severity: string;
+    }>;
+  };
 }
 
 export interface TemplateMetadata {
