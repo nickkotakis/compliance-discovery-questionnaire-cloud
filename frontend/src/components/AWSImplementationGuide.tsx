@@ -120,7 +120,6 @@ const AWSImplementationGuide: React.FC<AWSImplementationGuideProps> = ({
   const allConfigRules = [...new Set(awsControls.flatMap(c => c.config_rules))];
   const allSecurityHubControls = [...new Set(awsControls.flatMap(c => c.security_hub_controls))];
   const allControlTowerIds = [...new Set(awsControls.flatMap(c => c.control_tower_ids))];
-  const allServices = [...new Set(awsControls.flatMap(c => c.services))];
 
   const coreControls = awsControls.filter(c => c.priority === 'core');
   const recommendedControls = awsControls.filter(c => (c.priority || 'recommended') === 'recommended');
@@ -184,7 +183,7 @@ const AWSImplementationGuide: React.FC<AWSImplementationGuideProps> = ({
         header={
           <Header
             variant="h3"
-            description={`${awsControls.length} AWS control${awsControls.length !== 1 ? 's' : ''} • ${allConfigRules.length} Config rules • ${allSecurityHubControls.length} Security Hub controls • ${allControlTowerIds.length} Control Tower controls`}
+            description={`${awsControls.length} AWS control${awsControls.length !== 1 ? 's' : ''} mapped to this subcategory`}
             actions={
               <Button
                 onClick={() => copyToClipboard(generateImplementationReport(), 'full')}
@@ -199,33 +198,6 @@ const AWSImplementationGuide: React.FC<AWSImplementationGuideProps> = ({
         }
       >
         <SpaceBetween size="l">
-          <ColumnLayout columns={4} variant="text-grid">
-            <div>
-              <Box variant="awsui-key-label">AWS services</Box>
-              <Box variant="h1" fontSize="display-l" fontWeight="bold">
-                {allServices.length}
-              </Box>
-            </div>
-            <div>
-              <Box variant="awsui-key-label">Config rules</Box>
-              <Box variant="h1" fontSize="display-l" fontWeight="bold">
-                {allConfigRules.length}
-              </Box>
-            </div>
-            <div>
-              <Box variant="awsui-key-label">Security Hub</Box>
-              <Box variant="h1" fontSize="display-l" fontWeight="bold">
-                {allSecurityHubControls.length}
-              </Box>
-            </div>
-            <div>
-              <Box variant="awsui-key-label">Control Tower</Box>
-              <Box variant="h1" fontSize="display-l" fontWeight="bold">
-                {allControlTowerIds.length}
-              </Box>
-            </div>
-          </ColumnLayout>
-
           {/* Priority tier summary */}
           <ColumnLayout columns={3} variant="text-grid">
             {(['core', 'recommended', 'enhanced'] as const).map(tier => {
@@ -245,25 +217,18 @@ const AWSImplementationGuide: React.FC<AWSImplementationGuideProps> = ({
             })}
           </ColumnLayout>
 
-          {/* Core controls - always expanded */}
+          {/* Core controls - expanded by default */}
           {coreControls.length > 0 && (
-            <Container
-              header={
-                <Header
-                  variant="h3"
-                  counter={`(${coreControls.length})`}
-                  description="Enable these first for audit readiness"
-                >
-                  <span style={{ color: '#037f0c' }}>
-                    <Icon name="status-positive" /> Core controls
-                  </span>
-                </Header>
-              }
+            <ExpandableSection
+              variant="container"
+              headerText={`Core controls (${coreControls.length})`}
+              headerDescription="Enable these first for audit readiness"
+              defaultExpanded
             >
               <SpaceBetween size="m">
                 {coreControls.map(renderControlCard)}
               </SpaceBetween>
-            </Container>
+            </ExpandableSection>
           )}
 
           {/* Recommended controls - expandable */}
