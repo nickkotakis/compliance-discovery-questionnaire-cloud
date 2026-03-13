@@ -558,6 +558,7 @@ const ComplianceQuestionnaire: React.FC<ComplianceQuestionnaireProps> = ({ sessi
                             <AWSImplementationGuide
                               controlId={selectedControl.control.id}
                               awsControls={selectedControl.aws_controls}
+                              framework={selectedFramework}
                             />
                           )}
 
@@ -671,6 +672,7 @@ const ComplianceQuestionnaire: React.FC<ComplianceQuestionnaireProps> = ({ sessi
           onResponseChange={handleResponseChange}
           onSave={saveResponse}
           onClose={() => setInterviewControl(null)}
+          framework={selectedFramework}
         />
       )}
     </>

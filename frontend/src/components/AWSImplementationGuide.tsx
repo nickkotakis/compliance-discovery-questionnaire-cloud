@@ -11,6 +11,7 @@ import Link from '@cloudscape-design/components/link';
 import Alert from '@cloudscape-design/components/alert';
 import Flashbar from '@cloudscape-design/components/flashbar';
 import Icon from '@cloudscape-design/components/icon';
+import Popover from '@cloudscape-design/components/popover';
 
 interface AWSControl {
   control_id: string;
@@ -27,7 +28,24 @@ interface AWSControl {
 interface AWSImplementationGuideProps {
   controlId: string;
   awsControls?: AWSControl[];
+  framework?: string;
 }
+
+const FRAMEWORK_CLASSIFICATION_INFO: Record<string, { name: string; explanation: string }> = {
+  'nist-csf': {
+    name: 'NIST CSF 2.0',
+    explanation: 'For NIST CSF, controls are classified based on how directly they support the CSF function and subcategory objectives. Core controls have AWS Config rules enabling automated compliance validation and appear in major benchmarks (CIS, PCI DSS, SOC 2). Recommended controls have Security Hub or Control Tower support, or broad framework coverage, but may lack Config rules. Enhanced controls are service-specific or advanced implementations for mature programs.'
+  },
+  'nist-800-53': {
+    name: 'NIST 800-53 Rev 5',
+    explanation: 'For NIST 800-53, controls are classified based on alignment with the control family objectives and baseline impact levels. Core controls have AWS Config rules for automated validation and are referenced across major frameworks (CIS Benchmarks, PCI DSS, FedRAMP). Recommended controls have Security Hub or Control Tower managed controls, or appear in multiple compliance frameworks. Enhanced controls provide defense-in-depth for organizations with advanced security requirements.'
+  }
+};
+
+const DEFAULT_CLASSIFICATION_INFO = {
+  name: 'this framework',
+  explanation: 'Controls are classified based on their automation capabilities and cross-framework coverage. Core controls have AWS Config rules for automated compliance validation and appear across major industry benchmarks. Recommended controls have Security Hub or Control Tower support, or broad framework coverage. Enhanced controls are advanced implementations for mature security programs.'
+};
 
 const PRIORITY_META: Record<string, { label: string; color: string; badgeColor: 'blue' | 'green' | 'grey'; icon: string; desc: string }> = {
   core: {
@@ -55,7 +73,8 @@ const PRIORITY_META: Record<string, { label: string; color: string; badgeColor: 
 
 const AWSImplementationGuide: React.FC<AWSImplementationGuideProps> = ({
   controlId,
-  awsControls = []
+  awsControls = [],
+  framework = 'nist-800-53'
 }) => {
   const [copiedSection, setCopiedSection] = useState<string | null>(null);
   const [flashbarItems, setFlashbarItems] = useState<any[]>([]);
@@ -172,6 +191,8 @@ const AWSImplementationGuide: React.FC<AWSImplementationGuideProps> = ({
     );
   };
 
+  const classificationInfo = FRAMEWORK_CLASSIFICATION_INFO[framework] || DEFAULT_CLASSIFICATION_INFO;
+
   return (
     <>
       <Flashbar items={flashbarItems} />
@@ -189,7 +210,28 @@ const AWSImplementationGuide: React.FC<AWSImplementationGuideProps> = ({
               </Button>
             }
           >
-            AWS implementation guide
+            <SpaceBetween size="xs" direction="horizontal">
+              <span>AWS implementation guide</span>
+              <Popover
+                header="How are controls classified?"
+                content={
+                  <SpaceBetween size="s">
+                    <Box variant="p">{classificationInfo.explanation}</Box>
+                    <SpaceBetween size="xs">
+                      <Box><Box variant="strong" color="text-status-success">Core</Box> — Has AWS Config rules for automated validation; referenced in major industry benchmarks (CIS, PCI DSS, SOC 2, FedRAMP)</Box>
+                      <Box><Box variant="strong" color="text-status-info">Recommended</Box> — Has Security Hub or Control Tower managed controls, or appears in 3+ compliance frameworks</Box>
+                      <Box><Box variant="strong" color="text-body-secondary">Enhanced</Box> — Advanced or service-specific controls for mature security programs</Box>
+                    </SpaceBetween>
+                  </SpaceBetween>
+                }
+                triggerType="custom"
+                size="large"
+              >
+                <span style={{ cursor: 'pointer', verticalAlign: 'middle' }}>
+                  <Icon name="status-info" variant="link" />
+                </span>
+              </Popover>
+            </SpaceBetween>
           </Header>
         }
       >

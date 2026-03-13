@@ -47,6 +47,7 @@ interface InterviewModeProps {
   onResponseChange: (questionId: string, value: string) => void;
   onSave: (questionId: string) => void;
   onClose: () => void;
+  framework?: string;
 }
 
 const InterviewMode: React.FC<InterviewModeProps> = ({
@@ -54,7 +55,8 @@ const InterviewMode: React.FC<InterviewModeProps> = ({
   responses,
   onResponseChange,
   onSave,
-  onClose
+  onClose,
+  framework = 'nist-800-53'
 }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const questions = control.questions || [];
@@ -223,6 +225,7 @@ const InterviewMode: React.FC<InterviewModeProps> = ({
           <AWSImplementationGuide
             controlId={control.control.id}
             awsControls={control.aws_controls}
+            framework={framework}
           />
         )}
 
