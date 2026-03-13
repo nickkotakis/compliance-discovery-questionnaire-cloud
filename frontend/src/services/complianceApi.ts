@@ -119,12 +119,14 @@ export interface ControlDetail {
       scp_id: string;
       description: string;
       example_actions: string;
+      priority?: 'core' | 'recommended' | 'enhanced';
     }>;
     opa_rules: Array<{
       opa_rule: string;
       description: string;
       resource_types: string;
       severity: string;
+      priority?: 'core' | 'recommended' | 'enhanced';
     }>;
   };
 }

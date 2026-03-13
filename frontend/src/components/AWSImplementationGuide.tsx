@@ -35,12 +35,14 @@ interface AWSImplementationGuideProps {
       scp_id: string;
       description: string;
       example_actions: string;
+      priority?: 'core' | 'recommended' | 'enhanced';
     }>;
     opa_rules: Array<{
       opa_rule: string;
       description: string;
       resource_types: string;
       severity: string;
+      priority?: 'core' | 'recommended' | 'enhanced';
     }>;
   };
 }
@@ -181,6 +183,53 @@ const AWSImplementationGuide: React.FC<AWSImplementationGuideProps> = ({
   const recommendedControls = awsControls.filter(c => (c.priority || 'recommended') === 'recommended');
   const enhancedControls = awsControls.filter(c => c.priority === 'enhanced');
 
+  // Categorize preventive controls by priority
+  const coreScps = preventiveControls?.scps?.filter(s => (s as any).priority === 'core') || [];
+  const recommendedScps = preventiveControls?.scps?.filter(s => (s as any).priority === 'recommended') || [];
+  const enhancedScps = preventiveControls?.scps?.filter(s => (s as any).priority === 'enhanced') || [];
+  const coreOpa = preventiveControls?.opa_rules?.filter(r => (r as any).priority === 'core') || [];
+  const recommendedOpa = preventiveControls?.opa_rules?.filter(r => (r as any).priority === 'recommended') || [];
+  const enhancedOpa = preventiveControls?.opa_rules?.filter(r => (r as any).priority === 'enhanced') || [];
+
+  const totalCore = coreControls.length + coreScps.length + coreOpa.length;
+  const totalRecommended = recommendedControls.length + recommendedScps.length + recommendedOpa.length;
+  const totalEnhanced = enhancedControls.length + enhancedScps.length + enhancedOpa.length;
+
+  const renderScpCard = (scp: any, idx: number) => (
+    <div key={`scp-${idx}`} style={{ borderLeft: '4px solid #ff9900', paddingLeft: '12px', marginBottom: '8px' }}>
+      <SpaceBetween size="xxs">
+        <Box>
+          <SpaceBetween size="xxs" direction="horizontal">
+            <Badge color="green">Preventive</Badge>
+            <Box variant="small" color="text-body-secondary">AWS Organizations — SCP</Box>
+          </SpaceBetween>
+          <Box variant="strong" margin={{ top: 'xxs' }}>{scp.scp_name}</Box>
+        </Box>
+        <Box variant="small" color="text-body-secondary">{scp.description}</Box>
+        <Box variant="code" fontSize="body-s">{scp.example_actions}</Box>
+      </SpaceBetween>
+    </div>
+  );
+
+  const renderOpaCard = (rule: any, idx: number) => (
+    <div key={`opa-${idx}`} style={{ borderLeft: '4px solid #9469d6', paddingLeft: '12px', marginBottom: '8px' }}>
+      <SpaceBetween size="xxs">
+        <Box>
+          <SpaceBetween size="xxs" direction="horizontal">
+            <Badge color="green">Preventive</Badge>
+            <Badge color={rule.severity === 'CRITICAL' ? 'red' : rule.severity === 'HIGH' ? 'blue' : 'grey'}>
+              {rule.severity}
+            </Badge>
+            <Box variant="small" color="text-body-secondary">CI/CD Pipeline — OPA/Rego</Box>
+          </SpaceBetween>
+          <Box variant="strong" margin={{ top: 'xxs' }}>{rule.opa_rule}</Box>
+        </Box>
+        <Box variant="small" color="text-body-secondary">{rule.description}</Box>
+        <Box variant="code" fontSize="body-s">Resources: {rule.resource_types}</Box>
+      </SpaceBetween>
+    </div>
+  );
+
   const renderControlCard = (control: AWSControl) => {
     const tier = control.priority || 'recommended';
     const meta = PRIORITY_META[tier];
@@ -299,9 +348,9 @@ const AWSImplementationGuide: React.FC<AWSImplementationGuideProps> = ({
           {/* Priority tier summary */}
           <ColumnLayout columns={3} variant="text-grid">
             {(['core', 'recommended', 'enhanced'] as const).map(tier => {
-              const count = tier === 'core' ? coreControls.length
-                : tier === 'recommended' ? recommendedControls.length
-                : enhancedControls.length;
+              const count = tier === 'core' ? totalCore
+                : tier === 'recommended' ? totalRecommended
+                : totalEnhanced;
               const meta = PRIORITY_META[tier];
               return (
                 <div key={tier} style={{ borderLeft: `4px solid ${meta.color}`, paddingLeft: '8px' }}>
@@ -316,99 +365,48 @@ const AWSImplementationGuide: React.FC<AWSImplementationGuideProps> = ({
           </ColumnLayout>
 
           {/* Core controls - expanded by default */}
-          {coreControls.length > 0 && (
+          {totalCore > 0 && (
             <ExpandableSection
               variant="container"
-              headerText={`Core controls (${coreControls.length})`}
+              headerText={`Core controls (${totalCore})`}
               headerDescription="Enable these first for audit readiness"
               defaultExpanded
             >
               <SpaceBetween size="m">
                 {coreControls.map(renderControlCard)}
+                {coreScps.map((scp, idx) => renderScpCard(scp, idx))}
+                {coreOpa.map((rule, idx) => renderOpaCard(rule, idx))}
               </SpaceBetween>
             </ExpandableSection>
           )}
 
           {/* Recommended controls - expandable */}
-          {recommendedControls.length > 0 && (
+          {totalRecommended > 0 && (
             <ExpandableSection
               variant="container"
-              headerText={`Recommended controls (${recommendedControls.length})`}
+              headerText={`Recommended controls (${totalRecommended})`}
               headerDescription="Important controls most organizations should implement"
-              defaultExpanded={coreControls.length === 0}
+              defaultExpanded={totalCore === 0}
             >
               <SpaceBetween size="m">
                 {recommendedControls.map(renderControlCard)}
+                {recommendedScps.map((scp, idx) => renderScpCard(scp, idx))}
+                {recommendedOpa.map((rule, idx) => renderOpaCard(rule, idx))}
               </SpaceBetween>
             </ExpandableSection>
           )}
 
           {/* Enhanced controls - collapsed by default */}
-          {enhancedControls.length > 0 && (
+          {totalEnhanced > 0 && (
             <ExpandableSection
               variant="container"
-              headerText={`Enhanced controls (${enhancedControls.length})`}
+              headerText={`Enhanced controls (${totalEnhanced})`}
               headerDescription="Advanced controls for mature security programs"
             >
               <SpaceBetween size="m">
                 {enhancedControls.map(renderControlCard)}
-              </SpaceBetween>
-            </ExpandableSection>
-          )}
-
-          {/* Preventive Controls — SCPs (AWS Organizations) */}
-          {preventiveControls && preventiveControls.scps && preventiveControls.scps.length > 0 && (
-            <ExpandableSection
-              variant="container"
-              headerText={`Service Control Policies (${preventiveControls.scps.length})`}
-              headerDescription="Preventive guardrails via AWS Organizations — block non-compliant actions at the API level"
-            >
-              <SpaceBetween size="m">
-                {preventiveControls.scps.map((scp, idx) => (
-                  <div key={idx} style={{ borderLeft: '4px solid #ff9900', paddingLeft: '12px', marginBottom: '8px' }}>
-                    <SpaceBetween size="xxs">
-                      <Box>
-                        <SpaceBetween size="xxs" direction="horizontal">
-                          <Badge color="grey">Preventive</Badge>
-                          <Box variant="small" color="text-body-secondary">AWS Organizations</Box>
-                        </SpaceBetween>
-                        <Box variant="strong" margin={{ top: 'xxs' }}>{scp.scp_name}</Box>
-                      </Box>
-                      <Box variant="small" color="text-body-secondary">{scp.description}</Box>
-                      <Box variant="code" fontSize="body-s">{scp.example_actions}</Box>
-                    </SpaceBetween>
-                  </div>
-                ))}
-              </SpaceBetween>
-            </ExpandableSection>
-          )}
-
-          {/* Preventive Controls — OPA/Rego (CI/CD Pipeline) */}
-          {preventiveControls && preventiveControls.opa_rules && preventiveControls.opa_rules.length > 0 && (
-            <ExpandableSection
-              variant="container"
-              headerText={`IaC Policy Rules (${preventiveControls.opa_rules.length})`}
-              headerDescription="Pre-deployment validation via OPA/Rego — catch misconfigurations before they reach AWS"
-            >
-              <SpaceBetween size="m">
-                {preventiveControls.opa_rules.map((rule, idx) => (
-                  <div key={idx} style={{ borderLeft: '4px solid #9469d6', paddingLeft: '12px', marginBottom: '8px' }}>
-                    <SpaceBetween size="xxs">
-                      <Box>
-                        <SpaceBetween size="xxs" direction="horizontal">
-                          <Badge color="grey">Preventive</Badge>
-                          <Badge color={rule.severity === 'CRITICAL' ? 'red' : rule.severity === 'HIGH' ? 'blue' : 'grey'}>
-                            {rule.severity}
-                          </Badge>
-                          <Box variant="small" color="text-body-secondary">CI/CD Pipeline</Box>
-                        </SpaceBetween>
-                        <Box variant="strong" margin={{ top: 'xxs' }}>{rule.opa_rule}</Box>
-                      </Box>
-                      <Box variant="small" color="text-body-secondary">{rule.description}</Box>
-                      <Box variant="code" fontSize="body-s">Resources: {rule.resource_types}</Box>
-                    </SpaceBetween>
-                  </div>
-                ))}
+                {enhancedScps.map((scp, idx) => renderScpCard(scp, idx))}
+                {enhancedOpa.map((rule, idx) => renderOpaCard(rule, idx))}
               </SpaceBetween>
             </ExpandableSection>
           )}

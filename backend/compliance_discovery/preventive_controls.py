@@ -37,25 +37,29 @@ NIST_800_53_SCPS: Dict[str, List[Dict[str, str]]] = {
             "scp_name": "Deny root account usage",
             "scp_id": "SCP-DenyRootAccount",
             "description": "Prevents use of the root user for any operations except those that require root credentials",
-            "example_actions": "Deny: * (with condition aws:PrincipalArn matches root)"
+            "example_actions": "Deny: * (with condition aws:PrincipalArn matches root)",
+            "priority": "core"
         },
         {
             "scp_name": "Restrict IAM user creation",
             "scp_id": "SCP-RestrictIAMUserCreation",
             "description": "Prevents creation of IAM users with long-lived credentials, enforcing federation through IAM Identity Center",
-            "example_actions": "Deny: iam:CreateUser, iam:CreateAccessKey"
+            "example_actions": "Deny: iam:CreateUser, iam:CreateAccessKey",
+            "priority": "recommended"
         },
         {
             "scp_name": "Require MFA for sensitive actions",
             "scp_id": "SCP-RequireMFA",
             "description": "Denies sensitive actions unless MFA is present in the request context",
-            "example_actions": "Deny: iam:DeactivateMFADevice, iam:DeleteVirtualMFADevice (without MFA)"
+            "example_actions": "Deny: iam:DeactivateMFADevice, iam:DeleteVirtualMFADevice (without MFA)",
+            "priority": "core"
         },
         {
             "scp_name": "Deny access key creation for root",
             "scp_id": "SCP-DenyRootAccessKeys",
             "description": "Prevents creation of access keys for the root account",
-            "example_actions": "Deny: iam:CreateAccessKey (for root principal)"
+            "example_actions": "Deny: iam:CreateAccessKey (for root principal)",
+            "priority": "core"
         },
     ],
     # AU — Audit and Accountability
@@ -64,19 +68,22 @@ NIST_800_53_SCPS: Dict[str, List[Dict[str, str]]] = {
             "scp_name": "Prevent CloudTrail modification",
             "scp_id": "SCP-ProtectCloudTrail",
             "description": "Prevents anyone from stopping, deleting, or modifying CloudTrail logging",
-            "example_actions": "Deny: cloudtrail:StopLogging, cloudtrail:DeleteTrail, cloudtrail:UpdateTrail"
+            "example_actions": "Deny: cloudtrail:StopLogging, cloudtrail:DeleteTrail, cloudtrail:UpdateTrail",
+            "priority": "core"
         },
         {
             "scp_name": "Protect CloudWatch Logs",
             "scp_id": "SCP-ProtectCloudWatchLogs",
             "description": "Prevents deletion of CloudWatch log groups used for audit logging",
-            "example_actions": "Deny: logs:DeleteLogGroup, logs:DeleteLogStream"
+            "example_actions": "Deny: logs:DeleteLogGroup, logs:DeleteLogStream",
+            "priority": "recommended"
         },
         {
             "scp_name": "Protect S3 audit log buckets",
             "scp_id": "SCP-ProtectAuditBuckets",
             "description": "Prevents deletion or modification of S3 buckets designated for audit log storage",
-            "example_actions": "Deny: s3:DeleteBucket, s3:PutBucketPolicy (on audit buckets)"
+            "example_actions": "Deny: s3:DeleteBucket, s3:PutBucketPolicy (on audit buckets)",
+            "priority": "core"
         },
     ],
     # CM — Configuration Management
@@ -85,19 +92,22 @@ NIST_800_53_SCPS: Dict[str, List[Dict[str, str]]] = {
             "scp_name": "Restrict AWS Regions",
             "scp_id": "SCP-RestrictRegions",
             "description": "Limits resource creation to approved AWS Regions only, preventing shadow deployments in unauthorized regions",
-            "example_actions": "Deny: * (where aws:RequestedRegion not in approved list)"
+            "example_actions": "Deny: * (where aws:RequestedRegion not in approved list)",
+            "priority": "core"
         },
         {
             "scp_name": "Prevent Config rule deletion",
             "scp_id": "SCP-ProtectConfigRules",
             "description": "Prevents deletion or modification of AWS Config rules and recorders",
-            "example_actions": "Deny: config:DeleteConfigRule, config:StopConfigurationRecorder"
+            "example_actions": "Deny: config:DeleteConfigRule, config:StopConfigurationRecorder",
+            "priority": "core"
         },
         {
             "scp_name": "Restrict service usage",
             "scp_id": "SCP-RestrictServices",
             "description": "Limits which AWS services can be used, enforcing least functionality",
-            "example_actions": "Deny: specific service actions not in approved service list"
+            "example_actions": "Deny: specific service actions not in approved service list",
+            "priority": "recommended"
         },
     ],
     # IA — Identification and Authentication
@@ -106,7 +116,8 @@ NIST_800_53_SCPS: Dict[str, List[Dict[str, str]]] = {
             "scp_name": "Enforce MFA for console access",
             "scp_id": "SCP-EnforceMFA",
             "description": "Denies all actions except identity-related ones unless MFA is authenticated",
-            "example_actions": "Deny: * (without aws:MultiFactorAuthPresent condition)"
+            "example_actions": "Deny: * (without aws:MultiFactorAuthPresent condition)",
+            "priority": "core"
         },
     ],
     # IR — Incident Response
@@ -115,7 +126,8 @@ NIST_800_53_SCPS: Dict[str, List[Dict[str, str]]] = {
             "scp_name": "Protect GuardDuty configuration",
             "scp_id": "SCP-ProtectGuardDuty",
             "description": "Prevents disabling or modifying GuardDuty detectors used for threat detection",
-            "example_actions": "Deny: guardduty:DeleteDetector, guardduty:DisassociateFromMasterAccount"
+            "example_actions": "Deny: guardduty:DeleteDetector, guardduty:DisassociateFromMasterAccount",
+            "priority": "core"
         },
     ],
     # SC — System and Communications Protection
@@ -124,37 +136,43 @@ NIST_800_53_SCPS: Dict[str, List[Dict[str, str]]] = {
             "scp_name": "Deny unencrypted S3 uploads",
             "scp_id": "SCP-DenyUnencryptedS3",
             "description": "Prevents uploading objects to S3 without server-side encryption",
-            "example_actions": "Deny: s3:PutObject (without x-amz-server-side-encryption header)"
+            "example_actions": "Deny: s3:PutObject (without x-amz-server-side-encryption header)",
+            "priority": "core"
         },
         {
             "scp_name": "Deny public S3 access",
             "scp_id": "SCP-DenyPublicS3",
             "description": "Prevents making S3 buckets or objects publicly accessible",
-            "example_actions": "Deny: s3:PutBucketPublicAccessBlock (if disabling), s3:PutBucketAcl (if public)"
+            "example_actions": "Deny: s3:PutBucketPublicAccessBlock (if disabling), s3:PutBucketAcl (if public)",
+            "priority": "core"
         },
         {
             "scp_name": "Require TLS for data in transit",
             "scp_id": "SCP-RequireTLS",
             "description": "Denies API calls that don't use TLS, enforcing encryption in transit",
-            "example_actions": "Deny: * (where aws:SecureTransport is false)"
+            "example_actions": "Deny: * (where aws:SecureTransport is false)",
+            "priority": "core"
         },
         {
             "scp_name": "Deny unencrypted EBS volumes",
             "scp_id": "SCP-DenyUnencryptedEBS",
             "description": "Prevents creation of unencrypted EBS volumes",
-            "example_actions": "Deny: ec2:CreateVolume (without encryption)"
+            "example_actions": "Deny: ec2:CreateVolume (without encryption)",
+            "priority": "core"
         },
         {
             "scp_name": "Deny unencrypted RDS instances",
             "scp_id": "SCP-DenyUnencryptedRDS",
             "description": "Prevents creation of unencrypted RDS database instances",
-            "example_actions": "Deny: rds:CreateDBInstance (without StorageEncrypted)"
+            "example_actions": "Deny: rds:CreateDBInstance (without StorageEncrypted)",
+            "priority": "core"
         },
         {
             "scp_name": "Restrict VPC modifications",
             "scp_id": "SCP-RestrictVPCChanges",
             "description": "Prevents unauthorized modifications to VPC configurations, internet gateways, and route tables",
-            "example_actions": "Deny: ec2:CreateInternetGateway, ec2:AttachInternetGateway (without approval tag)"
+            "example_actions": "Deny: ec2:CreateInternetGateway, ec2:AttachInternetGateway (without approval tag)",
+            "priority": "recommended"
         },
     ],
     # SI — System and Information Integrity
@@ -163,13 +181,15 @@ NIST_800_53_SCPS: Dict[str, List[Dict[str, str]]] = {
             "scp_name": "Protect Security Hub configuration",
             "scp_id": "SCP-ProtectSecurityHub",
             "description": "Prevents disabling Security Hub or removing member accounts",
-            "example_actions": "Deny: securityhub:DisableSecurityHub, securityhub:DisassociateFromMasterAccount"
+            "example_actions": "Deny: securityhub:DisableSecurityHub, securityhub:DisassociateFromMasterAccount",
+            "priority": "core"
         },
         {
             "scp_name": "Protect Inspector configuration",
             "scp_id": "SCP-ProtectInspector",
             "description": "Prevents disabling Amazon Inspector scanning",
-            "example_actions": "Deny: inspector2:Disable, inspector2:DisassociateMember"
+            "example_actions": "Deny: inspector2:Disable, inspector2:DisassociateMember",
+            "priority": "recommended"
         },
     ],
     # CP — Contingency Planning
@@ -178,7 +198,8 @@ NIST_800_53_SCPS: Dict[str, List[Dict[str, str]]] = {
             "scp_name": "Protect backup vaults",
             "scp_id": "SCP-ProtectBackups",
             "description": "Prevents deletion of AWS Backup vaults and recovery points",
-            "example_actions": "Deny: backup:DeleteBackupVault, backup:DeleteRecoveryPoint"
+            "example_actions": "Deny: backup:DeleteBackupVault, backup:DeleteRecoveryPoint",
+            "priority": "core"
         },
     ],
     # MP — Media Protection
@@ -187,7 +208,8 @@ NIST_800_53_SCPS: Dict[str, List[Dict[str, str]]] = {
             "scp_name": "Enforce S3 encryption at rest",
             "scp_id": "SCP-EnforceS3Encryption",
             "description": "Requires all S3 objects to be encrypted with KMS",
-            "example_actions": "Deny: s3:PutObject (without aws:kms encryption)"
+            "example_actions": "Deny: s3:PutObject (without aws:kms encryption)",
+            "priority": "core"
         },
     ],
     # RA — Risk Assessment
@@ -196,7 +218,8 @@ NIST_800_53_SCPS: Dict[str, List[Dict[str, str]]] = {
             "scp_name": "Protect vulnerability scanning",
             "scp_id": "SCP-ProtectScanning",
             "description": "Prevents disabling Amazon Inspector or modifying scan configurations",
-            "example_actions": "Deny: inspector2:Disable, inspector2:UpdateOrganizationConfiguration"
+            "example_actions": "Deny: inspector2:Disable, inspector2:UpdateOrganizationConfiguration",
+            "priority": "recommended"
         },
     ],
 }
@@ -215,13 +238,15 @@ NIST_800_53_OPA: Dict[str, List[Dict[str, str]]] = {
             "opa_rule": "IAM_POLICY_NO_WILDCARD_RESOURCES",
             "description": "Ensures IAM policies don't use wildcard (*) for resources without conditions",
             "resource_types": "aws_iam_policy, aws_iam_role_policy",
-            "severity": "HIGH"
+            "severity": "HIGH",
+            "priority": "recommended"
         },
         {
             "opa_rule": "IAM_NO_INLINE_POLICIES",
             "description": "Ensures IAM roles and users don't have inline policies (use managed policies instead)",
             "resource_types": "aws_iam_role, aws_iam_user",
-            "severity": "MEDIUM"
+            "severity": "MEDIUM",
+            "priority": "enhanced"
         },
     ],
     "AU": [
@@ -229,13 +254,15 @@ NIST_800_53_OPA: Dict[str, List[Dict[str, str]]] = {
             "opa_rule": "CLOUDTRAIL_ENABLED_ALL_REGIONS",
             "description": "Validates CloudTrail is configured for all regions with log file validation",
             "resource_types": "aws_cloudtrail",
-            "severity": "CRITICAL"
+            "severity": "CRITICAL",
+            "priority": "core"
         },
         {
             "opa_rule": "CLOUDWATCH_LOG_GROUP_RETENTION",
             "description": "Ensures CloudWatch log groups have retention periods set (not indefinite)",
             "resource_types": "aws_cloudwatch_log_group",
-            "severity": "MEDIUM"
+            "severity": "MEDIUM",
+            "priority": "enhanced"
         },
     ],
     "CM": [
@@ -243,13 +270,15 @@ NIST_800_53_OPA: Dict[str, List[Dict[str, str]]] = {
             "opa_rule": "REQUIRED_TAGS_CHECK",
             "description": "Validates all resources have required tags (environment, owner, data-classification)",
             "resource_types": "All taggable resources",
-            "severity": "MEDIUM"
+            "severity": "MEDIUM",
+            "priority": "enhanced"
         },
         {
             "opa_rule": "APPROVED_AMI_CHECK",
             "description": "Ensures EC2 instances use only approved, hardened AMIs",
             "resource_types": "aws_instance, aws_launch_template",
-            "severity": "HIGH"
+            "severity": "HIGH",
+            "priority": "recommended"
         },
     ],
     "IA": [
@@ -257,13 +286,15 @@ NIST_800_53_OPA: Dict[str, List[Dict[str, str]]] = {
             "opa_rule": "IAM_MFA_REQUIRED",
             "description": "Validates IAM policies include MFA conditions for sensitive actions",
             "resource_types": "aws_iam_policy",
-            "severity": "HIGH"
+            "severity": "HIGH",
+            "priority": "recommended"
         },
         {
             "opa_rule": "SECRETS_NO_PLAINTEXT",
             "description": "Ensures no plaintext secrets in Terraform variables or resource configurations",
             "resource_types": "All resources",
-            "severity": "CRITICAL"
+            "severity": "CRITICAL",
+            "priority": "core"
         },
     ],
     "SC": [
@@ -271,43 +302,50 @@ NIST_800_53_OPA: Dict[str, List[Dict[str, str]]] = {
             "opa_rule": "S3_BUCKET_ENCRYPTION_ENABLED",
             "description": "Validates S3 buckets have server-side encryption configured with KMS",
             "resource_types": "aws_s3_bucket, aws_s3_bucket_server_side_encryption_configuration",
-            "severity": "HIGH"
+            "severity": "HIGH",
+            "priority": "recommended"
         },
         {
             "opa_rule": "S3_BUCKET_PUBLIC_ACCESS_BLOCKED",
             "description": "Ensures S3 buckets have public access block enabled",
             "resource_types": "aws_s3_bucket_public_access_block",
-            "severity": "CRITICAL"
+            "severity": "CRITICAL",
+            "priority": "core"
         },
         {
             "opa_rule": "EBS_VOLUME_ENCRYPTION",
             "description": "Validates all EBS volumes are encrypted",
             "resource_types": "aws_ebs_volume, aws_instance",
-            "severity": "HIGH"
+            "severity": "HIGH",
+            "priority": "recommended"
         },
         {
             "opa_rule": "RDS_ENCRYPTION_ENABLED",
             "description": "Ensures RDS instances have storage encryption enabled",
             "resource_types": "aws_db_instance, aws_rds_cluster",
-            "severity": "HIGH"
+            "severity": "HIGH",
+            "priority": "recommended"
         },
         {
             "opa_rule": "SECURITY_GROUP_NO_UNRESTRICTED_INGRESS",
             "description": "Prevents security groups with 0.0.0.0/0 ingress on sensitive ports (SSH, RDP, DB)",
             "resource_types": "aws_security_group, aws_security_group_rule",
-            "severity": "CRITICAL"
+            "severity": "CRITICAL",
+            "priority": "core"
         },
         {
             "opa_rule": "VPC_FLOW_LOGS_ENABLED",
             "description": "Validates VPCs have flow logs enabled for network monitoring",
             "resource_types": "aws_vpc, aws_flow_log",
-            "severity": "HIGH"
+            "severity": "HIGH",
+            "priority": "recommended"
         },
         {
             "opa_rule": "ALB_HTTPS_ONLY",
             "description": "Ensures ALB listeners use HTTPS with TLS 1.2+",
             "resource_types": "aws_lb_listener",
-            "severity": "HIGH"
+            "severity": "HIGH",
+            "priority": "recommended"
         },
     ],
     "SI": [
@@ -315,13 +353,15 @@ NIST_800_53_OPA: Dict[str, List[Dict[str, str]]] = {
             "opa_rule": "GUARDDUTY_ENABLED",
             "description": "Validates GuardDuty detector is enabled in the account",
             "resource_types": "aws_guardduty_detector",
-            "severity": "HIGH"
+            "severity": "HIGH",
+            "priority": "recommended"
         },
         {
             "opa_rule": "SSM_PATCH_COMPLIANCE",
             "description": "Ensures Systems Manager patch baselines are configured for EC2 instances",
             "resource_types": "aws_ssm_patch_baseline, aws_ssm_patch_group",
-            "severity": "MEDIUM"
+            "severity": "MEDIUM",
+            "priority": "enhanced"
         },
     ],
     "CP": [
@@ -329,13 +369,15 @@ NIST_800_53_OPA: Dict[str, List[Dict[str, str]]] = {
             "opa_rule": "BACKUP_PLAN_EXISTS",
             "description": "Validates AWS Backup plans exist for critical resources",
             "resource_types": "aws_backup_plan, aws_backup_selection",
-            "severity": "HIGH"
+            "severity": "HIGH",
+            "priority": "recommended"
         },
         {
             "opa_rule": "RDS_MULTI_AZ",
             "description": "Ensures production RDS instances are configured for Multi-AZ",
             "resource_types": "aws_db_instance",
-            "severity": "HIGH"
+            "severity": "HIGH",
+            "priority": "recommended"
         },
     ],
     "MP": [
@@ -343,7 +385,8 @@ NIST_800_53_OPA: Dict[str, List[Dict[str, str]]] = {
             "opa_rule": "S3_DEFAULT_ENCRYPTION_KMS",
             "description": "Validates S3 buckets use KMS encryption (not just AES-256)",
             "resource_types": "aws_s3_bucket_server_side_encryption_configuration",
-            "severity": "HIGH"
+            "severity": "HIGH",
+            "priority": "recommended"
         },
     ],
     "RA": [
@@ -351,7 +394,8 @@ NIST_800_53_OPA: Dict[str, List[Dict[str, str]]] = {
             "opa_rule": "INSPECTOR_ENABLED",
             "description": "Validates Amazon Inspector is enabled for vulnerability scanning",
             "resource_types": "aws_inspector2_enabler",
-            "severity": "HIGH"
+            "severity": "HIGH",
+            "priority": "recommended"
         },
     ],
 }
