@@ -7,6 +7,7 @@ from compliance_discovery.control_questions import get_control_questions, has_cu
 from compliance_discovery.csf_custom_questions import get_csf_custom_questions, has_csf_custom_questions, get_csf_evidence_question, has_csf_evidence_question
 from compliance_discovery.cmmc_custom_questions import get_cmmc_custom_questions, has_cmmc_custom_questions, get_cmmc_evidence_question, has_cmmc_evidence_question
 from compliance_discovery.evidence_questions import get_family_evidence_question, has_family_evidence_question
+from compliance_discovery.nist_800_53_evidence import get_nist_evidence_question, has_nist_evidence_question
 from compliance_discovery.defense_line_questions import (
     get_nist_second_line_question, get_nist_third_line_question,
     get_csf_second_line_question, get_csf_third_line_question,
@@ -67,8 +68,17 @@ class DiscoveryQuestionGenerator:
                     aws_service_guidance=aws_guidance if idx == 0 else None
                 ))
             
-            # Add evidence question - prefer family-level over generic custom evidence
-            if evidence_questions:
+            # Add evidence question — priority: control-specific > custom > family-level > auto-generated
+            if has_nist_evidence_question(control.id):
+                evidence_text = get_nist_evidence_question(control.id)
+                questions.append(DiscoveryQuestion(
+                    id=f"{control.id}-EVIDENCE",
+                    control_id=control.id,
+                    question_text=f"What evidence demonstrates {control.id} compliance? {evidence_text}",
+                    question_type=QuestionType.EVIDENCE,
+                    family=control.family
+                ))
+            elif evidence_questions:
                 ev_text = evidence_questions[0]['question']
                 # If the custom evidence is a generic template, prefer family-level
                 is_generic = ('Configuration screenshots from' in ev_text
@@ -79,6 +89,15 @@ class DiscoveryQuestionGenerator:
                         id=f"{control.id}-EVIDENCE",
                         control_id=control.id,
                         question_text=family_evidence,
+                        question_type=QuestionType.EVIDENCE,
+                        family=control.family
+                    ))
+                elif is_generic and has_nist_evidence_question(control.id):
+                    evidence_text = get_nist_evidence_question(control.id)
+                    questions.append(DiscoveryQuestion(
+                        id=f"{control.id}-EVIDENCE",
+                        control_id=control.id,
+                        question_text=f"What evidence demonstrates {control.id} compliance? {evidence_text}",
                         question_type=QuestionType.EVIDENCE,
                         family=control.family
                     ))
@@ -131,7 +150,16 @@ class DiscoveryQuestionGenerator:
             ))
             
             # Generate AWS-specific evidence question
-            if has_family_evidence_question(control.id):
+            if has_nist_evidence_question(control.id):
+                evidence_text = get_nist_evidence_question(control.id)
+                questions.append(DiscoveryQuestion(
+                    id=f"{control.id}-EVIDENCE",
+                    control_id=control.id,
+                    question_text=f"What evidence demonstrates {control.id} compliance? {evidence_text}",
+                    question_type=QuestionType.EVIDENCE,
+                    family=control.family
+                ))
+            elif has_family_evidence_question(control.id):
                 family_evidence = get_family_evidence_question(control.id, control.title)
                 questions.append(DiscoveryQuestion(
                     id=f"{control.id}-EVIDENCE",
