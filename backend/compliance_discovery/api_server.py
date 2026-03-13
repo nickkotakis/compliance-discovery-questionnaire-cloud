@@ -22,6 +22,7 @@ from compliance_discovery.csf_control_mapping import get_csf_responsibility, get
 from compliance_discovery.csf_framework_mapper import get_csf_framework_relevance
 from compliance_discovery.csf_organizational_controls import get_organizational_requirements, get_category_metadata
 from compliance_discovery.cmmc_organizational_controls import get_cmmc_organizational_requirements, get_cmmc_category_metadata
+from compliance_discovery.cmmc_responsibility import get_cmmc_responsibility
 from compliance_discovery.preventive_controls import get_preventive_controls_for_control, get_control_type_label
 
 
@@ -356,7 +357,7 @@ def get_controls():
                     'family': c.family,
                     'domain_name': CMMC_DOMAIN_NAMES.get(c.family.upper(), c.family),
                     'in_moderate_baseline': True,
-                    'aws_responsibility': 'shared'
+                    'aws_responsibility': get_cmmc_responsibility(c.id)
                 }
                 for c in sorted_controls
             ],
@@ -508,8 +509,7 @@ def get_control(control_id: str):
     if framework == 'nist-csf':
         responsibility = get_csf_responsibility(control.id)
     elif framework == 'cmmc':
-        # CMMC practices are generally shared or customer responsibility
-        responsibility = 'shared' if aws_controls_data else 'customer'
+        responsibility = get_cmmc_responsibility(control.id)
     else:
         responsibility = get_aws_responsibility(control.id)
     
