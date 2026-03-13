@@ -149,7 +149,6 @@ const AWSImplementationGuide: React.FC<AWSImplementationGuideProps> = ({
           <Box>
             <SpaceBetween size="xs" direction="horizontal">
               <Badge color={meta.badgeColor}>{meta.label}</Badge>
-              <Badge>{control.control_id}</Badge>
             </SpaceBetween>
             <Box variant="strong" margin={{ top: 'xxs' }}>{control.title}</Box>
           </Box>
