@@ -2,9 +2,6 @@ import React, { useState } from 'react';
 import Container from '@cloudscape-design/components/container';
 import Header from '@cloudscape-design/components/header';
 import SpaceBetween from '@cloudscape-design/components/space-between';
-import FormField from '@cloudscape-design/components/form-field';
-import Input from '@cloudscape-design/components/input';
-import Select from '@cloudscape-design/components/select';
 import Button from '@cloudscape-design/components/button';
 import Box from '@cloudscape-design/components/box';
 import Badge from '@cloudscape-design/components/badge';
@@ -33,19 +30,6 @@ interface Meeting {
   agendaItems: AgendaItem[];
 }
 
-interface EngagementConfig {
-  customerName: string;
-  framework: string;
-  scope: string;
-  regulator: string;
-  engagementWeeks: number;
-  meetingFrequency: string;
-  maxMeetingDuration: number;
-}
-
-// =========================================================================
-// Control group definitions with complexity scoring
-// =========================================================================
 interface ControlGroup {
   id: string;
   topic: string;
@@ -212,177 +196,81 @@ function generateMeetings(groups: ControlGroup[], maxDuration: number, available
 }
 
 // =========================================================================
-// Persistence
+// Component — reads from shared EngagementContext
 // =========================================================================
-const STORAGE_KEY = 'sas-engagements';
-interface SavedEngagement { id: string; config: EngagementConfig; savedAt: string; }
-const loadSaved = (): SavedEngagement[] => { try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch { return []; } };
-const persistSaved = (e: SavedEngagement[]) => localStorage.setItem(STORAGE_KEY, JSON.stringify(e));
+import { useEngagement, FRAMEWORK_LABELS } from '../contexts/EngagementContext';
 
-const FRAMEWORK_LABELS: Record<string, string> = { 'nist-csf': 'NIST CSF 2.0', 'nist-800-53': 'NIST 800-53 Rev 5', 'cmmc': 'CMMC Level 2' };
-
-// =========================================================================
-// Component
-// =========================================================================
 const EngagementSchedule: React.FC = () => {
-  const [savedList, setSavedList] = useState<SavedEngagement[]>(loadSaved());
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [config, setConfig] = useState<EngagementConfig>({
-    customerName: '', framework: 'nist-csf', scope: 'AWS Environment Only',
-    regulator: '', engagementWeeks: 10, meetingFrequency: 'weekly', maxMeetingDuration: 75,
-  });
-  const [generated, setGenerated] = useState(false);
+  const { activeEngagement } = useEngagement();
   const [meetings, setMeetings] = useState<Meeting[]>([]);
+  const [generated, setGenerated] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [saved, setSaved] = useState(false);
   const [scheduleWarning, setScheduleWarning] = useState('');
+
+  const config = activeEngagement!.config;
 
   const doGenerate = () => {
     const groups = FRAMEWORK_GROUPS[config.framework] || [];
     const slotsPerWeek = config.meetingFrequency === 'weekly' ? 1 : 0.5;
-    // Reserve 1 slot for kickoff, leave rest for interviews
     const interviewSlots = Math.floor(config.engagementWeeks * slotsPerWeek) - 1;
     const totalNeeded = groups.reduce((s, g) => s + g.controlCount * g.minutesPerControl, 0);
     const totalAvailable = interviewSlots * config.maxMeetingDuration;
 
     if (totalNeeded > totalAvailable * 1.3) {
-      setScheduleWarning(`This schedule is compressed. ${totalNeeded} minutes of discussion time needed but only ${totalAvailable} minutes available across ${interviewSlots} interview slots. Consider increasing engagement duration or meeting length.`);
+      setScheduleWarning(`Schedule is compressed: ${totalNeeded} min needed but only ${totalAvailable} min available across ${interviewSlots} slots. Consider increasing duration or meeting length.`);
     } else if (totalNeeded < totalAvailable * 0.6) {
-      setScheduleWarning(`This schedule has ample time. ${totalNeeded} minutes needed across ${totalAvailable} available. Meetings will include buffer time for deeper discussion.`);
-    } else {
-      setScheduleWarning('');
-    }
+      setScheduleWarning(`Schedule has ample time: ${totalNeeded} min needed across ${totalAvailable} available. Meetings will include buffer for deeper discussion.`);
+    } else { setScheduleWarning(''); }
 
-    const mtgs = generateMeetings(groups, config.maxMeetingDuration, interviewSlots);
-    setMeetings(mtgs);
+    setMeetings(generateMeetings(groups, config.maxMeetingDuration, interviewSlots));
     setGenerated(true);
   };
 
-  const handleSave = () => {
-    if (!config.customerName.trim()) return;
-    const id = selectedId || `eng-${Date.now()}`;
-    const updated = savedList.filter(e => e.id !== id);
-    updated.push({ id, config: { ...config }, savedAt: new Date().toISOString() });
-    persistSaved(updated);
-    setSavedList(updated);
-    setSelectedId(id);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
-  };
-
-  const handleLoad = (id: string) => {
-    const eng = savedList.find(e => e.id === id);
-    if (eng) { setConfig(eng.config); setSelectedId(eng.id); doGenerate(); setGenerated(true); }
-  };
-
-  const handleDelete = (id: string) => {
-    const updated = savedList.filter(e => e.id !== id);
-    persistSaved(updated); setSavedList(updated);
-    if (selectedId === id) { setSelectedId(null); setGenerated(false); }
-  };
-
-  const handleNew = () => {
-    setSelectedId(null);
-    setConfig({ customerName: '', framework: 'nist-csf', scope: 'AWS Environment Only', regulator: '', engagementWeeks: 10, meetingFrequency: 'weekly', maxMeetingDuration: 75 });
-    setGenerated(false); setMeetings([]);
-  };
+  // Auto-generate on mount
+  React.useEffect(() => { doGenerate(); }, []);
 
   const generateReport = () => {
-    let r = `${config.customerName || '[Customer Name]'}\n`;
-    r += `${FRAMEWORK_LABELS[config.framework]} Stakeholder Interview Schedule\n\n`;
-    r += `AWS Security Assurance Services (AWS SAS) - Advisory Engagement\n`;
-    r += `Scope: ${config.scope}${config.regulator ? ` | Regulator: ${config.regulator}` : ''}\n`;
+    let r = `${config.customerName}\n${FRAMEWORK_LABELS[config.framework]} Stakeholder Interview Schedule\n\n`;
+    r += `AWS SAS Advisory Engagement | Scope: ${config.scope}${config.regulator ? ` | Regulator: ${config.regulator}` : ''}\n`;
     r += `Duration: ${config.engagementWeeks} weeks | Cadence: ${config.meetingFrequency} | Max meeting: ${config.maxMeetingDuration} min\n\n`;
     r += `AWS SAS Advisory Notice: This schedule is advisory guidance only.\n\n`;
-    r += `SRM Scoping Note: Scoped to ${config.scope}. AWS responsible for security of the cloud; customer responsible for security in the cloud.\n\n`;
+    r += `SRM Scoping Note: Scoped to ${config.scope}.\n\n`;
     r += `--- SCHEDULE (${meetings.length} interviews + kickoff + buffer + close-out) ---\n\n`;
-    r += `Kickoff: Engagement Overview & Scope Confirmation (90 min)\n\n`;
     meetings.forEach((m, i) => {
-      r += `Meeting ${i + 1}: ${m.topic}\n`;
-      r += `  Functions: ${m.functions} | Duration: ${m.duration} min | ProServe: ${m.proserve}\n`;
-      r += `  Attendees: ${m.attendees.join(', ')}\n`;
-      r += `  Agenda:\n`;
+      r += `Meeting ${i + 1}: ${m.topic}\n  ${m.functions} | ${m.duration} min | ProServe: ${m.proserve}\n  Attendees: ${m.attendees.join(', ')}\n`;
       m.agendaItems.forEach(a => { r += `    ${a.minutes} min — ${a.topic}\n`; });
       r += `\n`;
     });
-    r += `Buffer: Evidence Collection & CPR Drafting (3+ weeks)\n`;
-    r += `Session 1: Draft CPR Walkthrough (90 min)\n`;
-    r += `Session 2: Recommendations Review & Close-Out (90 min)\n`;
+    r += `Buffer: Evidence Collection & CPR Drafting (3+ weeks)\nSession 1: Draft CPR Walkthrough (90 min)\nSession 2: Close-Out (90 min)\n`;
     return r;
   };
 
   const copyReport = () => { navigator.clipboard.writeText(generateReport()); setCopied(true); setTimeout(() => setCopied(false), 2000); };
 
-  const totalControlMinutes = (FRAMEWORK_GROUPS[config.framework] || []).reduce((s, g) => s + g.controlCount * g.minutesPerControl, 0);
   const totalControls = (FRAMEWORK_GROUPS[config.framework] || []).reduce((s, g) => s + g.controlCount, 0);
 
   return (
     <SpaceBetween size="l">
-      {savedList.length > 0 && (
-        <Container header={<Header variant="h3" description="Select a saved engagement or create a new one" actions={<Button onClick={handleNew} iconName="add-plus">New engagement</Button>}>Saved engagements</Header>}>
-          <SpaceBetween size="s">
-            {savedList.map(eng => (
-              <div key={eng.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', borderRadius: '8px', cursor: 'pointer', border: selectedId === eng.id ? '2px solid #0972d3' : '1px solid #e9ebed', background: selectedId === eng.id ? '#f2f8fd' : '#fff' }} onClick={() => handleLoad(eng.id)}>
-                <SpaceBetween size="xxs">
-                  <Box variant="strong">{eng.config.customerName}</Box>
-                  <SpaceBetween size="xxs" direction="horizontal">
-                    <Badge color="blue">{FRAMEWORK_LABELS[eng.config.framework]}</Badge>
-                    <Box variant="small" color="text-body-secondary">{eng.config.engagementWeeks} weeks | {eng.config.maxMeetingDuration} min meetings</Box>
-                  </SpaceBetween>
-                </SpaceBetween>
-                <Button variant="icon" iconName="remove" onClick={(e) => { e.stopPropagation(); handleDelete(eng.id); }} />
-              </div>
-            ))}
-          </SpaceBetween>
-        </Container>
-      )}
-
-      <Container header={<Header variant="h2" description="Configure engagement parameters — the schedule adapts to your timeline and framework complexity">Engagement Schedule Builder</Header>}>
-        <SpaceBetween size="m">
-          <ColumnLayout columns={2}>
-            <FormField label="Customer name">
-              <Input value={config.customerName} onChange={({ detail }) => setConfig({ ...config, customerName: detail.value })} placeholder="e.g., Acme Financial Corp" />
-            </FormField>
-            <FormField label="Compliance framework">
-              <Select selectedOption={{ label: FRAMEWORK_LABELS[config.framework], value: config.framework }} onChange={({ detail }) => setConfig({ ...config, framework: detail.selectedOption.value || 'nist-csf' })} options={Object.entries(FRAMEWORK_LABELS).map(([v, l]) => ({ label: l, value: v }))} />
-            </FormField>
-            <FormField label="Engagement scope">
-              <Input value={config.scope} onChange={({ detail }) => setConfig({ ...config, scope: detail.value })} placeholder="e.g., AWS Environment Only" />
-            </FormField>
-            <FormField label="Primary regulator (optional)">
-              <Input value={config.regulator} onChange={({ detail }) => setConfig({ ...config, regulator: detail.value })} placeholder="e.g., OCC, FFIEC, DoD" />
-            </FormField>
-          </ColumnLayout>
-          <ColumnLayout columns={3}>
-            <FormField label="Interview weeks" description={`${totalControls} controls, ~${totalControlMinutes} min discussion time`}>
-              <Select selectedOption={{ label: `${config.engagementWeeks} weeks`, value: String(config.engagementWeeks) }} onChange={({ detail }) => setConfig({ ...config, engagementWeeks: parseInt(detail.selectedOption.value || '10') })} options={[4,6,8,10,12,14,16].map(w => ({ label: `${w} weeks`, value: String(w) }))} />
-            </FormField>
-            <FormField label="Meeting frequency">
-              <Select selectedOption={{ label: config.meetingFrequency === 'weekly' ? 'Weekly (1/week)' : 'Bi-weekly (1/2 weeks)', value: config.meetingFrequency }} onChange={({ detail }) => setConfig({ ...config, meetingFrequency: detail.selectedOption.value || 'weekly' })} options={[{ label: 'Weekly (1/week)', value: 'weekly' }, { label: 'Bi-weekly (1/2 weeks)', value: 'biweekly' }]} />
-            </FormField>
-            <FormField label="Max meeting duration">
-              <Select selectedOption={{ label: `${config.maxMeetingDuration} minutes`, value: String(config.maxMeetingDuration) }} onChange={({ detail }) => setConfig({ ...config, maxMeetingDuration: parseInt(detail.selectedOption.value || '75') })} options={[{ label: '60 minutes', value: '60' }, { label: '75 minutes', value: '75' }, { label: '90 minutes', value: '90' }]} />
-            </FormField>
-          </ColumnLayout>
-          <SpaceBetween size="xs" direction="horizontal">
-            <Button variant="primary" onClick={() => { doGenerate(); handleSave(); }}>Generate schedule</Button>
-            <Button onClick={handleSave} iconName={saved ? 'check' : 'upload'} disabled={!config.customerName.trim()}>{saved ? 'Saved' : 'Save engagement'}</Button>
-            {generated && <Button iconName={copied ? 'check' : 'copy'} onClick={copyReport}>{copied ? 'Copied' : 'Copy full report'}</Button>}
-          </SpaceBetween>
+      <Container header={<Header variant="h2" description={`${config.customerName} — ${FRAMEWORK_LABELS[config.framework]} — ${config.engagementWeeks} weeks — ${totalControls} controls`} actions={
+        <SpaceBetween size="xs" direction="horizontal">
+          <Button onClick={doGenerate}>Regenerate</Button>
+          <Button iconName={copied ? 'check' : 'copy'} onClick={copyReport}>{copied ? 'Copied' : 'Copy report'}</Button>
         </SpaceBetween>
+      }>Engagement Schedule</Header>}>
+        <Box variant="small" color="text-body-secondary">Schedule generated based on control complexity scoring. Adjust engagement parameters from the engagement setup page.</Box>
+      </Container>
+
+      {scheduleWarning && <Alert type={scheduleWarning.includes('compressed') ? 'warning' : 'info'}>{scheduleWarning}</Alert>}
+
+      <Alert type="info">AWS SAS Advisory Notice: This schedule is advisory guidance only. Legal counsel should be consulted for regulatory interpretation.</Alert>
+
+      <Container header={<Header variant="h3">Shared Responsibility Model (SRM) Scoping Note</Header>}>
+        <Box>This engagement is scoped to <Box variant="strong" display="inline">{config.scope}</Box>. AWS is responsible for security of the cloud. {config.customerName} is responsible for security in the cloud.</Box>
       </Container>
 
       {generated && meetings.length > 0 && (
         <>
-          {scheduleWarning && <Alert type={scheduleWarning.includes('compressed') ? 'warning' : 'info'}>{scheduleWarning}</Alert>}
-
-          <Alert type="info">AWS SAS Advisory Notice: This schedule is advisory guidance only. Legal counsel should be consulted for regulatory interpretation.</Alert>
-
-          <Container header={<Header variant="h3">Shared Responsibility Model (SRM) Scoping Note</Header>}>
-            <Box>This engagement is scoped to <Box variant="strong" display="inline">{config.scope}</Box>. AWS is responsible for security of the cloud. {config.customerName || 'The customer'} is responsible for security in the cloud.</Box>
-          </Container>
-
-          <Container header={<Header variant="h2" description={`Kickoff + ${meetings.length} interview sessions + buffer + 2 close-out sessions`}>{config.customerName || '[Customer]'} — {FRAMEWORK_LABELS[config.framework]} Interview Schedule</Header>}>
+          <Container header={<Header variant="h2" description={`Kickoff + ${meetings.length} interviews + buffer + 2 close-out`}>{config.customerName} — Interview Schedule</Header>}>
             <Table
               columnDefinitions={[
                 { id: 'meeting', header: 'Meeting', cell: (m: Meeting) => <Box variant="strong">Meeting {meetings.indexOf(m) + 1}</Box>, width: 100 },
@@ -418,9 +306,7 @@ const EngagementSchedule: React.FC = () => {
                   <Box variant="awsui-key-label">Agenda (timed)</Box>
                   <SpaceBetween size="xxs">
                     {m.agendaItems.map((a, i) => (
-                      <Box key={i} variant="small">
-                        <Badge color="grey">{a.minutes} min</Badge>{' '}{a.topic}
-                      </Box>
+                      <Box key={i} variant="small"><Badge color="grey">{a.minutes} min</Badge>{' '}{a.topic}</Box>
                     ))}
                   </SpaceBetween>
                 </div>
@@ -430,9 +316,9 @@ const EngagementSchedule: React.FC = () => {
 
           <Container header={<Header variant="h3">Close-Out Sessions</Header>}>
             <SpaceBetween size="s">
-              <Box><Box variant="strong" display="inline">Buffer Period</Box> — Evidence Collection & CPR Drafting (3+ weeks after final interview)</Box>
+              <Box><Box variant="strong" display="inline">Buffer Period</Box> — Evidence Collection & CPR Drafting (3+ weeks)</Box>
               <Box><Box variant="strong" display="inline">Session 1</Box> — Draft CPR Walkthrough & Findings Review (90 min)</Box>
-              <Box><Box variant="strong" display="inline">Session 2</Box> — Recommendations Review & Engagement Close-Out (90 min)</Box>
+              <Box><Box variant="strong" display="inline">Session 2</Box> — Recommendations Review & Close-Out (90 min)</Box>
             </SpaceBetween>
           </Container>
         </>

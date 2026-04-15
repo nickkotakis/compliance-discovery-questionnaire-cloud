@@ -24,6 +24,8 @@ import ExportPanel from './ExportPanel';
 import EngagementSchedule from './EngagementSchedule';
 import EvidenceTracker from './EvidenceTracker';
 import FacilitationGuide from './FacilitationGuide';
+import EngagementSetup from './EngagementSetup';
+import { EngagementProvider, useEngagement } from '../contexts/EngagementContext';
 import './ComplianceQuestionnaire.css';
 
 // NIST 800-53 Family Name Mappings
@@ -226,6 +228,7 @@ const ComplianceQuestionnaire: React.FC<ComplianceQuestionnaireProps> = ({ sessi
   const [showExportModal, setShowExportModal] = useState(false);
   const [selectedFramework, setSelectedFramework] = useState<string>('nist-800-53');
   const [frameworks, setFrameworks] = useState<Framework[]>([]);
+  const { activeEngagement } = useEngagement();
   const [frameworkLabel, setFrameworkLabel] = useState<string>('NIST 800-53 Rev 5 Moderate Baseline');
 
   useEffect(() => {
@@ -356,6 +359,7 @@ const ComplianceQuestionnaire: React.FC<ComplianceQuestionnaireProps> = ({ sessi
             onViewChange={setActiveView}
             controlCount={controls.length}
             completionRate={totalQuestions > 0 ? Math.round((answeredQuestions / totalQuestions) * 100) : 0}
+            activeEngagementName={activeEngagement?.config.customerName}
           />
         }
         navigationOpen={true}
@@ -519,9 +523,10 @@ const ComplianceQuestionnaire: React.FC<ComplianceQuestionnaireProps> = ({ sessi
               />
             )}
 
-            {activeView === 'schedule' && <EngagementSchedule />}
-            {activeView === 'evidence' && <EvidenceTracker />}
-            {activeView === 'facilitation' && <FacilitationGuide />}
+            {activeView === 'schedule' && (activeEngagement ? <EngagementSchedule /> : <EngagementSetup />)}
+            {activeView === 'evidence' && (activeEngagement ? <EvidenceTracker /> : <EngagementSetup />)}
+            {activeView === 'facilitation' && (activeEngagement ? <FacilitationGuide /> : <EngagementSetup />)}
+            {activeView === 'engagement-setup' && <EngagementSetup />}
 
             {activeView === 'questionnaire' && (
               <SpaceBetween size="m">
@@ -782,4 +787,10 @@ const ComplianceQuestionnaire: React.FC<ComplianceQuestionnaireProps> = ({ sessi
   );
 };
 
-export default ComplianceQuestionnaire;
+const ComplianceQuestionnaireWithProvider: React.FC<ComplianceQuestionnaireProps> = (props) => (
+  <EngagementProvider>
+    <ComplianceQuestionnaire {...props} />
+  </EngagementProvider>
+);
+
+export default ComplianceQuestionnaireWithProvider;

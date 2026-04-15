@@ -7,10 +7,10 @@ import Button from '@cloudscape-design/components/button';
 import Badge from '@cloudscape-design/components/badge';
 import ExpandableSection from '@cloudscape-design/components/expandable-section';
 import ColumnLayout from '@cloudscape-design/components/column-layout';
-import Select from '@cloudscape-design/components/select';
 import Input from '@cloudscape-design/components/input';
 import Alert from '@cloudscape-design/components/alert';
 import { complianceApi, Control, Question } from '../services/complianceApi';
+import { useEngagement, FRAMEWORK_LABELS } from '../contexts/EngagementContext';
 
 interface ControlGuideData {
   control: Control;
@@ -18,9 +18,10 @@ interface ControlGuideData {
 }
 
 const FacilitationGuide: React.FC = () => {
-  const [framework, setFramework] = useState('nist-csf');
+  const { activeEngagement } = useEngagement();
+  const framework = activeEngagement!.config.framework;
+  const customerName = activeEngagement!.config.customerName;
   const [meetingName, setMeetingName] = useState('');
-  const [customerName, setCustomerName] = useState('');
   const [controlIds, setControlIds] = useState('');
   const [loading, setLoading] = useState(false);
   const [guideData, setGuideData] = useState<ControlGuideData[]>([]);
@@ -116,31 +117,17 @@ const FacilitationGuide: React.FC = () => {
   return (
     <SpaceBetween size="l">
       <Container header={
-        <Header variant="h2" description="Generate structured interview guides with opening questions, follow-ups, red flags, and CPR templates">
+        <Header variant="h2" description={`${customerName} — ${FRAMEWORK_LABELS[framework]} — Generate structured interview guides`}>
           Facilitation Guide Generator
         </Header>
       }>
         <SpaceBetween size="m">
           <ColumnLayout columns={2}>
-            <FormField label="Customer name">
-              <Input value={customerName} onChange={({ detail }) => setCustomerName(detail.value)} placeholder="e.g., Acme Financial Corp" />
-            </FormField>
             <FormField label="Meeting name">
               <Input value={meetingName} onChange={({ detail }) => setMeetingName(detail.value)} placeholder="e.g., Meeting 4 — Risk Assessment" />
             </FormField>
-            <FormField label="Framework">
-              <Select
-                selectedOption={{ label: framework === 'nist-csf' ? 'NIST CSF 2.0' : framework === 'nist-800-53' ? 'NIST 800-53' : 'CMMC Level 2', value: framework }}
-                onChange={({ detail }) => setFramework(detail.selectedOption.value || 'nist-csf')}
-                options={[
-                  { label: 'NIST CSF 2.0', value: 'nist-csf' },
-                  { label: 'NIST 800-53 Rev 5', value: 'nist-800-53' },
-                  { label: 'CMMC Level 2', value: 'cmmc' },
-                ]}
-              />
-            </FormField>
-            <FormField label="Control IDs (comma-separated)" description="e.g., ID.RA-01, ID.RA-02, ID.IM-01">
-              <Input value={controlIds} onChange={({ detail }) => setControlIds(detail.value)} placeholder="GV.RM-01, GV.RM-02, GV.SC-01" />
+            <FormField label="Control IDs (comma-separated)" description={`Enter ${FRAMEWORK_LABELS[framework]} control IDs`}>
+              <Input value={controlIds} onChange={({ detail }) => setControlIds(detail.value)} placeholder="e.g., GV.RM-01, GV.RM-02, GV.SC-01" />
             </FormField>
           </ColumnLayout>
           <SpaceBetween size="xs" direction="horizontal">

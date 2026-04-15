@@ -8,6 +8,7 @@ import Badge from '@cloudscape-design/components/badge';
 import Button from '@cloudscape-design/components/button';
 import Box from '@cloudscape-design/components/box';
 import Input from '@cloudscape-design/components/input';
+import { useEngagement, FRAMEWORK_LABELS } from '../contexts/EngagementContext';
 
 interface EvidenceItem {
   id: string;
@@ -57,14 +58,15 @@ const SAMPLE_EVIDENCE: Record<string, EvidenceItem[]> = {
 };
 
 const EvidenceTracker: React.FC = () => {
-  const [framework, setFramework] = useState('nist-csf');
+  const { activeEngagement } = useEngagement();
+  const framework = activeEngagement!.config.framework;
   const [items, setItems] = useState<EvidenceItem[]>(SAMPLE_EVIDENCE['nist-csf'] || []);
   const [copied, setCopied] = useState(false);
 
-  const handleFrameworkChange = (fw: string) => {
-    setFramework(fw);
-    setItems(SAMPLE_EVIDENCE[fw] || SAMPLE_EVIDENCE['nist-csf'] || []);
-  };
+  // Load evidence for the active engagement's framework
+  React.useEffect(() => {
+    setItems(SAMPLE_EVIDENCE[framework] || SAMPLE_EVIDENCE['nist-csf'] || []);
+  }, [framework]);
 
   const updateStatus = (id: string, newStatus: string) => {
     setItems(prev => prev.map(item => item.id === id ? { ...item, status: newStatus } : item));
@@ -103,19 +105,8 @@ const EvidenceTracker: React.FC = () => {
   return (
     <SpaceBetween size="l">
       <Container header={
-        <Header variant="h2" description="Track evidence artifacts across your engagement"
-          actions={<SpaceBetween size="xs" direction="horizontal">
-            <Select
-              selectedOption={{ label: framework === 'nist-csf' ? 'NIST CSF 2.0' : framework === 'nist-800-53' ? 'NIST 800-53' : 'CMMC Level 2', value: framework }}
-              onChange={({ detail }) => handleFrameworkChange(detail.selectedOption.value || 'nist-csf')}
-              options={[
-                { label: 'NIST CSF 2.0', value: 'nist-csf' },
-                { label: 'NIST 800-53 Rev 5', value: 'nist-800-53' },
-                { label: 'CMMC Level 2', value: 'cmmc' },
-              ]}
-            />
-            <Button iconName={copied ? 'check' : 'copy'} onClick={copyReport}>{copied ? 'Copied' : 'Copy tracker'}</Button>
-          </SpaceBetween>}
+        <Header variant="h2" description={`${activeEngagement!.config.customerName} — ${FRAMEWORK_LABELS[framework]} — Track evidence artifacts across your engagement`}
+          actions={<Button iconName={copied ? 'check' : 'copy'} onClick={copyReport}>{copied ? 'Copied' : 'Copy tracker'}</Button>}
         >
           Evidence Request Tracker
         </Header>
