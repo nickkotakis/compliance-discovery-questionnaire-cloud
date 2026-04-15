@@ -43,6 +43,30 @@ const Sidebar: React.FC<SidebarProps> = ({
         },
         {
           type: 'section',
+          text: 'Engagement PM',
+          items: [
+            {
+              type: 'link',
+              text: 'Engagement Schedule',
+              href: '#schedule'
+            },
+            {
+              type: 'link',
+              text: 'Evidence Tracker',
+              href: '#evidence'
+            },
+            {
+              type: 'link',
+              text: 'Facilitation Guide',
+              href: '#facilitation'
+            }
+          ]
+        },
+        {
+          type: 'divider'
+        },
+        {
+          type: 'section',
           text: 'Configuration',
           items: [
             {

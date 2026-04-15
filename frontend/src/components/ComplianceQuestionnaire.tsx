@@ -21,6 +21,9 @@ import InterviewMode from './InterviewMode';
 import AWSImplementationGuide from './AWSImplementationGuide';
 import Settings from './Settings';
 import ExportPanel from './ExportPanel';
+import EngagementSchedule from './EngagementSchedule';
+import EvidenceTracker from './EvidenceTracker';
+import FacilitationGuide from './FacilitationGuide';
 import './ComplianceQuestionnaire.css';
 
 // NIST 800-53 Family Name Mappings
@@ -510,6 +513,10 @@ const ComplianceQuestionnaire: React.FC<ComplianceQuestionnaireProps> = ({ sessi
                 onSessionChange={setSessionId}
               />
             )}
+
+            {activeView === 'schedule' && <EngagementSchedule />}
+            {activeView === 'evidence' && <EvidenceTracker />}
+            {activeView === 'facilitation' && <FacilitationGuide />}
 
             {activeView === 'questionnaire' && (
               <SpaceBetween size="m">
