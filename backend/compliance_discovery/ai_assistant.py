@@ -9,7 +9,7 @@ import boto3
 import os
 
 # Use Claude 3.5 Haiku for speed and cost
-MODEL_ID = 'anthropic.claude-3-5-haiku-20241022-v1:0'
+MODEL_ID = 'us.anthropic.claude-3-5-haiku-20241022-v1:0'
 REGION = os.environ.get('AWS_REGION', 'us-east-1')
 
 SYSTEM_PROMPT = """You are an AI assistant for AWS Security Assurance Services (AWS SAS) compliance engagement project management. You help SAS consultants manage their customer engagements by generating professional artifacts.
