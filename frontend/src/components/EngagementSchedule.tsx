@@ -210,7 +210,28 @@ const FRAMEWORK_MEETINGS: Record<string, Meeting[]> = {
   ],
 };
 
+const STORAGE_KEY = 'sas-engagements';
+
+interface SavedEngagement {
+  id: string;
+  config: EngagementConfig;
+  savedAt: string;
+}
+
+const loadSavedEngagements = (): SavedEngagement[] => {
+  try {
+    const data = localStorage.getItem(STORAGE_KEY);
+    return data ? JSON.parse(data) : [];
+  } catch { return []; }
+};
+
+const saveEngagements = (engagements: SavedEngagement[]) => {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(engagements));
+};
+
 const EngagementSchedule: React.FC = () => {
+  const [savedEngagements, setSavedEngagements] = useState<SavedEngagement[]>(loadSavedEngagements());
+  const [selectedEngagementId, setSelectedEngagementId] = useState<string | null>(null);
   const [config, setConfig] = useState<EngagementConfig>({
     customerName: '',
     framework: 'nist-csf',
@@ -221,6 +242,7 @@ const EngagementSchedule: React.FC = () => {
   });
   const [generated, setGenerated] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   const meetings = FRAMEWORK_MEETINGS[config.framework] || [];
 
@@ -228,6 +250,44 @@ const EngagementSchedule: React.FC = () => {
     'nist-csf': 'NIST CSF 2.0',
     'nist-800-53': 'NIST 800-53 Rev 5',
     'cmmc': 'CMMC Level 2',
+  };
+
+  const handleSave = () => {
+    if (!config.customerName.trim()) return;
+    const id = selectedEngagementId || `eng-${Date.now()}`;
+    const updated = savedEngagements.filter(e => e.id !== id);
+    updated.push({ id, config: { ...config }, savedAt: new Date().toISOString() });
+    saveEngagements(updated);
+    setSavedEngagements(updated);
+    setSelectedEngagementId(id);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  };
+
+  const handleLoad = (id: string) => {
+    const eng = savedEngagements.find(e => e.id === id);
+    if (eng) {
+      setConfig(eng.config);
+      setSelectedEngagementId(eng.id);
+      setGenerated(true);
+    }
+  };
+
+  const handleDelete = (id: string) => {
+    const updated = savedEngagements.filter(e => e.id !== id);
+    saveEngagements(updated);
+    setSavedEngagements(updated);
+    if (selectedEngagementId === id) {
+      setSelectedEngagementId(null);
+      setConfig({ customerName: '', framework: 'nist-csf', scope: 'AWS Environment Only', regulator: '', startDate: '', cadence: 'weekly' });
+      setGenerated(false);
+    }
+  };
+
+  const handleNew = () => {
+    setSelectedEngagementId(null);
+    setConfig({ customerName: '', framework: 'nist-csf', scope: 'AWS Environment Only', regulator: '', startDate: '', cadence: 'weekly' });
+    setGenerated(false);
   };
 
   const generateReport = () => {
@@ -265,6 +325,38 @@ const EngagementSchedule: React.FC = () => {
 
   return (
     <SpaceBetween size="l">
+      {/* Saved engagements selector */}
+      {savedEngagements.length > 0 && (
+        <Container header={
+          <Header variant="h3" description="Select a saved engagement or create a new one"
+            actions={<Button onClick={handleNew} iconName="add-plus">New engagement</Button>}
+          >
+            Saved engagements
+          </Header>
+        }>
+          <SpaceBetween size="s">
+            {savedEngagements.map(eng => (
+              <div key={eng.id} style={{
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                padding: '10px 14px', borderRadius: '8px', cursor: 'pointer',
+                border: selectedEngagementId === eng.id ? '2px solid #0972d3' : '1px solid #e9ebed',
+                background: selectedEngagementId === eng.id ? '#f2f8fd' : '#fff',
+              }} onClick={() => handleLoad(eng.id)}>
+                <SpaceBetween size="xxs">
+                  <Box variant="strong">{eng.config.customerName}</Box>
+                  <SpaceBetween size="xxs" direction="horizontal">
+                    <Badge color="blue">{frameworkLabel[eng.config.framework] || eng.config.framework}</Badge>
+                    <Box variant="small" color="text-body-secondary">{eng.config.scope}</Box>
+                    {eng.config.regulator && <Box variant="small" color="text-body-secondary">| {eng.config.regulator}</Box>}
+                  </SpaceBetween>
+                </SpaceBetween>
+                <Button variant="icon" iconName="remove" onClick={(e) => { e.stopPropagation(); handleDelete(eng.id); }} />
+              </div>
+            ))}
+          </SpaceBetween>
+        </Container>
+      )}
+
       <Container header={
         <Header variant="h2" description="Configure your engagement parameters to generate a structured interview schedule">
           Engagement Schedule Builder
@@ -294,7 +386,8 @@ const EngagementSchedule: React.FC = () => {
         </ColumnLayout>
         <Box margin={{ top: 'm' }}>
           <SpaceBetween size="xs" direction="horizontal">
-            <Button variant="primary" onClick={() => setGenerated(true)}>Generate schedule</Button>
+            <Button variant="primary" onClick={() => { setGenerated(true); handleSave(); }}>Generate schedule</Button>
+            <Button onClick={handleSave} iconName={saved ? 'check' : 'upload'} disabled={!config.customerName.trim()}>{saved ? 'Saved' : 'Save engagement'}</Button>
             {generated && <Button iconName={copied ? 'check' : 'copy'} onClick={copyReport}>{copied ? 'Copied' : 'Copy full report'}</Button>}
           </SpaceBetween>
         </Box>
