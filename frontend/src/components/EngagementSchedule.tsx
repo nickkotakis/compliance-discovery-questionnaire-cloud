@@ -111,25 +111,51 @@ const FRAMEWORK_GROUPS: Record<string, ControlGroup[]> = {
 // Schedule generation algorithm
 // =========================================================================
 function generateMeetings(groups: ControlGroup[], maxDuration: number, availableSlots: number): Meeting[] {
-  // Calculate total minutes needed
-  const groupMinutes = groups.map(g => ({
-    ...g,
-    totalMinutes: g.controlCount * g.minutesPerControl,
-  }));
-  const totalNeeded = groupMinutes.reduce((sum, g) => sum + g.totalMinutes, 0);
+  // Calculate total minutes needed and apply compression to fit available time
+  const totalNeeded = groups.reduce((s, g) => s + g.controlCount * g.minutesPerControl, 0);
   const totalAvailable = availableSlots * maxDuration;
+  const compressionFactor = Math.min(1, totalAvailable / totalNeeded);
 
-  // Compression factor if we need to fit into fewer slots
-  const compressionFactor = totalNeeded > totalAvailable ? totalAvailable / totalNeeded : 1;
+  // Build weighted groups
+  const weightedGroups = groups.map(g => ({
+    ...g,
+    adjustedMinutes: Math.max(10, Math.round(g.controlCount * g.minutesPerControl * compressionFactor)),
+  }));
 
-  const meetings: Meeting[] = [];
-  let currentMeeting: { groups: typeof groupMinutes; totalMin: number } = { groups: [], totalMin: 0 };
-  let meetingNum = 1;
+  // Bin-pack groups into exactly availableSlots meetings (or fewer)
+  const bins: { groups: typeof weightedGroups; totalMin: number }[] = [];
 
-  const flushMeeting = () => {
-    if (currentMeeting.groups.length === 0) return;
-    const grps = currentMeeting.groups;
-    const duration = Math.min(Math.ceil(currentMeeting.totalMin / 5) * 5, maxDuration); // round to 5min
+  for (const group of weightedGroups) {
+    // Try to fit into an existing bin
+    let placed = false;
+    for (const bin of bins) {
+      if (bin.totalMin + group.adjustedMinutes <= maxDuration) {
+        bin.groups.push(group);
+        bin.totalMin += group.adjustedMinutes;
+        placed = true;
+        break;
+      }
+    }
+    if (!placed) {
+      bins.push({ groups: [group], totalMin: group.adjustedMinutes });
+    }
+  }
+
+  // If we have more bins than slots, merge the two smallest bins repeatedly
+  while (bins.length > availableSlots && bins.length > 1) {
+    bins.sort((a, b) => a.totalMin - b.totalMin);
+    const smallest = bins.shift()!;
+    const secondSmallest = bins.shift()!;
+    bins.push({
+      groups: [...smallest.groups, ...secondSmallest.groups],
+      totalMin: smallest.totalMin + secondSmallest.totalMin,
+    });
+  }
+
+  // Convert bins to Meeting objects
+  const meetings: Meeting[] = bins.map((bin, idx) => {
+    const grps = bin.groups;
+    const duration = Math.min(Math.ceil(bin.totalMin / 5) * 5, Math.max(maxDuration, bin.totalMin));
     const needsProserve = grps.some(g => g.proserve);
     const allAttendees = new Set<string>();
     grps.forEach(g => g.attendees.forEach(a => allAttendees.add(a)));
@@ -137,16 +163,15 @@ function generateMeetings(groups: ControlGroup[], maxDuration: number, available
 
     const agendaItems: AgendaItem[] = [];
     grps.forEach(g => {
-      const adjustedMin = Math.round(g.totalMinutes * compressionFactor);
-      const perTopic = Math.max(5, Math.round(adjustedMin / g.agendaTopics.length));
+      const perTopic = Math.max(5, Math.round(g.adjustedMinutes / g.agendaTopics.length));
       g.agendaTopics.forEach(topic => {
         agendaItems.push({ topic, controls: g.controls.join(', '), minutes: perTopic });
       });
     });
 
-    // Adjust agenda times to fit duration
+    // Scale agenda to fit duration
     const agendaTotal = agendaItems.reduce((s, a) => s + a.minutes, 0);
-    if (agendaTotal > duration) {
+    if (agendaTotal > duration && agendaTotal > 0) {
       const scale = duration / agendaTotal;
       agendaItems.forEach(a => { a.minutes = Math.max(5, Math.round(a.minutes * scale)); });
     }
@@ -156,8 +181,8 @@ function generateMeetings(groups: ControlGroup[], maxDuration: number, available
       agendaItems.push({ topic: `SRM Note: ${srmNotes.join('; ')}`, controls: '', minutes: 0 });
     }
 
-    meetings.push({
-      id: `mtg${meetingNum}`,
+    return {
+      id: `mtg${idx + 1}`,
       topic: grps.map(g => g.topic).join(' & '),
       functions: grps.map(g => g.functions).join(' / '),
       controls: grps.map(g => g.controls.join(', ')).join('; '),
@@ -165,32 +190,8 @@ function generateMeetings(groups: ControlGroup[], maxDuration: number, available
       proserve: needsProserve ? 'Yes' : 'No',
       attendees: Array.from(allAttendees),
       agendaItems,
-    });
-    meetingNum++;
-    currentMeeting = { groups: [], totalMin: 0 };
-  };
-
-  for (const group of groupMinutes) {
-    const adjustedMin = Math.round(group.totalMinutes * compressionFactor);
-
-    // If this group alone exceeds max duration, it gets its own meeting
-    if (adjustedMin > maxDuration) {
-      flushMeeting();
-      currentMeeting.groups.push(group);
-      currentMeeting.totalMin = adjustedMin;
-      flushMeeting();
-      continue;
-    }
-
-    // If adding this group would exceed max duration, flush and start new
-    if (currentMeeting.totalMin + adjustedMin > maxDuration) {
-      flushMeeting();
-    }
-
-    currentMeeting.groups.push(group);
-    currentMeeting.totalMin += adjustedMin;
-  }
-  flushMeeting();
+    };
+  });
 
   return meetings;
 }
