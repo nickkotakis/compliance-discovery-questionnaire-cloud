@@ -58,22 +58,26 @@ const SAMPLE_EVIDENCE: Record<string, EvidenceItem[]> = {
 };
 
 const EvidenceTracker: React.FC = () => {
-  const { activeEngagement } = useEngagement();
+  const { activeEngagement, evidenceItems, setEvidenceItems, updateEvidenceStatus, updateEvidenceNotes } = useEngagement();
   const framework = activeEngagement!.config.framework;
-  const [items, setItems] = useState<EvidenceItem[]>(SAMPLE_EVIDENCE['nist-csf'] || []);
   const [copied, setCopied] = useState(false);
 
-  // Load evidence for the active engagement's framework
+  // Initialize evidence from sample data if empty
   React.useEffect(() => {
-    setItems(SAMPLE_EVIDENCE[framework] || SAMPLE_EVIDENCE['nist-csf'] || []);
+    if (evidenceItems.length === 0) {
+      const sample = SAMPLE_EVIDENCE[framework] || SAMPLE_EVIDENCE['nist-csf'] || [];
+      setEvidenceItems(sample);
+    }
   }, [framework]);
 
+  const items = evidenceItems;
+
   const updateStatus = (id: string, newStatus: string) => {
-    setItems(prev => prev.map(item => item.id === id ? { ...item, status: newStatus } : item));
+    updateEvidenceStatus(id, newStatus);
   };
 
   const updateNotes = (id: string, newNotes: string) => {
-    setItems(prev => prev.map(item => item.id === id ? { ...item, notes: newNotes } : item));
+    updateEvidenceNotes(id, newNotes);
   };
 
   const stats = {

@@ -202,9 +202,9 @@ function generateMeetings(groups: ControlGroup[], maxDuration: number, available
 import { useEngagement, FRAMEWORK_LABELS } from '../contexts/EngagementContext';
 
 const EngagementSchedule: React.FC = () => {
-  const { activeEngagement } = useEngagement();
-  const [meetings, setMeetings] = useState<Meeting[]>([]);
-  const [generated, setGenerated] = useState(false);
+  const { activeEngagement, setScheduleMeetings, scheduleMeetings: savedMeetings } = useEngagement();
+  const [meetings, setMeetings] = useState<Meeting[]>(savedMeetings as Meeting[]);
+  const [generated, setGenerated] = useState(savedMeetings.length > 0);
   const [copied, setCopied] = useState(false);
   const [scheduleWarning, setScheduleWarning] = useState('');
 
@@ -223,12 +223,14 @@ const EngagementSchedule: React.FC = () => {
       setScheduleWarning(`Schedule has ample time: ${totalNeeded} min needed across ${totalAvailable} available. Meetings will include buffer for deeper discussion.`);
     } else { setScheduleWarning(''); }
 
-    setMeetings(generateMeetings(groups, config.maxMeetingDuration, interviewSlots));
+    const mtgs = generateMeetings(groups, config.maxMeetingDuration, interviewSlots);
+    setMeetings(mtgs);
+    setScheduleMeetings(mtgs);  // persist to context
     setGenerated(true);
   };
 
-  // Auto-generate on mount
-  React.useEffect(() => { doGenerate(); }, []);
+  // Auto-generate on mount if no saved schedule
+  React.useEffect(() => { if (savedMeetings.length === 0) doGenerate(); }, []);
 
   const generateReport = () => {
     let r = `${config.customerName}\n${FRAMEWORK_LABELS[config.framework]} Stakeholder Interview Schedule\n\n`;

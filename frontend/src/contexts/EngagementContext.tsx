@@ -16,6 +16,26 @@ export interface SavedEngagement {
   savedAt: string;
 }
 
+export interface ScheduleMeeting {
+  id: string;
+  topic: string;
+  functions: string;
+  controls: string;
+  duration: number;
+  proserve: string;
+  attendees: string[];
+  agendaItems: { topic: string; controls: string; minutes: number }[];
+}
+
+export interface EvidenceItem {
+  id: string;
+  meeting: string;
+  artifact: string;
+  controlMapping: string;
+  status: string;
+  notes: string;
+}
+
 interface EngagementContextType {
   activeEngagement: SavedEngagement | null;
   savedEngagements: SavedEngagement[];
@@ -23,43 +43,58 @@ interface EngagementContextType {
   saveEngagement: (config: EngagementConfig) => SavedEngagement;
   deleteEngagement: (id: string) => void;
   updateActiveConfig: (config: EngagementConfig) => void;
+  // Schedule
+  scheduleMeetings: ScheduleMeeting[];
+  setScheduleMeetings: (meetings: ScheduleMeeting[]) => void;
+  // Evidence
+  evidenceItems: EvidenceItem[];
+  setEvidenceItems: (items: EvidenceItem[]) => void;
+  updateEvidenceStatus: (id: string, status: string) => void;
+  updateEvidenceNotes: (id: string, notes: string) => void;
 }
 
 const STORAGE_KEY = 'sas-engagements';
 const ACTIVE_KEY = 'sas-active-engagement';
+const SCHEDULE_KEY = 'sas-schedule';
+const EVIDENCE_KEY = 'sas-evidence';
 
-const loadSaved = (): SavedEngagement[] => {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
-  catch { return []; }
-};
-
-const loadActiveId = (): string | null => {
-  return localStorage.getItem(ACTIVE_KEY);
-};
+const loadSaved = (): SavedEngagement[] => { try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch { return []; } };
+const loadActiveId = (): string | null => localStorage.getItem(ACTIVE_KEY);
+const loadSchedule = (engId: string): ScheduleMeeting[] => { try { return JSON.parse(localStorage.getItem(`${SCHEDULE_KEY}-${engId}`) || '[]'); } catch { return []; } };
+const loadEvidence = (engId: string): EvidenceItem[] => { try { return JSON.parse(localStorage.getItem(`${EVIDENCE_KEY}-${engId}`) || '[]'); } catch { return []; } };
 
 const EngagementContext = createContext<EngagementContextType | null>(null);
 
 export const EngagementProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [savedEngagements, setSavedEngagements] = useState<SavedEngagement[]>(loadSaved());
   const [activeEngagement, setActiveState] = useState<SavedEngagement | null>(null);
+  const [scheduleMeetings, setScheduleState] = useState<ScheduleMeeting[]>([]);
+  const [evidenceItems, setEvidenceState] = useState<EvidenceItem[]>([]);
 
-  // Load active engagement on mount
   useEffect(() => {
     const activeId = loadActiveId();
     if (activeId) {
       const eng = savedEngagements.find(e => e.id === activeId);
-      if (eng) setActiveState(eng);
+      if (eng) {
+        setActiveState(eng);
+        setScheduleState(loadSchedule(eng.id));
+        setEvidenceState(loadEvidence(eng.id));
+      }
     }
   }, []);
 
-  const persist = (engs: SavedEngagement[]) => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(engs));
-    setSavedEngagements(engs);
-  };
+  const persist = (engs: SavedEngagement[]) => { localStorage.setItem(STORAGE_KEY, JSON.stringify(engs)); setSavedEngagements(engs); };
 
   const setActiveEngagement = (eng: SavedEngagement | null) => {
     setActiveState(eng);
     localStorage.setItem(ACTIVE_KEY, eng?.id || '');
+    if (eng) {
+      setScheduleState(loadSchedule(eng.id));
+      setEvidenceState(loadEvidence(eng.id));
+    } else {
+      setScheduleState([]);
+      setEvidenceState([]);
+    }
   };
 
   const saveEngagement = (config: EngagementConfig): SavedEngagement => {
@@ -75,9 +110,9 @@ export const EngagementProvider: React.FC<{ children: ReactNode }> = ({ children
   const deleteEngagement = (id: string) => {
     const updated = savedEngagements.filter(e => e.id !== id);
     persist(updated);
-    if (activeEngagement?.id === id) {
-      setActiveEngagement(null);
-    }
+    localStorage.removeItem(`${SCHEDULE_KEY}-${id}`);
+    localStorage.removeItem(`${EVIDENCE_KEY}-${id}`);
+    if (activeEngagement?.id === id) setActiveEngagement(null);
   };
 
   const updateActiveConfig = (config: EngagementConfig) => {
@@ -89,10 +124,32 @@ export const EngagementProvider: React.FC<{ children: ReactNode }> = ({ children
     setActiveState(eng);
   };
 
+  const setScheduleMeetings = (meetings: ScheduleMeeting[]) => {
+    setScheduleState(meetings);
+    if (activeEngagement) localStorage.setItem(`${SCHEDULE_KEY}-${activeEngagement.id}`, JSON.stringify(meetings));
+  };
+
+  const setEvidenceItems = (items: EvidenceItem[]) => {
+    setEvidenceState(items);
+    if (activeEngagement) localStorage.setItem(`${EVIDENCE_KEY}-${activeEngagement.id}`, JSON.stringify(items));
+  };
+
+  const updateEvidenceStatus = (id: string, status: string) => {
+    const updated = evidenceItems.map(i => i.id === id ? { ...i, status } : i);
+    setEvidenceItems(updated);
+  };
+
+  const updateEvidenceNotes = (id: string, notes: string) => {
+    const updated = evidenceItems.map(i => i.id === id ? { ...i, notes } : i);
+    setEvidenceItems(updated);
+  };
+
   return (
     <EngagementContext.Provider value={{
       activeEngagement, savedEngagements, setActiveEngagement,
       saveEngagement, deleteEngagement, updateActiveConfig,
+      scheduleMeetings, setScheduleMeetings,
+      evidenceItems, setEvidenceItems, updateEvidenceStatus, updateEvidenceNotes,
     }}>
       {children}
     </EngagementContext.Provider>
