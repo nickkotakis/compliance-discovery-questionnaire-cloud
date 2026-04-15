@@ -363,6 +363,9 @@ const ComplianceQuestionnaire: React.FC<ComplianceQuestionnaireProps> = ({ sessi
         maxContentWidth={Number.MAX_VALUE}
         content={
           <SpaceBetween size="l">
+            {/* Framework selector and filters — only show for assessment views */}
+            {(activeView === 'questionnaire' || activeView === 'dashboard') && (
+            <>
             {/* Framework selector — prominent cards */}
             <div style={{ display: 'flex', gap: '12px', marginBottom: '4px' }}>
               {frameworks.map(f => {
@@ -497,6 +500,8 @@ const ComplianceQuestionnaire: React.FC<ComplianceQuestionnaireProps> = ({ sessi
               </SpaceBetween>
             </Container>
             </div>
+            </>
+            )}
 
             {/* Content views */}
             {activeView === 'dashboard' && (
