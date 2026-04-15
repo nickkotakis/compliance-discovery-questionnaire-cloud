@@ -32,6 +32,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         { type: 'divider' },
         { type: 'section', text: `Engagement PM`, items: [
           { type: 'link', text: engagementLabel, href: '#engagement-setup' },
+          { type: 'link', text: '🤖 AI Assistant', href: '#ai-assistant' },
           { type: 'link', text: 'Engagement Schedule', href: '#schedule' },
           { type: 'link', text: 'Evidence Tracker', href: '#evidence' },
           { type: 'link', text: 'Facilitation Guide', href: '#facilitation' },

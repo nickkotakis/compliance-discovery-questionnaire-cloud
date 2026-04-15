@@ -25,6 +25,7 @@ import EngagementSchedule from './EngagementSchedule';
 import EvidenceTracker from './EvidenceTracker';
 import FacilitationGuide from './FacilitationGuide';
 import EngagementSetup from './EngagementSetup';
+import AIAssistant from './AIAssistant';
 import { EngagementProvider, useEngagement } from '../contexts/EngagementContext';
 import './ComplianceQuestionnaire.css';
 
@@ -526,6 +527,7 @@ const ComplianceQuestionnaire: React.FC<ComplianceQuestionnaireProps> = ({ sessi
             {activeView === 'schedule' && (activeEngagement ? <EngagementSchedule /> : <EngagementSetup />)}
             {activeView === 'evidence' && (activeEngagement ? <EvidenceTracker /> : <EngagementSetup />)}
             {activeView === 'facilitation' && (activeEngagement ? <FacilitationGuide /> : <EngagementSetup />)}
+            {activeView === 'ai-assistant' && (activeEngagement ? <AIAssistant /> : <EngagementSetup />)}
             {activeView === 'engagement-setup' && <EngagementSetup />}
 
             {activeView === 'questionnaire' && (

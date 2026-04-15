@@ -25,6 +25,7 @@ from compliance_discovery.cmmc_organizational_controls import get_cmmc_organizat
 from compliance_discovery.nist_800_53_organizational_controls import get_nist_organizational_requirements, get_nist_category_metadata
 from compliance_discovery.cmmc_responsibility import get_cmmc_responsibility
 from compliance_discovery.preventive_controls import get_preventive_controls_for_control, get_control_type_label
+from compliance_discovery.ai_assistant import invoke_assistant
 
 
 app = Flask(__name__)
@@ -1219,6 +1220,31 @@ def list_sessions():
         'sessions': [s.to_dict() for s in sessions],
         'total': len(sessions)
     })
+
+
+@app.route('/api/ai/chat', methods=['POST'])
+def ai_chat():
+    """AI assistant chat endpoint powered by Amazon Bedrock.
+    
+    Request body:
+        message: User's message/request
+        engagement_context: Dict with config, schedule, evidence data
+    """
+    data = request.get_json()
+    if not data or not data.get('message'):
+        return jsonify({'error': 'Message is required'}), 400
+    
+    user_message = data['message']
+    engagement_context = data.get('engagement_context', {})
+    
+    try:
+        response_text = invoke_assistant(user_message, engagement_context)
+        return jsonify({
+            'response': response_text,
+            'model': 'Claude 3.5 Haiku (Amazon Bedrock)',
+        })
+    except Exception as e:
+        return jsonify({'error': f'AI assistant error: {str(e)}'}), 500
 
 
 if __name__ == '__main__':

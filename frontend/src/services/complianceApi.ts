@@ -288,6 +288,15 @@ class ComplianceApi {
     }
     return response.blob();
   }
+  async aiChat(message: string, engagementContext: Record<string, unknown>): Promise<{ response: string; model: string }> {
+    const res = await fetch(`${this.baseUrl}/ai/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message, engagement_context: engagementContext }),
+    });
+    if (!res.ok) throw new Error(`AI chat failed: ${res.statusText}`);
+    return res.json();
+  }
 }
 
 export const complianceApi = new ComplianceApi();
